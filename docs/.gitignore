@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+
+# Build outputs
+*.esp
+*.fuz
+
+# OS
+Thumbs.db
+.DS_Store

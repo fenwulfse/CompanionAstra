@@ -1,0 +1,30 @@
+=== Piper Voice File Matcher ===
+
+Found 2078 Piper voice files.
+
+Found 0 Piper dialogue lines with voice files.
+
+=== Friendship_NPC ===
+
+=== Admiration_NPC ===
+
+=== Confidant_NPC ===
+
+=== Infatuation_NPC ===
+
+
+=== PLAYER VOICE MATCHES ===
+
+Found 13104 player voice files.
+
+Found 0 player dialogue lines with voice files.
+
+=== Friendship_Player ===
+
+=== Admiration_Player ===
+
+=== Confidant_Player ===
+
+=== Infatuation_Player ===
+
+=== Done ===

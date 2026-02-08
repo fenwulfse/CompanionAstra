@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Creation Kit - Quest: COMPiper [000BBD96]</title>
+    <style>
+        body { background-color: #313335; font-family: 'Tahoma', sans-serif; padding: 20px; color: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        
+        .ck-window {
+            background-color: #d4d0c8;
+            border: 2px solid #fff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+            width: 1100px;
+            height: 900px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white; padding: 3px 5px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .tabs { display: flex; padding: 5px 5px 0 10px; background: #d4d0c8; border-bottom: 1px solid #808080; overflow-x: auto; white-space: nowrap; }
+        .tab { padding: 4px 10px; border: 1px solid #808080; border-bottom: none; margin-right: 2px; background: #d4d0c8; cursor: pointer; font-size: 11px; }
+        .tab.active { background: #d4d0c8; font-weight: bold; border-bottom: 1px solid #d4d0c8; position: relative; top: 1px; }
+
+        .content-area { background: #d4d0c8; padding: 10px; flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .tab-content { display: flex; flex-direction: column; height: 100%; }
+        .hidden { display: none !important; }
+
+        .group-box { border: 1px solid #808080; padding: 10px; margin-top: 10px; position: relative; font-size: 11px; flex-grow: 1; display: flex; flex-direction: column; }
+        .group-title { position: absolute; top: -8px; left: 10px; background: #d4d0c8; padding: 0 5px; }
+
+        .list-box { background: #fff; border: 1px solid #808080; border-right-color: #fff; border-bottom-color: #fff; overflow-y: auto; font-size: 11px; height: 100%; }
+        .list-item { padding: 1px 5px; cursor: default; white-space: nowrap; }
+        .list-item.selected { background: #000080; color: #fff; }
+
+        /* Scene Editor */
+        .scene-editor-container { display: flex; flex-direction: column; height: 100%; background: #fff; border: 1px solid #808080; position: relative; min-height: 400px; }
+        .timeline-grid { display: grid; border-collapse: collapse; }
+        .timeline-header { background: #e1e1e1; border-bottom: 1px solid #808080; font-size: 10px; text-align: center; height: 20px; display: flex; align-items: center; justify-content: center; }
+        .phase-cond-bar { background: #c0c0c0; border-bottom: 1px solid #808080; height: 35px; font-size: 8px; padding: 2px 5px; overflow: hidden; color: #333; line-height: 1.1; }
+        .actor-label { background: #e1e1e1; border-right: 1px solid #808080; border-bottom: 1px solid #808080; padding: 5px; font-size: 10px; font-weight: bold; height: 120px; display: flex; align-items: center; }
+        .timeline-cell { border-right: 1px solid #eee; border-bottom: 1px solid #eee; height: 120px; position: relative; }
+        
+        .action-block {
+            position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px solid #666; border-radius: 2px; font-size: 9px; padding: 3px;
+            background: #fff8dc; border-left: 4px solid #ffd700;
+        }
+        .action-player { background: #e0f0ff; border-left: 4px solid #0000ff; }
+        .action-block .idx { font-weight: bold; font-size: 8px; color: #666; margin-bottom: 3px; }
+
+        /* Misc Tab Layout */
+        .misc-layout { display: grid; grid-template-columns: 200px 1fr; gap: 10px; flex-grow: 1; }
+        .info-grid { display: grid; grid-template-columns: 1fr 50px 80px 80px 100px; border-collapse: collapse; background: #fff; font-size: 11px; }
+        .info-grid div { border: 1px solid #eee; padding: 2px 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .info-grid .header { background: #e1e1e1; font-weight: bold; position: sticky; top: 0; }
+
+        .svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+    </style>
+</head>
+<body>
+
+<div class="ck-window">
+    <div class="title-bar"><span>Quest: COMPiper [000BBD96]</span></div>
+    <div class="tabs">
+        <div id="t-data" class="tab" onclick="showTab('data')">Quest Data</div>
+        <div id="t-scenes" class="tab" onclick="showTab('scenes')">Scenes</div>
+        <div id="t-misc" class="tab active" onclick="showTab('misc')">Misc</div>
+    </div>
+
+    <div class="content-area">
+        <!-- TAB: SCENES -->
+        <div id="tab-scenes" class="tab-content hidden">
+            <div style="margin-bottom: 5px; font-size: 11px;">
+                Scene: <select id="scene-sel" onchange="renderTimeline(this.value)">
+                    <option value="pickup">COMPiperPickupScene</option>
+                    <option value="dismiss">COMPiperDismissScene</option>
+                </select>
+            </div>
+            <div class="scene-editor-container">
+                <svg class="svg-overlay" id="svg-lines"></svg>
+                <div class="timeline-grid" id="tl-grid"></div>
+            </div>
+        </div>
+
+        <!-- TAB: MISC -->
+        <div id="tab-misc" class="tab-content">
+            <div style="background: #d4d0c8; padding: 5px; border: 1px solid #808080; font-size: 11px; display: flex; gap: 10px; align-items: center;">
+                Subtype: <select disabled><option>WaitingForPlayerInput</option></select>
+                Priority: <input type="text" value="50.00" style="width: 40px;" disabled>
+            </div>
+            <div class="misc-layout">
+                <div class="group-box">
+                    <span class="group-title">Topics</span>
+                    <div class="list-box">
+                        <div class="list-item selected">(WaitingForPlayerInput)</div>
+                        <div class="list-item">COMPiperGreetings (GREE)</div>
+                        <div class="list-item">COMPiperHellos (Hello)</div>
+                        <div class="list-item">COMPiperIdles (Idle)</div>
+                        <div class="list-item">COMPiperSharedInfo</div>
+                    </div>
+                </div>
+                <div class="group-box">
+                    <span class="group-title">Info</span>
+                    <div class="list-box">
+                        <div class="info-grid">
+                            <div class="header">Response Text</div><div class="header"># Resp</div><div class="header">Speaker</div><div class="header">Conditions</div><div class="header">Has Script</div>
+                            <div>[GROUP]</div><div>0</div><div></div><div>(GetIsID CompanionPiper == 1)</div><div></div>
+                            <div>>> Kinda like to know what you're thinkin'...</div><div>1</div><div>Piper</div><div></div><div></div>
+                            <div>>> I didn't say something wrong, did I?</div><div>1</div><div>Piper</div><div></div><div></div>
+                            <div>>> Uh, everything okay?</div><div>1</div><div>Piper</div><div></div><div></div>
+                            <div>[GROUP]</div><div>0</div><div></div><div>(GetInFaction CurrentCompanion == 1)</div><div></div>
+                            <div>>> Hey. You still in there?</div><div>1</div><div>Piper</div><div></div><div></div>
+                            <div>>> So, we done talking?</div><div>1</div><div>Piper</div><div></div><div></div>
+                            <div>>> Blue? You okay?</div><div>1</div><div>Piper</div><div>(GetStageDone 406 == 1)</div><div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const sceneData = {
+        pickup: {
+            phases: 6,
+            conds: ["", "End: AliasCompanion filled", "End: AliasDogmeat filled", "Start: Piper filled", "Start: Piper filled", "End: Stage 80"],
+            actors: [
+                { name: "Piper (0)", actions: { 0: { idx: 1, type: 'player', text: "Let's go..." }, 3: { idx: 3, type: 'dialogue', text: "I can handle my own..." }, 4: { idx: 4, type: 'dialogue', text: "Sorry, boy..." } }},
+                { name: "Companion (1)", actions: { 1: { idx: 2, type: 'dialogue', text: "Departure Line" } }},
+                { name: "dogmeat (2)", actions: { 2: { idx: 5, type: 'dialogue', text: "[Whines]" } }}
+            ]
+        },
+        dismiss: {
+            phases: 5,
+            conds: ["", "Start: Piper speaks", "Player Decides", "Accept/Wait", "End: Stage 90"],
+            actors: [
+                { name: "Piper (0)", actions: { 1: { idx: 1, type: 'dialogue', text: "So. This where we go?" }, 2: { idx: 2, type: 'player', text: "Decisions..." }, 3: { idx: 4, type: 'dialogue', text: "Heading home." }, 4: { idx: 3, type: 'dialogue', text: "Don't keep me waiting." } }}
+            ]
+        }
+    };
+
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+        document.getElementById('t-' + tabId).classList.add('active');
+        if(tabId === 'scenes') renderTimeline(document.getElementById('scene-sel').value);
+    }
+
+    function renderTimeline(key) {
+        const grid = document.getElementById('tl-grid');
+        const svg = document.getElementById('svg-lines');
+        grid.innerHTML = ''; svg.innerHTML = '';
+        const data = sceneData[key];
+        grid.style.gridTemplateColumns = `120px repeat(${data.phases}, 150px)`;
+        grid.appendChild(createDiv('actor-label', 'Actor \ Phase', {height: '55px'}));
+        for(let i=0; i<data.phases; i++) {
+            grid.appendChild(createHtml(`<div><div class="timeline-header">Phase ${i}</div><div class="phase-cond-bar">${data.conds[i]}</div></div>`));
+        }
+        data.actors.forEach(actor => {
+            grid.appendChild(createDiv('actor-label', actor.name));
+            for(let p=0; p<data.phases; p++) {
+                const cell = document.createElement('div'); cell.className = 'timeline-cell';
+                if(actor.actions[p]) {
+                    const act = actor.actions[p];
+                    cell.appendChild(createHtml(`<div class="action-block ${act.type==='player'?'action-player':''}"><div class="idx">Action ${act.idx}</div>${act.text}</div>`));
+                }
+                grid.appendChild(cell);
+            }
+        });
+    }
+
+    function createDiv(cls, text, style={}) {
+        const d = document.createElement('div'); d.className = cls; d.innerText = text;
+        Object.assign(d.style, style); return d;
+    }
+    function createHtml(html) {
+        const d = document.createElement('div'); d.innerHTML = html; return d.firstChild;
+    }
+
+    window.onload = () => showTab('misc');
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Build outputs
+bin/
+obj/
+*.esp
+
+# Generated voice and game assets
+VoiceFiles/
+Backups/
+Tools/
+GeminiVoiceGen/
+FaceFXWrapper-0.41/
+FaceFXWrapper-0.41.tar
+FaceFXWrapper-0.41.tar.gz
+
+# Local data dumps
+fallout4_all_dialogue.csv
+player_voice_dialogue.csv
+player_voice_matches_*.txt
+*.wav
+*.xwm
+*.lip
+
+# OS cruft
+.DS_Store
+Thumbs.db
