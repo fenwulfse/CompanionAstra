@@ -27,6 +27,7 @@
 - Added Recovery/Murder TTS generation flags.
 - Added Recovery/Murder locked ID map doc.
 - Guardrails now allow COMAstra/COMClaude fragment names and alias properties.
+- Guardrails now use a configurable CompanionName/QuestEditorId pattern (Companion{Name}, COM{Name}).
 
 ## 2026-02-07
 - Fixed Fallout 4 `.fuz` layout (FUZE + version + lip + audio).

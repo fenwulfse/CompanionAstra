@@ -16,6 +16,19 @@ namespace CompanionClaude
     // ==============================================================================
     public static class Guardrail
     {
+        public static string CompanionName { get; private set; } = "Astra";
+        public static string QuestEditorId { get; private set; } = "COMAstra";
+        public static string LegacyQuestEditorId { get; private set; } = "COMClaude";
+        public static string FragmentPrefix => $"Fragments:Quests:QF_{QuestEditorId}_";
+        public static string LegacyFragmentPrefix => $"Fragments:Quests:QF_{LegacyQuestEditorId}_";
+
+        public static void Configure(string companionName, string questEditorId, string legacyQuestEditorId)
+        {
+            CompanionName = companionName;
+            QuestEditorId = questEditorId;
+            LegacyQuestEditorId = legacyQuestEditorId;
+        }
+
         public static void AssertGreeting(DialogTopic topic)
         {
             if (topic.Priority != 50) 
@@ -36,8 +49,11 @@ namespace CompanionClaude
             if (quest.Data!.Priority != 70)
                 throw new Exception($"GUARDRAIL ERROR: Quest '{quest.EditorID}' must have Priority 70. Found: {quest.Data.Priority}");
 
-            if (quest.Name?.ToString() != "Astra")
-                throw new Exception($"GUARDRAIL ERROR: Quest Name must be 'Astra'. Found: {quest.Name}");
+            if (quest.EditorID != QuestEditorId)
+                throw new Exception($"GUARDRAIL ERROR: Quest EditorID must be '{QuestEditorId}'. Found: {quest.EditorID}");
+
+            if (quest.Name?.ToString() != CompanionName)
+                throw new Exception($"GUARDRAIL ERROR: Quest Name must be '{CompanionName}'. Found: {quest.Name}");
 
             // Flag Locks
             if (!quest.Data.Flags.HasFlag(Quest.Flag.StartGameEnabled)) throw new Exception("GUARDRAIL ERROR: StartGameEnabled must be Checked.");
@@ -47,7 +63,7 @@ namespace CompanionClaude
             
             // Alias Locks
             var alias0 = quest.Aliases.FirstOrDefault(a => (a is IQuestReferenceAliasGetter r) && r.ID == 0) as IQuestReferenceAliasGetter;
-            if (alias0 == null || alias0.Name?.ToString() != "Astra") throw new Exception("GUARDRAIL ERROR: Alias 0 must be named 'Astra'.");
+            if (alias0 == null || alias0.Name?.ToString() != CompanionName) throw new Exception($"GUARDRAIL ERROR: Alias 0 must be named '{CompanionName}'.");
             if (alias0.Flags == null || !alias0.Flags.Value.HasFlag(QuestReferenceAlias.Flag.Essential)) throw new Exception("GUARDRAIL ERROR: Alias 0 must be 'Essential'.");
 
             var alias1 = quest.Aliases.FirstOrDefault(a => (a is IQuestReferenceAliasGetter r) && r.ID == 1) as IQuestReferenceAliasGetter;
@@ -104,7 +120,7 @@ namespace CompanionClaude
 
             // 1. Check Fragment Script (Internal Stage Logic)
             var fragScript = quest.VirtualMachineAdapter.Script;
-            if (fragScript == null || !(fragScript.Name.StartsWith(fragmentPrefix) || fragScript.Name.StartsWith(legacyFragmentPrefix)))
+            if (fragScript == null || !(fragScript.Name.StartsWith(FragmentPrefix) || fragScript.Name.StartsWith(LegacyFragmentPrefix)))
                 throw new Exception($"GUARDRAIL ERROR: Missing or invalid Fragment script. Found: {fragScript?.Name ?? "Null"}");
 
             if (!fragScript.Properties.Any(p => p.Name == $"Alias_{CompanionName}") && !fragScript.Properties.Any(p => p.Name == "Alias_Claude"))
@@ -222,8 +238,9 @@ namespace CompanionClaude
             const string CompanionName = "Astra";
             const string QuestEditorId = "COMAstra";
             const string LegacyQuestEditorId = "COMClaude";
-            string fragmentPrefix = $"Fragments:Quests:QF_{QuestEditorId}_";
-            string legacyFragmentPrefix = $"Fragments:Quests:QF_{LegacyQuestEditorId}_";
+            const string CompanionNpcEditorId = "Companion" + CompanionName;
+
+            Guardrail.Configure(CompanionName, QuestEditorId, LegacyQuestEditorId);
 
             T? GetRecord<T>(string editorId) where T : class, IMajorRecordGetter {
                 return env.LoadOrder.PriorityOrder.WinningOverrides<T>().FirstOrDefault(r => r.EditorID == editorId);
@@ -370,9 +387,9 @@ namespace CompanionClaude
             // 3. CREATE NPC
             Console.WriteLine("Creating NPC: Astra...");
             var npc = new Npc(npcFK, Fallout4Release.Fallout4) {
-                EditorID = "CompanionAstra",
-                Name = new TranslatedString(Language.English, "Astra"),
-                ShortName = new TranslatedString(Language.English, "Astra"),
+                EditorID = CompanionNpcEditorId,
+                Name = new TranslatedString(Language.English, CompanionName),
+                ShortName = new TranslatedString(Language.English, CompanionName),
                 Race = humanRace.FormKey.ToLink<IRaceGetter>(),
                 Voice = new FormLinkNullable<IVoiceTypeGetter>(astraVoiceType.FormKey),
                 Class = companionClass,
