@@ -12,6 +12,12 @@ FaceFXWrapper-0.41/
 FaceFXWrapper-0.41.tar
 FaceFXWrapper-0.41.tar.gz
 
+# Allow xEdit automation scripts
+!Tools/run_xedit_dump.ps1
+!Tools/FO4Edit/
+!Tools/FO4Edit/Edit Scripts/
+!Tools/FO4Edit/Edit Scripts/DumpDialogueToCSV_Astra.pas
+
 # Local data dumps
 fallout4_all_dialogue.csv
 player_voice_dialogue.csv
