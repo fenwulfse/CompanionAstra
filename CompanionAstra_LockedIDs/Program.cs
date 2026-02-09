@@ -1939,9 +1939,9 @@ namespace CompanionClaude
                 // === HATRED SCENE PLAYER VOICE (text-first, closest vanilla) ===
                 (0x0EEC8B, hat1_P.Responses[0].FormKey),  // "Are you threatening me?"
                 // === RECOVERY SCENE PLAYER VOICE (text-first, closest vanilla) ===
-                (0x02672C, rec1_P.Responses[0].FormKey),  // "Sounds good."
+                (0x218C1B, rec1_P.Responses[0].FormKey),  // "I'm glad we're good again."
                 // === MURDER WARNING SCENE PLAYER VOICE (text-first, closest vanilla) ===
-                (0x0E576F, mur1_P.Responses[0].FormKey),  // "You'll have to explain what's going on."
+                (0x100280, mur1_P.Responses[0].FormKey),  // "This is all my fault. Will you forgive me?"
             };
 
             foreach (var voiceType in new[] { "PlayerVoiceMale01", "PlayerVoiceFemale01" }) {
