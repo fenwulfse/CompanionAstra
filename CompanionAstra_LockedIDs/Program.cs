@@ -1076,6 +1076,8 @@ namespace CompanionClaude
             // We are replacing Player Positive first (left-to-right), keeping structure intact.
             var astraPickup_PPos = CreateSceneTopic("COMAstraPickup_PPos", "Let's go", "Sure, let's go.");
             var astraPickup_PNeg = CreateSceneTopic("COMAstraPickup_PNeg", "Never mind", "You know what. Never mind.");
+            var astraPickup_PNeu = CreateSceneTopic("COMAstraPickup_PNeu", "Trade", "Let's trade.");
+            astraPickup_PNeu.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C82));
 
             // Link directly to Piper's vanilla topics to mirror CK layout exactly.
             var piperPickup_PPos = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4F));
@@ -1104,7 +1106,7 @@ namespace CompanionClaude
             pickupAction1.NpcPositiveResponse.SetTo(piperPickup_NPos);
             pickupAction1.PlayerNegativeResponse.SetTo(astraPickup_PNeg);
             pickupAction1.NpcNegativeResponse.SetTo(piperPickup_NNeg);
-            pickupAction1.PlayerNeutralResponse.SetTo(piperPickup_PNeu);
+            pickupAction1.PlayerNeutralResponse.SetTo(astraPickup_PNeu);
             pickupAction1.NpcNeutralResponse.SetTo(piperPickup_NNeu);
             pickupAction1.PlayerQuestionResponse.SetTo(piperPickup_PQue);
             pickupAction1.NpcQuestionResponse.SetTo(piperPickup_NQue);
