@@ -28,3 +28,13 @@ E:\CompanionGeminiFeb26\Tools\run_xedit_dump.ps1 -XEditPath "D:\Path\To\xFOEdit.
 - Text
 
 This helps catch mismatched text/audio and supports automated diffing.
+
+## Generate CK Checklist + Player Voice Audit
+After the dump, run:
+```
+E:\CompanionGeminiFeb26\Tools\run_reports.ps1
+```
+
+Outputs:
+- `E:\CompanionGeminiFeb26\Tools\CK_Checklist_Astra.txt`
+- `E:\CompanionGeminiFeb26\Tools\PlayerVoice_Audit.txt`
