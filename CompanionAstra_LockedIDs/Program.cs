@@ -123,8 +123,8 @@ namespace CompanionClaude
             if (fragScript == null || !(fragScript.Name.StartsWith(FragmentPrefix) || fragScript.Name.StartsWith(LegacyFragmentPrefix)))
                 throw new Exception($"GUARDRAIL ERROR: Missing or invalid Fragment script. Found: {fragScript?.Name ?? "Null"}");
 
-            if (!fragScript.Properties.Any(p => p.Name == $"Alias_{CompanionName}") && !fragScript.Properties.Any(p => p.Name == "Alias_Claude"))
-                throw new Exception($"GUARDRAIL ERROR: Fragment script is missing alias property (expected Alias_{CompanionName} or Alias_Claude).");
+            if (!fragScript.Properties.Any(p => p.Name == $"Alias_{CompanionName}"))
+                throw new Exception($"GUARDRAIL ERROR: Fragment script is missing alias property (expected Alias_{CompanionName}).");
 
             if (!fragScript.Properties.Any(p => p.Name == "CA_WantsToTalk"))
                 throw new Exception("GUARDRAIL ERROR: Fragment script is missing 'CA_WantsToTalk' property.");
@@ -356,8 +356,8 @@ namespace CompanionClaude
             var npcFK = new FormKey(mod.ModKey, 0x000803);
             var refFK = new FormKey(mod.ModKey, 0x000804);
 
-            // NOTE: Using legacy fragment script name until we compile COMAstra fragments.
-            string pscMainName = $"QF_{LegacyQuestEditorId}_" + mainQuestFK.ID.ToString("X8");
+            // Fragment script name should match COM + CompanionName
+            string pscMainName = $"QF_{QuestEditorId}_" + mainQuestFK.ID.ToString("X8");
 
             // 2. FETCH ASSETS
             var humanRace = GetRecord<IRaceGetter>("HumanRace") ?? throw new Exception("HumanRace not found");
@@ -1669,7 +1669,7 @@ namespace CompanionClaude
                 Script = new ScriptEntry {
                     Name = "Fragments:Quests:" + pscMainName,
                     Properties = new ExtendedList<ScriptProperty> {
-                        new ScriptObjectProperty { Name = "Alias_Claude", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>(), Alias = 0 },
+                        new ScriptObjectProperty { Name = "Alias_" + CompanionName, Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>(), Alias = 0 },
                         new ScriptObjectProperty { Name = "CA_WantsToTalk", Object = ca_WantsToTalk_FK.ToLink<IFallout4MajorRecordGetter>() },
                         new ScriptObjectProperty { Name = "CA_WantsToTalkMurder", Object = ca_WantsToTalkMurder.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                         new ScriptObjectProperty { Name = "CA_T5_Hatred", Object = ca_T5_Hatred.FormKey.ToLink<IFallout4MajorRecordGetter>() },

@@ -28,6 +28,7 @@
 - Added Recovery/Murder locked ID map doc.
 - Guardrails now allow COMAstra/COMClaude fragment names and alias properties.
 - Guardrails now use a configurable CompanionName/QuestEditorId pattern (Companion{Name}, COM{Name}).
+- Fragment script now uses COM{Name} (QF_COMAstra_00000805) and Alias_Astra.
 
 ## 2026-02-07
 - Fixed Fallout 4 `.fuz` layout (FUZE + version + lip + audio).
