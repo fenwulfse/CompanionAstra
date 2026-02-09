@@ -104,11 +104,11 @@ namespace CompanionClaude
 
             // 1. Check Fragment Script (Internal Stage Logic)
             var fragScript = quest.VirtualMachineAdapter.Script;
-            if (fragScript == null || !fragScript.Name.StartsWith("Fragments:Quests:QF_COMClaude_"))
+            if (fragScript == null || !(fragScript.Name.StartsWith(fragmentPrefix) || fragScript.Name.StartsWith(legacyFragmentPrefix)))
                 throw new Exception($"GUARDRAIL ERROR: Missing or invalid Fragment script. Found: {fragScript?.Name ?? "Null"}");
 
-            if (!fragScript.Properties.Any(p => p.Name == "Alias_Claude"))
-                throw new Exception("GUARDRAIL ERROR: Fragment script is missing 'Alias_Claude' property.");
+            if (!fragScript.Properties.Any(p => p.Name == $"Alias_{CompanionName}") && !fragScript.Properties.Any(p => p.Name == "Alias_Claude"))
+                throw new Exception($"GUARDRAIL ERROR: Fragment script is missing alias property (expected Alias_{CompanionName} or Alias_Claude).");
 
             if (!fragScript.Properties.Any(p => p.Name == "CA_WantsToTalk"))
                 throw new Exception("GUARDRAIL ERROR: Fragment script is missing 'CA_WantsToTalk' property.");
@@ -218,6 +218,12 @@ namespace CompanionClaude
             
             using var env = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
             var mod = new Fallout4Mod(ModKey.FromFileName("CompanionAstra.esp"), Fallout4Release.Fallout4);
+
+            const string CompanionName = "Astra";
+            const string QuestEditorId = "COMAstra";
+            const string LegacyQuestEditorId = "COMClaude";
+            string fragmentPrefix = $"Fragments:Quests:QF_{QuestEditorId}_";
+            string legacyFragmentPrefix = $"Fragments:Quests:QF_{LegacyQuestEditorId}_";
 
             T? GetRecord<T>(string editorId) where T : class, IMajorRecordGetter {
                 return env.LoadOrder.PriorityOrder.WinningOverrides<T>().FirstOrDefault(r => r.EditorID == editorId);
@@ -333,7 +339,8 @@ namespace CompanionClaude
             var npcFK = new FormKey(mod.ModKey, 0x000803);
             var refFK = new FormKey(mod.ModKey, 0x000804);
 
-            string pscMainName = "QF_COMClaude_" + mainQuestFK.ID.ToString("X8");
+            // NOTE: Using legacy fragment script name until we compile COMAstra fragments.
+            string pscMainName = $"QF_{LegacyQuestEditorId}_" + mainQuestFK.ID.ToString("X8");
 
             // 2. FETCH ASSETS
             var humanRace = GetRecord<IRaceGetter>("HumanRace") ?? throw new Exception("HumanRace not found");

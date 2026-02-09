@@ -26,6 +26,7 @@
 - Locked Recovery/Murder INFO IDs and mapped player voice to closest vanilla lines.
 - Added Recovery/Murder TTS generation flags.
 - Added Recovery/Murder locked ID map doc.
+- Guardrails now allow COMAstra/COMClaude fragment names and alias properties.
 
 ## 2026-02-07
 - Fixed Fallout 4 `.fuz` layout (FUZE + version + lip + audio).
