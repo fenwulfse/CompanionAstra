@@ -29,6 +29,7 @@ E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp
 - **Do not change locked INFO IDs.** They map directly to `.fuz` filenames.
 - **Do not overwrite NPC audio** unless you pass the explicit `--allow-*-voice-overwrite` flags.
 - **Text-first workflow:** keep Astra text as source of truth, map closest vanilla player audio.
+- **Papyrus compile standard:** use CK/Bethesda `PapyrusCompiler.exe` by default; Caprica is non-default due to historical output-path drift requiring manual file moves.
 
 ## Key Docs
 - `docs/WIKI_INDEX.md`

@@ -3,10 +3,19 @@
 ## Compiler Policy
 - Use Bethesda Papyrus compiler (`PapyrusCompiler.exe`) for final artifact generation.
 - Do not rely on Caprica for production deploy output paths.
+- Default policy is CK/Bethesda compiler unless there is an explicit approved reason to do otherwise.
 
 ## Why
 - CK/Bethesda compiler output aligns with in-game expected fragment layout.
 - Namespace and folder matching (`Fragments:Quests`) are enforced correctly.
+
+## Historical Caprica Issue (Documented)
+- During earlier tooling runs (Gemini-era workflow), Caprica outputs repeatedly ended up in non-canonical locations.
+- This caused manual file moves after compile before CK/runtime would see the correct files.
+- Specifically, files had to be moved back to:
+  - `Data\Scripts\Fragments\Quests\QF_*.pex`
+  - `Data\Scripts\Source\User\Fragments\Quests\QF_*.psc`
+- To avoid repeat drift, this project treats Caprica as non-default and CK compiler as the standard path.
 
 ## Required Paths
 - Compiler:
