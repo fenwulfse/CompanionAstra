@@ -1,5 +1,12 @@
 # Repository Guidelines
 
+## **READ FIRST: Vanilla Mechanics Are Mandatory**
+- **Non-negotiable baseline:** Companion quest mechanics must match vanilla Fallout 4 patterns.
+- **Current canonical reference:** `COMPiper` is the source of truth for scene structure, greeting conditions, stage flow, and affinity behavior.
+- **Customization scope:** Keep the companion identity/content custom (Astra name, lines, personality), but keep the underlying nuts-and-bolts logic aligned to Piper unless the user explicitly approves a deviation.
+- **Never deep-copy or hook into Piper:** Do not copy/override/link `COMPiper` quest records inside custom companion quest graphs.
+- **Inspectors are read-only:** Use inspectors to learn vanilla behavior, then reimplement with companion-owned records.
+
 ## Project Structure & Module Organization
 - `Program.cs`: Main entry point that builds the `CompanionClaude.esp` using Mutagen.
 - `Program.cs.needsFix`: Working draft or alternate version for reference.

@@ -1,5 +1,228 @@
 # Changelog
 
+## 2026-02-18
+- User morning handoff retest reported:
+  - No handoff exchange lines fired for `Astra <-> Codsworth`, `Astra <-> Dogmeat`, and additional checks with Piper/Cait.
+  - Core flow remained stable: pickup/dismiss/menu/switch/exit all working.
+- Root-cause confirmation via live scene inspection:
+  - `COMAstraPickupScene` Action 2 was using custom topic `COMAstraPickup_Dialog2` (INFO `0000096B`) spoken by Alias 1.
+  - Deployed voice pack previously lacked non-Astra companion folders, so Alias 1 lines were effectively silent.
+  - Action 5 was bound to custom blank topic `COMAstraPickup_Dialog5` instead of a vanilla Dogmeat bark topic.
+- Patch applied (minimal-risk, pickup-flow only):
+  - `COMAstraPickupScene` Action 2 topic changed to vanilla companion handoff topic `Fallout4.esm:162C4B`.
+  - `COMAstraPickupScene` Action 5 topic changed to vanilla Dogmeat bark topic `Fallout4.esm:21748B`.
+  - Regenerated ESP + voice with greeting/dismiss TTS flags from project root.
+  - Voice output now includes fallback companion directories:
+    - `NPCFPiper`, `NPCFCait`, `NPCFCurie`, `NPCMPrestonGarvey`, `NPCMNickValentine`, `NPCMMacCready`,
+      `NPCMHancock`, `NPCMDeacon`, `NPCMPaladinDanse`, `NPCMStrong`, `NPCMX6-88`, `RobotMrHandy`.
+- Deploy + fingerprint:
+  - Deployed ESP SHA256: `F25979E80060425051258060AF1CA7065E1E67622ECF62CB445B177136E281F0`
+  - Deployed voice dirs now include: `NPCFAstra`, companion fallback dirs above, `PlayerVoiceMale01`, `PlayerVoiceFemale01`.
+- Safety artifacts:
+  - Pre-deploy backup: `E:/FO4Projects/Backups/PreDeploy_HandoffPatch_2026-02-18_100704`
+  - Full checkpoint: `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-18_100738_2026-02-18_pickup_handoff_topic_patch_action2_5`
+- VMAD fragment skip-list parity update (source-only, not deployed in this handoff test):
+  - Corrected stage-fragment skip list in `CompanionAstra_LockedIDs/Program.cs`.
+  - Old skip items removed: `630`, `1010`.
+  - Correct no-fragment skip items added: `540`, `600`, `1000`.
+- Regression observed in handoff-topic patch test:
+  - User reported `Astra` became non-interactive after handoff attempts and game hung during later save load.
+  - Immediate rollback performed to pre-deploy known-good runtime artifacts.
+- Emergency rollback actions:
+  - Force-stopped hung `Fallout4.exe`.
+  - Restored ESP from pre-deploy backup:
+    - `E:/FO4Projects/Backups/PreDeploy_HandoffPatch_2026-02-18_100704/CompanionAstra.esp`
+    - Live hash after restore: `20D2595BB4028D48DE7C97119D5C58AF0716F2C1D22534CE8652F0E414BC87A8`
+  - Restored voice pack to known-good checkpoint snapshot:
+    - Source: `Backups/WorkingHistory/2026-02-17_195509_2026-02-17_voice_pickup_dismiss_affinity_reset_o/Deployed/Sound/Voice/CompanionAstra.esp`
+    - Live voice set normalized to:
+      - dirs: `NPCFAstra`, `PlayerVoiceFemale01`, `PlayerVoiceMale01`
+      - counts: `total=227`, `NPCFAstra=71`
+  - Main quest fragment script remained on previously repaired hash:
+    - `QF_COMAstra_00000805.pex` SHA256 `70864D0F8493EC5CBB0830E97F6331AEFC74FD5439CC32D6D285EACD8145A765`
+- User validation after rollback (2026-02-18 morning follow-up):
+  - Tested on:
+    - brand new game
+    - long-play Castle save
+  - Confirmed working:
+    - pickup
+    - dismiss
+    - follower switch flow remains stable
+  - Still missing:
+    - exchange lines for `Astra <-> Codsworth`
+    - exchange lines for `Astra <-> Dogmeat`
+- Baseline checkpoint captured:
+  - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-18_110434_2026-02-18_verified_newgame_castle_pickup_dismis`
+
+## 2026-02-17
+- Incident diagnosis and recovery for "companions not talking" reports:
+  - Confirmed last-night handoff notes in `HANDOVER_CODEX.md` (`LastWriteTime: 2026-02-16 21:05`).
+  - Verified deployed voice files are structurally valid (`184/184` modern `FUZE + audio + lip`, `RIFF` audio headers).
+  - Found a critical generation pitfall:
+    - Running generator from `E:\FO4Projects` sets `repoRoot` incorrectly.
+    - Voice source lookup then misses project voice archive and logs many `MISSING` lines (partial output only).
+  - Re-ran generator from correct working directory:
+    - `E:\FO4Projects\ChatGPT\CompanionAstra`
+    - Command: `dotnet run --project .\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --tools-root E:\FO4Projects\Tools --enable-greeting-tts --enable-dismiss-tts`
+    - Result: `Copied 163 voice files total.`
+  - Synced generated plugin to game Data:
+    - Source hash `9D5B02C887C5998D78714CBEA9183B50C9C803F1FD2356F73AD133E7C07DAE4F`
+    - Destination hash matched after deploy.
+- Environment note from current Papyrus logs:
+  - No `COMAstra`/`CompanionAstra` errors present in `Papyrus.0-3.log`.
+  - Logs show heavy global script binding/scene-start errors (DLC/CC/vanilla) and VM freeze/revert events.
+- Rolled back to pre-voice-update known-good snapshot for isolation test:
+  - Snapshot deployed: `Backups/2026-02-11_084347_good_build_2026-02-11_morning`
+  - Deployed to game:
+    - `Data/CompanionAstra.esp` (snapshot build)
+    - `Data/Scripts/Fragments/Quests/QF_COMAstra_00000805.pex`
+    - `Data/Scripts/Fragments/Quests/QF_COMAstra_Test_000009A1.pex`
+    - `Data/Scripts/Source/User/Fragments/Quests/QF_COMAstra_Test_000009A1.psc`
+  - Temporarily disabled custom voice folder for strict "plugin-only" test by moving:
+    - `Data/Sound/Voice/CompanionAstra.esp`
+    - moved to backup archive `E:/FO4Projects/Backups/RollbackPreVoice_2026-02-17_190605/CompanionAstra.esp_voice_folder`
+  - Full rollback backup archive:
+    - `E:/FO4Projects/Backups/RollbackPreVoice_2026-02-17_190605`
+- Restored matched Feb-16 package from disaster archive to fix ESP/voice mismatch:
+  - Source package: `E:/FO4Projects/ChatGPT/_disaster_eval/113542/deployed`
+  - Deployed ESP hash: `20D2595BB4028D48DE7C97119D5C58AF0716F2C1D22534CE8652F0E414BC87A8`
+  - Deployed voice set: `227` total `.fuz`, `71` in `NPCFAstra`
+  - Deployment safety backup:
+    - `E:/FO4Projects/Backups/PreRestore_113542_2026-02-17_191312`
+- User validation on restored package:
+  - `Pickup`: working
+  - `Astra voice`: working
+  - `Dismiss`: still broken (cannot dismiss)
+  - This state is now treated as a checkpoint candidate for future rollback.
+- Created disaster-checkpoint backup for this exact state:
+  - Folder checkpoint (source + deployed + notes):  
+    `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_1918_voice_pickup_ok_dismiss_broken`
+  - Notes file in checkpoint:  
+    `NOTES_THIS_BUILD.md`
+  - ZIP archive + hash:  
+    `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_vok_pok_dbad.zip`  
+    `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_vok_pok_dbad.zip.sha256`
+- Dismiss forensic clarification added:
+  - `docs/DISMISS_FORENSICS_2026-02-17.md`
+  - Confirms by source diff that:
+    - Feb 11 and Feb 16 share the same dismiss routing block.
+    - `workshopnpcscript` exists in recovered Feb 16 working source but not Feb 11 snapshot.
+  - Working rule: keep workshop support for vanilla-like settlement dismiss behavior.
+  - Added vanilla companion-script context note (`COM*Script` tie-ins and cross-name reference risk).
+- Dismiss-only runtime script repair candidate (no ESP/voice replacement):
+  - Recompiled and deployed `QF_COMAstra_00000805.pex` from:
+    - `Tools/Papyrus/Fragments/Quests/QF_COMAstra_00000805.psc`
+  - Removed runtime type-link failure source by using fragment script without `COMClaudeScript` autocast in stage 150.
+  - Added script property alignment:
+    - `FollowerEndgameForceGreetOn` property added to `QF_COMAstra_00000805.psc` to match quest VMAD property initialization.
+    - Corrected property type to `ActorValue` (not `GlobalVariable`) to match quest VMAD binding target.
+  - Deployed files:
+    - `Data/Scripts/Fragments/Quests/QF_COMAstra_00000805.pex` (new compile)
+    - `Data/Scripts/Source/User/Fragments/Quests/QF_COMAstra_00000805.psc`
+    - `Data/Scripts/Source/User/QF_COMAstra_00000805.psc`
+  - Intent: fix dismiss reliability without altering the currently working voice pack/pickup behavior.
+  - Checkpoint folder:
+    - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_1936_dismiss_pex_fix_candidate`
+  - ZIP + hash:
+    - `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_dpex1.zip`
+    - `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_dpex1.zip.sha256`
+- Backup workflow hardening:
+  - Upgraded `Tools/create_working_checkpoint.ps1` to capture:
+    - source + changelog + build artifact
+    - deployed game artifacts (`ESP`/`PEX`/`PSC`)
+    - optional deployed voice pack copy (`-IncludeVoice`)
+    - latest Papyrus log and `Plugins.txt`
+    - SHA256 fingerprints and voice counts in manifest
+    - structured `NOTES_THIS_BUILD.md` (`Intent/Worked/Broken/Changed/Hypothesis/NextStep`)
+  - Updated docs:
+    - `docs/BACKUP_WORKFLOW.md`
+  - Created checkpoint with full notes for current stable state:
+    - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_195509_2026-02-17_voice_pickup_dismiss_affinity_reset_o`
+- One-attempt handoff exchange test build (2026-02-17 night):
+  - Built isolated candidate ESP from recovered Feb-16 source with minimal change:
+    - Alias 1 (`Companion`) set to external link -> `Followers` quest alias `0`
+    - Alias 2 (`Dogmeat`) set to external link -> `Followers` quest alias `5`
+  - Deployed **ESP only** (no script/voice replacement in this attempt):
+    - `Data/CompanionAstra.esp` SHA256 `4C94DEE08735837FA2B6538B732DDDFB6A7BDC1DCD54A2290C4CCA98E606894B`
+  - Pre-deploy rollback backup:
+    - `E:/FO4Projects/Backups/OneAttemptPreDeploy_2026-02-17_200023`
+  - Full checkpoint (notes + deployed state):
+    - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_200035_2026-02-17_one_attempt_handoff_alias_external`
+
+## 2026-02-11
+- Dismiss reliability update (hybrid routing):
+  - Kept Piper-style `Scene/Enter` starter topic `COMAstraDismissEnter`.
+  - Restored greeting-path dismiss fallback (`CurrentCompanionFaction == 1`) for command-wheel Talk reliability.
+  - Renamed dismiss scene EditorID to `COMAstraDismissScene`.
+- Actor VMAD parity pass (targeted, no deep-copy links):
+  - Expanded `CompanionActorScript` on `CompanionAstra` with high-impact properties:
+    - `CA_Event_Murder`, `Experience`, `HasItemForPlayer`, `TemporaryAngerLevel`, `MurderToggle`
+    - `StartingThreshold`, `InfatuationThreshold`, `MQComplete`, `Tutorial`, `ShouldGivePlayerItems`
+  - Added `workshopnpcscript` with:
+    - `WorkshopParent`, `bAllowCaravan=true`, `bAllowMove=true`, `bApplyWorkshopOwnerFaction=false`, `bCommandable=true`
+  - Verified via local inspector: `RESULT: PASS` for required actor script/property presence.
+- Rebuilt and redeployed current test artifacts:
+  - `CompanionAstra.esp`
+  - `QF_COMAstra_Test_000009A1.psc`
+  - `QF_COMAstra_Test_000009A1.pex`
+- Fixed true scene phase mismatch warning:
+  - `COMClaude_11_InfatuationRepeaterRegular` Action 3 start-scene label now matches index 10 in target scene:
+    - `StartPhaseForScene: "Romance Gate"` -> `"Loop05"`
+- Confirmed root cause for recurring INFO phase warnings:
+  - Mutagen `DialogResponses` exposes `StartScene` + `StartScenePhase` only (no writable phase-index field).
+  - CK warns when name/index drift exists and auto-normalizes on check-out/check-in.
+- Active test quest identity is now:
+  - `COMAstra_Test` FormKey `0009A1`
+  - script `Fragments:Quests:QF_COMAstra_Test_000009A1`
+- Added documentation set for ongoing wiki/encyclopedia/bible workflow:
+  - `docs/WIKI_INDEX.md`
+  - `docs/COMPANION_CREATION_BIBLE.md`
+  - `docs/PAPYRUS_WORKFLOW.md`
+  - `docs/BACKUP_WORKFLOW.md`
+  - `docs/ACTOR_SCRIPT_PROPERTY_AUDIT.md`
+- Added snapshot automation:
+  - `Tools/create_build_snapshot.ps1`
+  - Created snapshot: `Backups/2026-02-11_084347_good_build_2026-02-11_morning`
+
+## 2026-02-10
+- Added Piper-parity repeater affinity greetings for scenes 06/07/08/09/10 in `COMClaudeGreetings`.
+- Added stable INFO IDs for repeater greetings: `00F640` to `00F648`.
+- Added missing repeater condition globals on greetings:
+  - `CA_Scene_Repeat_Admiration_Downward`
+  - `CA_Scene_Repeat_Neutral_Downward`
+  - `CA_Scene_Repeat_Disdain_Downward`
+  - `CA_Scene_Repeat_Hatred_Downward`
+  - `CA_Scene_Repeat_Infatuation_Upward`
+- Matched vanilla condition shape:
+  - paired greetings with `CA_WantsToTalk == 1` and `== 2`
+  - scene 09 uses `CA_WantsToTalk >= 1`
+  - scene 10 includes `GetStageDone(COMAstra, 420) == 1` on both greetings
+- Rebuilt and deployed latest `CompanionAstra.esp` and synced quest fragment scripts (`QF_COMAstra_00000805`, `QF_COMAstra_Test_00000995`) to game `Data`.
+- Expanded `COMAstra_Test` stage routing to include repeater scene tests:
+  - stages `70-79` now directly trigger repeat scenes 06/07/08/09/10, including `WantsToTalk=2` reminder variants.
+- Added repeat-scene globals to `COMAstra_Test` VMAD properties.
+- Added in-game `Debug.Notification` feedback for repeater test stages and reset.
+- Added `COMClaude_11_InfatuationRepeaterRegular` scene (Piper parity structure) and a matching greeting gate:
+  - `CA_WantsToTalkRomanceRetry == 1`
+  - `CA_CurrentThreshold == CA_T1_Infatuation`
+- Added `COMAstra_Test` stage `80` to force the scene-11 greeting path for in-game testing.
+- Wired scene-11 Action3 start-scene link to scene 03 romance gate:
+  - scene: `COMClaude_03_AdmirationToInfatuation`
+  - `PhaseIndex = 10`
+  - `StartPhaseForScene = Romance Gate`
+- Set scene-11 greeting start phase to `Loop01` for parity with Piper flow.
+- Confirmed active test fragment script identity changed to `QF_COMAstra_Test_0000099F` and deployed:
+  - `CompanionAstra.esp`
+  - `QF_COMAstra_Test_0000099F.psc`
+  - `QF_COMAstra_Test_0000099F.pex`
+- Dismiss routing updated to Piper-style minimal parity:
+  - Added `Scene/Enter` topic `COMAstraDismissEnter` that starts `COMAstraDismissScene`.
+  - Dismiss starter uses `StartScenePhase = Loop01`.
+  - Added back a greeting-path dismiss fallback for command-wheel Talk reliability.
+- Pickup greeting starters now explicitly use `StartScenePhase = Loop01` (both first-time and returning).
+- Renamed dismiss scene EditorID from `COMClaudeDismissScene` to `COMAstraDismissScene` for consistency.
+- Current test quest script identity is now `QF_COMAstra_Test_000009A1` and deployed with matching `.psc/.pex`.
+
 ## 2026-02-08
 - Locked Neutral -> Friendship INFO IDs to stable range `0000F200` - `0000F223`.
 - Softened Neutral -> Friendship player negative response to "Maybe later."

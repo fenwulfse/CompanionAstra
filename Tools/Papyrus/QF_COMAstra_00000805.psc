@@ -1,5 +1,5 @@
 ;BEGIN FRAGMENT CODE - Do not edit anything between this and the end comment
-Scriptname Fragments:Quests:QF_COMAstra_00000805 Extends Quest Hidden Const
+Scriptname Fragments:Quests:QF_COMAstra_00000805 Extends Quest Hidden
 
 ;BEGIN FRAGMENT Fragment_Stage_0080_Item_00
 Function Fragment_Stage_0080_Item_00()
@@ -56,10 +56,6 @@ EndFunction
 
 ;BEGIN FRAGMENT Fragment_Stage_0150_Item_00
 Function Fragment_Stage_0150_Item_00()
-;BEGIN AUTOCAST TYPE COMClaudeScript
-Quest __temp = self as Quest
-COMClaudeScript kmyQuest = __temp as COMClaudeScript
-;END AUTOCAST
 ;BEGIN CODE
 Alias_Astra.TryToSetActorValue(CA_WantsToTalk, 2) ;has forcegreeted
 Alias_Astra.GetActorReference().EvaluatePackage()
@@ -289,7 +285,55 @@ Quest __temp = self as Quest
 affinityscenehandlerscript kmyQuest = __temp as affinityscenehandlerscript
 ;END AUTOCAST
 ;BEGIN CODE
+(Alias_Astra.GetActorRef() as CompanionActorScript).RomanceDeclined(isPermanent = false)
+
+kmyquest.UnlockedInfatuation()
+;END CODE
+EndFunction
+;END FRAGMENT
+
+;BEGIN FRAGMENT Fragment_Stage_0520_Item_00
+Function Fragment_Stage_0520_Item_00()
+;BEGIN AUTOCAST TYPE affinityscenehandlerscript
+Quest __temp = self as Quest
+affinityscenehandlerscript kmyQuest = __temp as affinityscenehandlerscript
+;END AUTOCAST
+;BEGIN CODE
+(Alias_Astra.GetActorRef() as CompanionActorScript).RomanceFail()
+
+kmyquest.UnlockedInfatuation()
+;END CODE
+EndFunction
+;END FRAGMENT
+
+;BEGIN FRAGMENT Fragment_Stage_0522_Item_00
+Function Fragment_Stage_0522_Item_00()
+;BEGIN AUTOCAST TYPE affinityscenehandlerscript
+Quest __temp = self as Quest
+affinityscenehandlerscript kmyQuest = __temp as affinityscenehandlerscript
+;END AUTOCAST
+;BEGIN CODE
+(Alias_Astra.GetActorRef() as CompanionActorScript).RomanceDeclined(isPermanent = true)
+
 kmyquest.EndSceneInfatuation()
+
+kmyquest.UnlockedInfatuation()
+;END CODE
+EndFunction
+;END FRAGMENT
+
+;BEGIN FRAGMENT Fragment_Stage_0525_Item_00
+Function Fragment_Stage_0525_Item_00()
+;BEGIN AUTOCAST TYPE affinityscenehandlerscript
+Quest __temp = self as Quest
+affinityscenehandlerscript kmyQuest = __temp as affinityscenehandlerscript
+;END AUTOCAST
+;BEGIN CODE
+(Alias_Astra.GetActorRef() as CompanionActorScript).RomanceSuccess()
+
+kmyquest.EndSceneInfatuation()
+
+kmyquest.UnlockedInfatuation()
 ;END CODE
 EndFunction
 ;END FRAGMENT

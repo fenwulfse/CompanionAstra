@@ -11,18 +11,18 @@ Fallout 4 companion plugin generator (Mutagen). The generator builds `CompanionA
 1. Open a terminal in the repo root.
 2. Build/run:
 ```
-dotnet run --project E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
+dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
 ```
 
 Optional: generate Astra TTS lines for specific scenes:
 ```
-dotnet run --project E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --enable-friendship-tts
+dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --enable-friendship-tts
 ```
 
 ## Where The ESP Is Written
 The generator writes here:
 ```
-E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionAstra.esp
+E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp
 ```
 
 ## Core Rules (Do Not Break These)
@@ -31,6 +31,12 @@ E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionAstra.esp
 - **Text-first workflow:** keep Astra text as source of truth, map closest vanilla player audio.
 
 ## Key Docs
+- `docs/WIKI_INDEX.md`
+- `docs/COMPANION_CREATION_BIBLE.md`
+- `docs/PAPYRUS_WORKFLOW.md`
+- `docs/BACKUP_WORKFLOW.md`
+- `docs/GIT_OPERATING_MODEL.md`
+- `docs/ACTOR_SCRIPT_PROPERTY_AUDIT.md`
 - `docs/GREETING_VOICE_ID_STABILITY.md`
 - `docs/NEUTRAL_FRIENDSHIP_LOCKED_IDS.md`
 - `docs/FRIENDSHIP_ADMIRATION_LOCKED_IDS.md`
@@ -39,5 +45,28 @@ E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionAstra.esp
 - `docs/DISDAIN_HATRED_LOCKED_IDS.md`
 - `docs/RECOVERY_MURDER_LOCKED_IDS.md`
 
+## Snapshot Backup
+Create a known-good rollback point:
+```
+powershell -ExecutionPolicy Bypass -File E:\FO4Projects\Tools\create_build_snapshot.ps1 -Label your_label
+```
+
+Create a compact disaster-recovery zip (fits small backup drives):
+```
+powershell -ExecutionPolicy Bypass -File E:\FO4Projects\Tools\create_disaster_backup.ps1 -ProjectRoot E:\FO4Projects\ChatGPT\CompanionAstra -BackupRoot E:\FO4Projects\Backups -Fo4Data "E:\SteamLibrary\steamapps\common\Fallout 4\Data"
+```
+
+Include deployed voice files in the disaster zip:
+```
+powershell -ExecutionPolicy Bypass -File E:\FO4Projects\Tools\create_disaster_backup.ps1 -ProjectRoot E:\FO4Projects\ChatGPT\CompanionAstra -BackupRoot E:\FO4Projects\Backups -Fo4Data "E:\SteamLibrary\steamapps\common\Fallout 4\Data" -IncludeVoice
+```
+
 ## Contributing
 See `CONTRIBUTING.md`.
+
+## Multi-Agent Workflow
+- `docs/MULTI_AGENT_GIT_WORKFLOW.md`
+- `docs/agents/WORK_SPLIT.md`
+- `docs/agents/CHATGPT_README.md`
+- `docs/agents/CLAUDE_README.md`
+- `docs/agents/GEMINI_README.md`
