@@ -45,3 +45,12 @@
 - Deploy `.psc` sources to both CK paths:
   - `Data\Scripts\Source\User\QF_*.psc`
   - `Data\Scripts\Source\User\Fragments\Quests\QF_*.psc`
+
+## Canonical Runtime Paths (Astra)
+- Main quest runtime fragment binary:
+  - `Data\Scripts\Fragments\Quests\QF_COMAstra_00000805.pex`
+- Main quest source mirrors:
+  - `Data\Scripts\Source\User\QF_COMAstra_00000805.psc`
+  - `Data\Scripts\Source\User\Fragments\Quests\QF_COMAstra_00000805.psc`
+- Do not deploy to nested paths like:
+  - `Data\Scripts\Fragments\Quests\Fragments\Quests\...`
