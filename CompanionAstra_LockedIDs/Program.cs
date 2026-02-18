@@ -1366,8 +1366,9 @@ namespace CompanionClaude
             recruitScene.Actions.Add(pickupAction1);
 
             // Action 2: Dialog, AliasID 1 (Companion slot), Phase 1
+            // Keep this Astra-owned topic to avoid vanilla-topic condition dead-ends in custom quest context.
             var pickupAction2 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 2, AliasID = 1, StartPhase = 1, EndPhase = 1, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction2.Topic.SetTo(new FormKey(fo4, 0x162C4B)); // Vanilla companion handoff topic
+            pickupAction2.Topic.SetTo(astraPickup_Dialog2);
             recruitScene.Actions.Add(pickupAction2);
 
             // Action 5: Dialog, AliasID 2 (Dogmeat slot), Phase 2

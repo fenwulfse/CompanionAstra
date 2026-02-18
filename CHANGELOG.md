@@ -1,6 +1,18 @@
 # Changelog
 
 ## 2026-02-18
+- Offline fix candidate prepared (not deployed to live `Data`):
+  - Candidate folder:
+    - `Backups/Candidates/2026-02-18_action2_astra_owned`
+  - Targeted pickup fix:
+    - `COMAstraPickupScene` Action 2 switched from vanilla topic `Fallout4.esm:162C4B` to Astra-owned `COMAstraPickup_Dialog2`.
+  - Rationale:
+    - avoid vanilla-topic condition dead-end in custom quest context that can stall interaction.
+  - Candidate deploy set includes coherent artifacts:
+    - ESP `89C7F3843FD345A820D7BF9A09145CCBB1E5891A677C7F5EED6366974CC00D64`
+    - PEX `70864D0F8493EC5CBB0830E97F6331AEFC74FD5439CC32D6D285EACD8145A765`
+    - PSC `BF1537DC9D9AE0E0DFD9810F626F35A39B545CA22CA790121D01B9E961661D8A`
+    - Voice set `246` files with companion fallback dirs.
 - Emergency loop break (latest-test regression -> stable baseline restore):
   - User reported repeat non-interactive companion talk and player-in-place lock during interaction attempts.
   - Reverted runtime from latest-test set back to known playable baseline:
