@@ -1,6 +1,20 @@
 # Changelog
 
 ## 2026-02-18
+- Emergency loop break (latest-test regression -> stable baseline restore):
+  - User reported repeat non-interactive companion talk and player-in-place lock during interaction attempts.
+  - Reverted runtime from latest-test set back to known playable baseline:
+    - ESP: `20D2595BB4028D48DE7C97119D5C58AF0716F2C1D22534CE8652F0E414BC87A8`
+    - PEX: `70864D0F8493EC5CBB0830E97F6331AEFC74FD5439CC32D6D285EACD8145A765`
+    - PSC: `BF1537DC9D9AE0E0DFD9810F626F35A39B545CA22CA790121D01B9E961661D8A`
+    - Voice: `227` total (`NPCFAstra=71`)
+  - Kept CK-clean script source placement:
+    - present: `Data\Scripts\Source\User\Fragments\Quests\QF_COMAstra_00000805.psc`
+    - absent by design: `Data\Scripts\Source\User\QF_COMAstra_00000805.psc`
+  - Active plugin reconfirmed:
+    - `plugins.txt` -> `*CompanionAstra.esp`
+  - Pinned checkpoint for this recovered state:
+    - `Backups/WorkingHistory/2026-02-18_132928_stable_baseline_recovered_after_loop_2026-02-18_`
 - Current-state recovery hardening (afternoon pass):
   - Confirmed runtime confusion cause: mixed deployment state.
   - `plugins.txt` had wrong active plugin (`*CompanionClaude.esp`) during part of testing; corrected to `*CompanionAstra.esp`.
