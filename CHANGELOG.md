@@ -1,6 +1,20 @@
 # Changelog
 
 ## 2026-02-18
+- Current-state recovery hardening (afternoon pass):
+  - Confirmed runtime confusion cause: mixed deployment state.
+  - `plugins.txt` had wrong active plugin (`*CompanionClaude.esp`) during part of testing; corrected to `*CompanionAstra.esp`.
+  - Live runtime had latest-test ESP (`F25979E8...`) but older 227-file voice set, causing partial/silent pickup behavior.
+  - Restored matching voice set from the same latest-test checkpoint:
+    - voice dirs now include fallback companions (`NPCFPiper`, `NPCFCait`, `NPCFCurie`, `NPCM*`, `RobotMrHandy`) plus player folders.
+    - live voice count now `246` (`NPCFAstra=78`).
+  - Created pinned checkpoint for this coherent state:
+    - `Backups/WorkingHistory/2026-02-18_130832_latest_test_matched_voice_and_active_plugin_2026`
+  - Technical fingerprint for current test state:
+    - ESP `F25979E80060425051258060AF1CA7065E1E67622ECF62CB445B177136E281F0`
+    - PEX `70864D0F8493EC5CBB0830E97F6331AEFC74FD5439CC32D6D285EACD8145A765`
+    - PSC `BF1537DC9D9AE0E0DFD9810F626F35A39B545CA22CA790121D01B9E961661D8A`
+    - Active plugin `*CompanionAstra.esp`
 - User morning handoff retest reported:
   - No handoff exchange lines fired for `Astra <-> Codsworth`, `Astra <-> Dogmeat`, and additional checks with Piper/Cait.
   - Core flow remained stable: pickup/dismiss/menu/switch/exit all working.
