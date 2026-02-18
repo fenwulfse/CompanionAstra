@@ -1,23 +1,29 @@
-# Contributing to CompanionAstra
+﻿# Contributing to CompanionAstra
 
-Thank you for helping. This repo is very sensitive to ID stability and voice file mapping—please follow these rules.
+This project is sensitive to record stability. Small mistakes can break voice playback or quest flow.
 
 ## Golden Rules
-1. **Never change locked INFO IDs.**  
-   These IDs are the filename contract for `.fuz` audio.
-2. **Text-first workflow only.**  
-   Astra text stays as-is. Player voice lines are mapped to closest vanilla audio.
-3. **Do not overwrite NPC audio** unless explicitly instructed.  
-   Use `--allow-*-voice-overwrite` only if you intend to replace NPC lines with placeholders.
+1. Never change locked INFO IDs.
+2. Keep vanilla mechanics parity unless explicitly approved to deviate.
+3. Keep Astra text as source of truth; map player voice to closest vanilla lines.
+4. Do not overwrite NPC audio unless the change is intentional and documented.
 
 ## Build / Run
-```
-dotnet run --project E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
+```powershell
+dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
 ```
 
+## Branch + PR Flow
+1. Create a feature branch from `main` (or your agent branch).
+2. Keep commit scope focused (`fix`, `feat`, `docs`, `chore`).
+3. Update `CHANGELOG.md` with behavior-level notes.
+4. Open PR with:
+   - files touched
+   - gameplay impact
+   - test evidence (new game + existing save when possible)
+
 ## TTS Flags (NPC)
-Use these to generate Astra TTS for specific scenes:
-```
+```text
 --enable-greeting-tts
 --enable-friendship-tts
 --enable-admiration-tts
@@ -29,21 +35,10 @@ Use these to generate Astra TTS for specific scenes:
 --enable-murder-tts
 ```
 
-## Locked ID Maps
-These are the source of truth. If you change them, you break voice stability:
+## Locked ID Sources
 - `docs/GREETING_VOICE_ID_STABILITY.md`
 - `docs/*_LOCKED_IDS.md`
 
-## What We Need Help With
-- Better player voice mapping suggestions (closest vanilla lines)
-- CK verification: confirm correct lines play and are not “bouncing”
-- Documentation improvements
-
-## Pull Requests
-Keep PRs small and focused:
-1. State which scene you touched.
-2. Confirm locked IDs were not changed.
-3. Note which TTS flags (if any) were used.
-
-## Questions
-Open an issue or ping the maintainer.
+## Testing + Reporting
+- Use `TESTING.md` for CK checks.
+- Use `docs/TESTER_GUIDE.md` and `docs/BUG_REPORT_TEMPLATE.md` for in-game reports.

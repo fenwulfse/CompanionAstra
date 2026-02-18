@@ -1,5 +1,8 @@
-using System;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Fallout4;
 using Mutagen.Bethesda.Plugins;
@@ -62,6 +65,9 @@ namespace CompanionClaude
             if (!quest.Data.Flags.HasFlag(Quest.Flag.AllowRepeatedStages)) throw new Exception("GUARDRAIL ERROR: AllowRepeatedStages must be Checked.");
             
             // Alias Locks
+            if (quest.Aliases == null)
+                throw new Exception($"GUARDRAIL ERROR: Quest '{quest.EditorID}' must define aliases.");
+
             var alias0 = quest.Aliases.FirstOrDefault(a => (a is IQuestReferenceAliasGetter r) && r.ID == 0) as IQuestReferenceAliasGetter;
             if (alias0 == null || alias0.Name?.ToString() != CompanionName) throw new Exception($"GUARDRAIL ERROR: Alias 0 must be named '{CompanionName}'.");
             if (alias0.Flags == null || !alias0.Flags.Value.HasFlag(QuestReferenceAlias.Flag.Essential)) throw new Exception("GUARDRAIL ERROR: Alias 0 must be 'Essential'.");
@@ -185,11 +191,91 @@ namespace CompanionClaude
             }
         }
 
-        public static void Validate(Fallout4Mod mod)
+        private static HashSet<FormKey> CollectFormKeys(object root)
+        {
+            var keys = new HashSet<FormKey>();
+            var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+
+            void Visit(object? node)
+            {
+                if (node == null || node is string) return;
+
+                var type = node.GetType();
+                if (type.IsPrimitive || type.IsEnum || type == typeof(decimal))
+                    return;
+
+                if (node is FormKey fk)
+                {
+                    if (!fk.IsNull) keys.Add(fk);
+                    return;
+                }
+
+                if (!type.IsValueType && !visited.Add(node))
+                    return;
+
+                if (node is IEnumerable sequence)
+                {
+                    foreach (var item in sequence)
+                        Visit(item);
+                }
+
+                foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    if (!prop.CanRead || prop.GetIndexParameters().Length > 0)
+                        continue;
+
+                    object? value;
+                    try { value = prop.GetValue(node); }
+                    catch { continue; }
+
+                    if (value == null)
+                        continue;
+
+                    if (value is FormKey propFk)
+                    {
+                        if (!propFk.IsNull) keys.Add(propFk);
+                        continue;
+                    }
+
+                    var propertyType = prop.PropertyType;
+                    if (propertyType == typeof(string) || propertyType.IsPrimitive || propertyType.IsEnum || propertyType == typeof(decimal))
+                        continue;
+
+                    Visit(value);
+                }
+            }
+
+            Visit(root);
+            return keys;
+        }
+
+        public static void AssertNoCompiperQuestLinks(Quest quest, IReadOnlyDictionary<FormKey, string> forbiddenCompiperRecords)
+        {
+            if (forbiddenCompiperRecords.Count == 0)
+                return;
+
+            var questGraphKeys = CollectFormKeys(quest);
+            var offenders = questGraphKeys
+                .Where(k => forbiddenCompiperRecords.ContainsKey(k))
+                .OrderBy(k => k.ID)
+                .Select(k => $"{forbiddenCompiperRecords[k]} ({k})")
+                .ToList();
+
+            if (offenders.Count > 0)
+            {
+                throw new Exception(
+                    "GUARDRAIL ERROR: Quest graph links to COMPiper records. " +
+                    "Replace these links with Astra-owned records: " +
+                    string.Join(", ", offenders));
+            }
+        }
+
+        public static void Validate(Fallout4Mod mod, IReadOnlyDictionary<FormKey, string> forbiddenCompiperRecords)
         {
             Console.WriteLine("--- RUNNING GUARDRAIL VALIDATION ---");
             foreach (var quest in mod.Quests)
             {
+                AssertNoCompiperQuestLinks(quest, forbiddenCompiperRecords);
                 AssertQuest(quest);
                 AssertStages(quest);
                 AssertScripts(quest);
@@ -197,7 +283,7 @@ namespace CompanionClaude
                 foreach (var topic in quest.DialogTopics)
                 {
                     // Check every topic that is intended to be a Greeting
-                    if (topic.Subtype == DialogTopic.SubtypeEnum.Greeting || topic.EditorID.Contains("Greeting"))
+                    if (topic.Subtype == DialogTopic.SubtypeEnum.Greeting || topic.EditorID?.Contains("Greeting", StringComparison.OrdinalIgnoreCase) == true)
                         AssertGreeting(topic);
                 }
             }
@@ -210,6 +296,9 @@ namespace CompanionClaude
         static void Main(string[] args)
         {
             Console.WriteLine("=== CompanionAstra v14 - Actor Record Sync ===");
+            string repoRoot = System.IO.Directory.GetCurrentDirectory();
+            string workspaceRoot = System.IO.Directory.GetParent(repoRoot)?.FullName ?? repoRoot;
+            string globalRoot = System.IO.Directory.GetParent(workspaceRoot)?.FullName ?? workspaceRoot;
 
             string? GetArgValue(string name)
             {
@@ -223,6 +312,26 @@ namespace CompanionClaude
                 return null;
             }
             bool HasArg(string name) => args.Any(a => string.Equals(a, name, StringComparison.OrdinalIgnoreCase));
+            string? DetectFallout4DataPath()
+            {
+                var explicitFo4 = GetArgValue("--fo4-data");
+                if (!string.IsNullOrWhiteSpace(explicitFo4) && System.IO.Directory.Exists(explicitFo4))
+                    return explicitFo4;
+
+                var envFo4 = Environment.GetEnvironmentVariable("FO4_DATA");
+                if (!string.IsNullOrWhiteSpace(envFo4) && System.IO.Directory.Exists(envFo4))
+                    return envFo4;
+
+                var candidates = new[]
+                {
+                    @"E:\SteamLibrary\steamapps\common\Fallout 4\Data",
+                    @"D:\SteamLibrary\steamapps\common\Fallout 4\Data",
+                    @"C:\Program Files (x86)\Steam\steamapps\common\Fallout 4\Data",
+                    @"C:\Program Files\Steam\steamapps\common\Fallout 4\Data",
+                };
+
+                return candidates.FirstOrDefault(System.IO.Directory.Exists);
+            }
 
             var tempDir = GetArgValue("--temp-dir");
             if (!string.IsNullOrWhiteSpace(tempDir))
@@ -245,6 +354,37 @@ namespace CompanionClaude
             T? GetRecord<T>(string editorId) where T : class, IMajorRecordGetter {
                 return env.LoadOrder.PriorityOrder.WinningOverrides<T>().FirstOrDefault(r => r.EditorID == editorId);
             }
+
+            Dictionary<FormKey, string> BuildForbiddenCompiperRecordIndex()
+            {
+                var map = new Dictionary<FormKey, string>();
+
+                void Add<T>() where T : class, IMajorRecordGetter
+                {
+                    foreach (var record in env.LoadOrder.PriorityOrder.WinningOverrides<T>())
+                    {
+                        var edid = record.EditorID;
+                        if (string.IsNullOrWhiteSpace(edid))
+                            continue;
+
+                        if (!edid.StartsWith("COMPiper", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        map[record.FormKey] = edid;
+                    }
+                }
+
+                // Hard-stop on direct links into Piper quest graph records.
+                Add<IQuestGetter>();
+                Add<ISceneGetter>();
+                Add<IDialogBranchGetter>();
+                Add<IDialogTopicGetter>();
+                Add<IDialogResponsesGetter>();
+                Add<IGlobalGetter>();
+                return map;
+            }
+
+            var forbiddenCompiperLinks = BuildForbiddenCompiperRecordIndex();
 
             var fo4 = ModKey.FromNameAndExtension("Fallout4.esm");
             FormKey FK(uint id) => new FormKey(mod.ModKey, id);
@@ -344,10 +484,29 @@ namespace CompanionClaude
             const uint Hat_NPos1 = 0x00F621;
             const uint Hat_Greeting1Id = 0x00F630;
             const uint Hat_Greeting2Id = 0x00F631;
+            const uint Rep_AdmDown_Greeting1Id = 0x00F640;
+            const uint Rep_AdmDown_Greeting2Id = 0x00F641;
+            const uint Rep_NeutralDown_Greeting1Id = 0x00F642;
+            const uint Rep_NeutralDown_Greeting2Id = 0x00F643;
+            const uint Rep_DisdainDown_Greeting1Id = 0x00F644;
+            const uint Rep_DisdainDown_Greeting2Id = 0x00F645;
+            const uint Rep_HatredDown_GreetingId = 0x00F646;
+            const uint Rep_InfUp_Greeting1Id = 0x00F647;
+            const uint Rep_InfUp_Greeting2Id = 0x00F648;
+            const uint Inf_RepeatRegular_GreetingId = 0x00F650;
             const uint Rec_PPos1 = 0x00F700;
             const uint Rec_NPos1 = 0x00F701;
             const uint Mur_PPos1 = 0x00F720;
             const uint Mur_NPos1 = 0x00F721;
+            const uint Inf_RepeatRegular_PPos = 0x00F730;
+            const uint Inf_RepeatRegular_NPos = 0x00F731;
+            const uint Inf_RepeatRegular_PNeg = 0x00F732;
+            const uint Inf_RepeatRegular_NNeg = 0x00F733;
+            const uint Inf_RepeatRegular_PNeu = 0x00F734;
+            const uint Inf_RepeatRegular_NNeu = 0x00F735;
+            const uint Inf_RepeatRegular_PQue = 0x00F736;
+            const uint Inf_RepeatRegular_NQue = 0x00F737;
+            const uint Inf_RepeatRegular_Dialog2 = 0x00F738;
 
             // 1. BURN FORMKEYS & DEFINE HARDCODED IDs
             for (int i = 0; i < 200; i++) mod.GetNextFormKey();
@@ -377,12 +536,43 @@ namespace CompanionClaude
             var companionClass = new FormLinkNullable<IClassGetter>(new FormKey(fo4, 0x1CD0A8));
             var speedMult = GetRecord<IActorValueInformationGetter>("SpeedMult");
 
-            var ca_TCustom2_Friend = GetRecord<IGlobalGetter>("CA_TCustom2_Friend");
+            var ca_T1_Infatuation = GetRecord<IGlobalGetter>("CA_T1_Infatuation") ?? throw new Exception("CA_T1_Infatuation not found");
+            var ca_T2_Admiration = GetRecord<IGlobalGetter>("CA_T2_Admiration") ?? throw new Exception("CA_T2_Admiration not found");
+            var ca_T3_Neutral = GetRecord<IGlobalGetter>("CA_T3_Neutral") ?? throw new Exception("CA_T3_Neutral not found");
+            var ca_TCustom1_Confidant = GetRecord<IGlobalGetter>("CA_TCustom1_Confidant") ?? throw new Exception("CA_TCustom1_Confidant not found");
+            var ca_TCustom2_Friend = GetRecord<IGlobalGetter>("CA_TCustom2_Friend") ?? throw new Exception("CA_TCustom2_Friend not found");
             var ca_WantsToTalk_FK = new FormKey(fo4, 0x0FA86B);
+            var ca_WantsToTalkRomanceRetry_FK = new FormKey(fo4, 0x215DD3);
+            var ca_AffinitySceneToPlay_FK = new FormKey(fo4, 0x0FA875);
+            var ca_CurrentThreshold_FK = new FormKey(fo4, 0x0A1B81);
+            var ca_Scene_Admiration_FK = new FormKey(fo4, 0x0FA86C);
+            var ca_Scene_Infatuation_FK = new FormKey(fo4, 0x0FA86D);
+            var ca_Scene_Disdain_FK = new FormKey(fo4, 0x0FA86E);
+            var ca_Scene_Hatred_FK = new FormKey(fo4, 0x0FA86F);
+            var ca_Scene_Friendship_FK = new FormKey(fo4, 0x166700);
+            var ca_Scene_Confidant_FK = new FormKey(fo4, 0x166701);
+            var ca_Scene_Repeat_Admiration_Downward_FK = new FormKey(fo4, 0x0FA870);
+            var ca_Scene_Repeat_Neutral_Downward_FK = new FormKey(fo4, 0x0FA871);
+            var ca_Scene_Repeat_Disdain_Downward_FK = new FormKey(fo4, 0x0FA872);
+            var ca_Scene_Repeat_Hatred_Downward_FK = new FormKey(fo4, 0x0FA873);
+            var ca_Scene_Repeat_Infatuation_Upward_FK = new FormKey(fo4, 0x0FA874);
             var ca_WantsToTalkMurder = GetRecord<IActorValueInformationGetter>("CA_WantsToTalkMurder") ?? throw new Exception("CA_WantsToTalkMurder not found");
             var ca_T5_Hatred = GetRecord<IGlobalGetter>("CA_T5_Hatred") ?? throw new Exception("CA_T5_Hatred not found");
             var ca_T4_Disdain = GetRecord<IGlobalGetter>("CA_T4_Disdain") ?? throw new Exception("CA_T4_Disdain not found");
+            var ca_Event_Murder = GetRecord<IKeywordGetter>("CA_Event_Murder") ?? throw new Exception("CA_Event_Murder not found");
+            var experienceAV = GetRecord<IActorValueInformationGetter>("Experience") ?? throw new Exception("Experience AV not found");
+            var hasItemForPlayerAV = GetRecord<IActorValueInformationGetter>("HasItemForPlayer") ?? throw new Exception("HasItemForPlayer AV not found");
+            var temporaryAngerLevelAV = GetRecord<IActorValueInformationGetter>("TemporaryAngerLevel") ?? throw new Exception("TemporaryAngerLevel AV not found");
+            var commonMurderToggleAlwaysOff = GetRecord<IGlobalGetter>("CommonMurderToggle_AlwaysOff") ?? throw new Exception("CommonMurderToggle_AlwaysOff not found");
+            var tutorialQuest = GetRecord<IQuestGetter>("Tutorial") ?? throw new Exception("Tutorial quest not found");
+            var mqComplete = GetRecord<IGlobalGetter>("MQComplete") ?? throw new Exception("MQComplete global not found");
+            var workshopParentQuestFK = new FormKey(fo4, 0x02058E); // Vanilla WorkshopParent quest (no stable EDID in load order)
             var followerEndgameForceGreetOn = GetRecord<IActorValueInformationGetter>("FollowerEndgameForceGreetOn") ?? throw new Exception("FollowerEndgameForceGreetOn not found");
+            var astraPickupDistanceGlobal = new GlobalFloat(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                EditorID = "COMAstraPickupDistance",
+                Data = 250f
+            };
+            mod.Globals.Add(astraPickupDistanceGlobal);
 
             // 3. CREATE NPC
             Console.WriteLine("Creating NPC: Astra...");
@@ -467,40 +657,6 @@ namespace CompanionClaude
                 return t;
             }
 
-            // Create a looping question topic that references back to a scene/phase
-            DialogTopic CreateLoopingQuestionTopic(string edid, string text, Scene scene, string phaseName) {
-                var t = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                    EditorID = edid,
-                    Quest = new FormLink<IQuestGetter>(mainQuestFK),
-                    Category = DialogTopic.CategoryEnum.Scene,
-                    Subtype = DialogTopic.SubtypeEnum.Custom17,
-                    SubtypeName = "SCEN",
-                    Priority = 50
-                };
-                var r = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                    Flags = new DialogResponseFlags { Flags = 0 }
-                };
-                var response = new DialogResponse {
-                    Text = new TranslatedString(Language.English, text),
-                    ResponseNumber = 1,
-                    Unknown = 1,
-                    Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
-                    InterruptPercentage = 0,
-                    CameraTargetAlias = -1,
-                    CameraLocationAlias = -1,
-                    StopOnSceneEnd = false
-                };
-                r.Responses.Add(response);
-
-                // Set scene and phase on DialogResponses (Topic Info) to make it loop back
-                r.StartScene.SetTo(scene);
-                r.StartScenePhase = phaseName; // Use phase name like "Loop01", "Loop02", etc.
-
-                t.Responses.Add(r);
-                topics.Add(t);
-                return t;
-            }
-
             // Create a looping question topic with a fixed INFO ID (stable voice filenames)
             DialogTopic CreateLoopingQuestionTopicFixed(string edid, string text, Scene scene, string phaseName, uint infoId) {
                 var t = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
@@ -545,7 +701,7 @@ namespace CompanionClaude
             recruitScene.Actors.Add(new SceneActor { ID = 2, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
             ConditionGlobal DistanceCheck() => new ConditionGlobal {
                 CompareOperator = CompareOperator.LessThan,
-                ComparisonValue = new FormLink<IGlobalGetter>(new FormKey(fo4, 0x16650C)), // COMPiperPickupDistance
+                ComparisonValue = astraPickupDistanceGlobal.FormKey.ToLink<IGlobalGetter>(),
                 Data = new FunctionConditionData {
                     Function = Condition.Function.GetDistance,
                     ParameterOneNumber = 0, // Quest Alias 0 (Astra)
@@ -572,7 +728,7 @@ namespace CompanionClaude
             recruitScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 80 } });
 
             var dismissScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaudeDismissScene",
+                EditorID = "COMAstraDismissScene",
                 Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
                 Flags = (Scene.Flag)36
             };
@@ -682,6 +838,8 @@ namespace CompanionClaude
 
             // Action 9 closing dialogue topic (Phase 7)
             var friend_closingTopic = CreateSceneTopicFixed("COMClaudeFriend_Closing", "", "I'm glad we talked. Ready to move out?", 0x00F220);
+            // Piper parity: friendship scene completion is pushed by closing topic response (stage 407).
+            friend_closingTopic.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 407 };
 
             // Dialog action topics (NPC monologue between exchanges)
             var friend_Dialog2 = CreateSceneTopicFixed("COMClaudeFriend_Dialog2", "", "I've been analyzing our path together.", 0x00F221);
@@ -842,7 +1000,8 @@ namespace CompanionClaude
             admirationScene.Phases.Add(new ScenePhase { Name = "Loop02" });
             admirationScene.Phases.Add(new ScenePhase { Name = "" });
             admirationScene.Phases.Add(new ScenePhase { Name = "Loop03" });
-            admirationScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 410 } });
+            // Piper parity: admiration scene completes at stage 420 (not forcegreet stage 410).
+            admirationScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 420 } });
 
             // Create Dialogue Topics for the 3 Exchanges (Astra Admiration Flavor) - fixed INFO IDs
             var adm1_PPos = CreateSceneTopicFixed("COMClaudeAdm_Ex1_PPos", "Evolving", "You've grown significantly since vault exit.", Adm_PPos1);
@@ -889,7 +1048,8 @@ namespace CompanionClaude
             confidantScene.Phases.Add(new ScenePhase { Name = "Loop03" });
             confidantScene.Phases.Add(new ScenePhase { Name = "" });
             confidantScene.Phases.Add(new ScenePhase { Name = "Loop04" });
-            confidantScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 440 } });
+            // Piper parity: confidant scene completes at stage 497 (forcegreet is 496).
+            confidantScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 497 } });
 
             // Create Dialogue Topics for the 4 Exchanges (Astra Confidant Flavor) - fixed INFO IDs
             var conf1_PPos = CreateSceneTopicFixed("COMClaudeConf_Ex1_PPos", "Secure", "You can trust me with anything.", Conf_PPos1);
@@ -950,7 +1110,8 @@ namespace CompanionClaude
             infatuationScene.Phases.Add(new ScenePhase { Name = "Loop05" }); // 10
             infatuationScene.Phases.Add(new ScenePhase { Name = "" }); // 11
             infatuationScene.Phases.Add(new ScenePhase { Name = "Loop06" }); // 12
-            infatuationScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 496 } }); // 13
+            // Piper parity: infatuation completion is branch-driven via response-level stage triggers.
+            infatuationScene.Phases.Add(new ScenePhase { Name = "" }); // 13
 
             // Create Dialogue Topics for the 6 Exchanges (Astra Infatuation/Romance Flavor) - fixed INFO IDs
             var inf1_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex1_PPos", "Essential", "You have become essential to my operations.", Inf_PPos1);
@@ -988,6 +1149,13 @@ namespace CompanionClaude
             var inf6_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex6_PNeg", "Stay Practical", "Let's stay practical.", Inf_PNeg6);
             var inf6_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex6_PQue", "Eternal?", "Eternal? Forever?", Inf_PQue6);
             var inf6_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex6_NPos", "", "Optimized. Synchronized. Devoted. Database updated: Partnership status = Eternal.", Inf_NPos6);
+
+            // Full infatuation outcome branch (Piper-style terminal stage fan-out).
+            // We branch on the final player response so each path can set a distinct result stage.
+            inf6_PPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 525 }; // Romance complete
+            inf6_PNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 515 }; // Declined (temporary)
+            inf6_PNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 522 }; // Declined (permanent)
+            inf6_PQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 520 }; // Romance failed
 
             // Create NQue (looping question responses)
             var inf1_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex1_NQue", "My functions optimize when you are present. Deteriorate when you are absent. Definition: Dependency. Conclusion: Essential.", infatuationScene, "Loop01", Inf_NQue1);
@@ -1050,6 +1218,65 @@ namespace CompanionClaude
             var rec1_N = CreateSceneTopicFixed("COMClaudeRec_N", "", "Calculation: Correct. Trust levels have been re-verified. Resuming Infatuation protocols.", Rec_NPos1);
             AddExchange(recoveryScene, 0, 1, 1, rec1_P, rec1_N);
 
+            // ---------- 11: Infatuation Repeater (Regular) ----------
+            Console.WriteLine("Creating Scene 11: Infatuation Repeater Regular...");
+            var infatuationRepeaterRegularScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                EditorID = "COMClaude_11_InfatuationRepeaterRegular",
+                Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
+                Flags = (Scene.Flag)36
+            };
+            infatuationRepeaterRegularScene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
+            infatuationRepeaterRegularScene.Phases.Add(new ScenePhase { Name = "Loop01" }); // player dialogue loop
+            infatuationRepeaterRegularScene.Phases.Add(new ScenePhase { Name = "" }); // follow-up line
+            infatuationRepeaterRegularScene.Phases.Add(new ScenePhase { Name = "" }); // end
+
+            var infRep_PPos = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PPos", "No", "No. It was nice to hear.", Inf_RepeatRegular_PPos);
+            var infRep_NPos = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NPos", "", "You always know what to say, don't you?", Inf_RepeatRegular_NPos);
+            var infRep_PNeg = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PNeg", "Sounded nuts", "Yeah, it did sound kind of nuts.", Inf_RepeatRegular_PNeg);
+            var infRep_NNeg = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NNeg", "", "Yeah. I was afraid of that.", Inf_RepeatRegular_NNeg);
+            var infRep_PNeu = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PNeu", "No more than usual", "I don't think it was more than usual.", Inf_RepeatRegular_PNeu);
+            var infRep_NNeu = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NNeu", "", "Good. Consistency is reassuring.", Inf_RepeatRegular_NNeu);
+            var infRep_PQue = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PQue", "What conversation?", "What conversation?", Inf_RepeatRegular_PQue);
+            var infRep_NQue = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NQue", "", "When I was talking about my life before. I needed to know how it sounded.", Inf_RepeatRegular_NQue);
+            var infRep_Dialog2 = CreateSceneTopicFixed("COMClaudeInfRep_Reg_Dialog2", "", "It's been a long time since I've had someone like you in my life.", Inf_RepeatRegular_Dialog2);
+
+            var infRepAction1 = new SceneAction {
+                Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.PlayerDialogue },
+                Index = 1, AliasID = 0, StartPhase = 0, EndPhase = 0,
+                Flags = SceneAction.Flag.FaceTarget | SceneAction.Flag.HeadtrackPlayer | (SceneAction.Flag)2097152
+            };
+            infRepAction1.PlayerPositiveResponse.SetTo(infRep_PPos);
+            infRepAction1.NpcPositiveResponse.SetTo(infRep_NPos);
+            infRepAction1.PlayerNegativeResponse.SetTo(infRep_PNeg);
+            infRepAction1.NpcNegativeResponse.SetTo(infRep_NNeg);
+            infRepAction1.PlayerNeutralResponse.SetTo(infRep_PNeu);
+            infRepAction1.NpcNeutralResponse.SetTo(infRep_NNeu);
+            infRepAction1.PlayerQuestionResponse.SetTo(infRep_PQue);
+            infRepAction1.NpcQuestionResponse.SetTo(infRep_NQue);
+            infatuationRepeaterRegularScene.Actions.Add(infRepAction1);
+
+            var infRepAction2 = new SceneAction {
+                Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog },
+                Index = 2, AliasID = 0, StartPhase = 1, EndPhase = 1,
+                Flags = (SceneAction.Flag)163840, LoopingMin = 1, LoopingMax = 10
+            };
+            infRepAction2.Topic.SetTo(infRep_Dialog2);
+            infatuationRepeaterRegularScene.Actions.Add(infRepAction2);
+
+            var infRepAction3 = new SceneAction {
+                Type = new SceneActionStartScene(),
+                Index = 3, AliasID = 0, StartPhase = 2, EndPhase = 2
+            };
+            infRepAction3.StartScenes.Add(new StartScene {
+                Scene = new FormLinkNullable<ISceneGetter>(infatuationScene.FormKey),
+                PhaseIndex = 10,
+                // Must match phase name at index 10 in COMClaude_03_AdmirationToInfatuation.
+                // Keeping this synchronized avoids CK "index does not match phase name" warning.
+                StartPhaseForScene = "Loop05",
+                Conditions = new ExtendedList<Condition>()
+            });
+            infatuationRepeaterRegularScene.Actions.Add(infRepAction3);
+
             // ---------- MURDER SCENE (5 phases) ----------
             Console.WriteLine("Creating Murder Scene...");
             var murderScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMClaudeMurderScene", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
@@ -1066,35 +1293,61 @@ namespace CompanionClaude
                     new ScriptEntry {
                         Name = "CompanionActorScript",
                         Properties = new ExtendedList<ScriptProperty> {
-                            new ScriptObjectProperty { Name = "DismissScene", Object = dismissScene.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+                            new ScriptObjectProperty { Name = "DismissScene", Object = dismissScene.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            // Minimal high-impact parity set from Piper actor VMAD (safe globals/AVs).
+                            new ScriptObjectProperty { Name = "CA_Event_Murder", Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "Experience", Object = experienceAV.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "HasItemForPlayer", Object = hasItemForPlayerAV.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "TemporaryAngerLevel", Object = temporaryAngerLevelAV.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "MurderToggle", Object = commonMurderToggleAlwaysOff.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "StartingThreshold", Object = ca_T3_Neutral.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "InfatuationThreshold", Object = ca_T1_Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "MQComplete", Object = mqComplete.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "Tutorial", Object = tutorialQuest.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "ShouldGivePlayerItems", Data = true }
+                        }
+                    },
+                    new ScriptEntry {
+                        Name = "workshopnpcscript",
+                        Properties = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "WorkshopParent", Object = workshopParentQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "bAllowCaravan", Data = true },
+                            new ScriptBoolProperty { Name = "bAllowMove", Data = true },
+                            new ScriptBoolProperty { Name = "bApplyWorkshopOwnerFaction", Data = false },
+                            new ScriptBoolProperty { Name = "bCommandable", Data = true }
                         }
                     }
                 }
             };
 
-            // ===== PICKUP SCENE: PIPER-EXACT TOPICS (PARTIAL REPLACEMENT) =====
-            // We are replacing Player Positive first (left-to-right), keeping structure intact.
-            var astraPickup_PPos = CreateSceneTopic("COMAstraPickup_PPos", "Let's go", "Sure, let's go.");
-            var astraPickup_PNeg = CreateSceneTopic("COMAstraPickup_PNeg", "Never mind", "You know what. Never mind.");
+            // ===== PICKUP SCENE: ASTRA-OWNED TOPICS (Piper structure, no COMPiper links) =====
+            var astraPickup_PPos = CreateSceneTopic("COMAstraPickup_PPos", "Let's go", "Let's go.");
+            var astraPickup_NPos = CreateSceneTopic("COMAstraPickup_NPos", "", "Sure. Let's move.");
+            var astraPickup_PNeg = CreateSceneTopic("COMAstraPickup_PNeg", "Never mind", "Never mind.");
+            var astraPickup_NNeg = CreateSceneTopic("COMAstraPickup_NNeg", "", "All right. Your call.");
+            astraPickup_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
             var astraPickup_PNeu = CreateSceneTopic("COMAstraPickup_PNeu", "Trade", "Let's trade.");
-            astraPickup_PNeu.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C82));
+            var astraPickup_NNeu = CreateSceneTopic("COMAstraPickup_NNeu", "", "Show me what you've got.");
+            // Keep barter behavior on NPC neutral response, matching the older working implementation.
+            astraPickup_NNeu.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C82));
+            astraPickup_NNeu.Responses[0].VirtualMachineAdapter = new DialogResponsesAdapter {
+                Version = 6,
+                ObjectFormat = 2,
+                Scripts = new ExtendedList<ScriptEntry> {
+                    new ScriptEntry {
+                        Name = "OpenInventoryInfoScript",
+                        Properties = new ExtendedList<ScriptProperty>()
+                    }
+                }
+            };
+            astraPickup_NNeu.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
+            var astraPickup_PQue = CreateSceneTopic("COMAstraPickup_PQue", "Question", "Got a minute?");
+            var astraPickup_NQue = CreateSceneTopic("COMAstraPickup_NQue", "", "Make it quick.");
 
-            // Link directly to Piper's vanilla topics to mirror CK layout exactly.
-            var piperPickup_PPos = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4F));
-            var piperPickup_NPos = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C53));
-            var piperPickup_PNeg = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4E));
-            var piperPickup_NNeg = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C52));
-            var piperPickup_PNeu = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4D));
-            var piperPickup_NNeu = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C51));
-            var piperPickup_PQue = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4C));
-            var piperPickup_NQue = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C50));
-
-            // Apply EndSceneFlag to pickup negative NPC response
-            // Action 2/3/4/5 dialog topics (vanilla Piper topics)
-            var piperPickup_Dialog2 = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4B)); // Companion line set
-            var piperPickup_Dialog3 = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x162C4A)); // Piper reply set
-            var piperPickup_Dialog4 = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x21748C)); // "Sorry, boy..."
-            var piperPickup_Dialog5 = new FormLink<IDialogTopicGetter>(new FormKey(fo4, 0x21748B)); // Dogmeat bark/empty
+            var astraPickup_Dialog2 = CreateSceneTopic("COMAstraPickup_Dialog2", "", "Ready for assignment.");
+            var astraPickup_Dialog3 = CreateSceneTopic("COMAstraPickup_Dialog3", "", "Lead the way.");
+            var astraPickup_Dialog4 = CreateSceneTopic("COMAstraPickup_Dialog4", "", "Sorry, boy. Time for you to head home.");
+            var astraPickup_Dialog5 = CreateSceneTopic("COMAstraPickup_Dialog5", "", "");
 
             // Pickup Actions - ALL OUR OWN TOPICS
             var pickupAction1 = new SceneAction {
@@ -1103,33 +1356,33 @@ namespace CompanionClaude
                 Flags = (SceneAction.Flag)2260992
             };
             pickupAction1.PlayerPositiveResponse.SetTo(astraPickup_PPos);
-            pickupAction1.NpcPositiveResponse.SetTo(piperPickup_NPos);
+            pickupAction1.NpcPositiveResponse.SetTo(astraPickup_NPos);
             pickupAction1.PlayerNegativeResponse.SetTo(astraPickup_PNeg);
-            pickupAction1.NpcNegativeResponse.SetTo(piperPickup_NNeg);
+            pickupAction1.NpcNegativeResponse.SetTo(astraPickup_NNeg);
             pickupAction1.PlayerNeutralResponse.SetTo(astraPickup_PNeu);
-            pickupAction1.NpcNeutralResponse.SetTo(piperPickup_NNeu);
-            pickupAction1.PlayerQuestionResponse.SetTo(piperPickup_PQue);
-            pickupAction1.NpcQuestionResponse.SetTo(piperPickup_NQue);
+            pickupAction1.NpcNeutralResponse.SetTo(astraPickup_NNeu);
+            pickupAction1.PlayerQuestionResponse.SetTo(astraPickup_PQue);
+            pickupAction1.NpcQuestionResponse.SetTo(astraPickup_NQue);
             recruitScene.Actions.Add(pickupAction1);
 
             // Action 2: Dialog, AliasID 1 (Companion slot), Phase 1
             var pickupAction2 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 2, AliasID = 1, StartPhase = 1, EndPhase = 1, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction2.Topic.SetTo(piperPickup_Dialog2);
+            pickupAction2.Topic.SetTo(new FormKey(fo4, 0x162C4B)); // Vanilla companion handoff topic
             recruitScene.Actions.Add(pickupAction2);
 
             // Action 5: Dialog, AliasID 2 (Dogmeat slot), Phase 2
             var pickupAction5 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 5, AliasID = 2, StartPhase = 2, EndPhase = 2, Flags = (SceneAction.Flag)36864, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction5.Topic.SetTo(piperPickup_Dialog5);
+            pickupAction5.Topic.SetTo(new FormKey(fo4, 0x21748B)); // Vanilla Dogmeat bark topic
             recruitScene.Actions.Add(pickupAction5);
 
             // Action 3: Dialog, AliasID 0 (Claude), Phase 3
             var pickupAction3 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 3, AliasID = 0, StartPhase = 3, EndPhase = 3, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction3.Topic.SetTo(piperPickup_Dialog3);
+            pickupAction3.Topic.SetTo(astraPickup_Dialog3);
             recruitScene.Actions.Add(pickupAction3);
 
             // Action 4: Dialog, AliasID 0 (Claude), Phase 4
             var pickupAction4 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 4, AliasID = 0, StartPhase = 4, EndPhase = 4, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction4.Topic.SetTo(piperPickup_Dialog4);
+            pickupAction4.Topic.SetTo(astraPickup_Dialog4);
             recruitScene.Actions.Add(pickupAction4);
 
             // Pickup Scene Debug Dump (structure check)
@@ -1234,9 +1487,63 @@ namespace CompanionClaude
                 ComparisonValue = v,
                 Data = new FunctionConditionData {
                     Function = Condition.Function.GetValue,
+                    ParameterOneRecord = ca_WantsToTalk_FK.ToLink<IFallout4MajorRecordGetter>(),
                     ParameterOneNumber = (int)ca_WantsToTalk_FK.ID,
                     RunOnType = Condition.RunOnType.Subject,
                     Unknown3 = -1
+                }
+            };
+            ConditionFloat WantsRomanceRetryCheck(float v) => new ConditionFloat {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = v,
+                Data = new FunctionConditionData {
+                    Function = Condition.Function.GetValue,
+                    ParameterOneRecord = ca_WantsToTalkRomanceRetry_FK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterOneNumber = (int)ca_WantsToTalkRomanceRetry_FK.ID,
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            };
+            ConditionFloat WantsAtLeastCheck(float v) => new ConditionFloat {
+                CompareOperator = CompareOperator.GreaterThanOrEqualTo,
+                ComparisonValue = v,
+                Data = new FunctionConditionData {
+                    Function = Condition.Function.GetValue,
+                    ParameterOneRecord = ca_WantsToTalk_FK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterOneNumber = (int)ca_WantsToTalk_FK.ID,
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            };
+            ConditionGlobal AffinitySceneCheck(FormKey sceneGlobalFK) => new ConditionGlobal {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = sceneGlobalFK.ToLink<IGlobalGetter>(),
+                Data = new FunctionConditionData {
+                    Function = Condition.Function.GetValue,
+                    ParameterOneRecord = ca_AffinitySceneToPlay_FK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterOneNumber = (int)ca_AffinitySceneToPlay_FK.ID,
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            };
+            ConditionGlobal CurrentThresholdCheck(FormKey thresholdGlobalFK) => new ConditionGlobal {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = thresholdGlobalFK.ToLink<IGlobalGetter>(),
+                Data = new FunctionConditionData {
+                    Function = Condition.Function.GetValue,
+                    ParameterOneRecord = ca_CurrentThreshold_FK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterOneNumber = (int)ca_CurrentThreshold_FK.ID,
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            };
+            ConditionFloat StageDoneCheck(int stage) => new ConditionFloat {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1,
+                Data = new FunctionConditionData {
+                    Function = Condition.Function.GetStageDone,
+                    ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(),
+                    ParameterTwoNumber = stage
                 }
             };
 
@@ -1252,10 +1559,10 @@ namespace CompanionClaude
                 ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
             });
             pickupGreeting.StartScene.SetTo(recruitScene);
+            pickupGreeting.StartScenePhase = "Loop01";
             pickupGreeting.Conditions.Add(FCheck(hasBeenCompanionFaction.FormKey, 0));
             pickupGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 0));
             pickupGreeting.Conditions.Add(FCheck(disallowedCompanionFaction.FormKey, 0));
-            pickupGreeting.Conditions.Add(WantsCheck(0));
             greetingTopic.Responses.Add(pickupGreeting);
 
             // PICKUP GREETING 2: Returning (HasBeen=1) - fixed INFO ID for stable .fuz
@@ -1265,14 +1572,14 @@ namespace CompanionClaude
                 ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
             });
             formerPickupGreeting.StartScene.SetTo(recruitScene);
+            formerPickupGreeting.StartScenePhase = "Loop01";
             formerPickupGreeting.Conditions.Add(FCheck(hasBeenCompanionFaction.FormKey, 1));
             formerPickupGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 0));
             formerPickupGreeting.Conditions.Add(FCheck(disallowedCompanionFaction.FormKey, 0));
-            formerPickupGreeting.Conditions.Add(WantsCheck(0));
             greetingTopic.Responses.Add(formerPickupGreeting);
 
-            // FRIENDSHIP GREETING - TEST CHAIN: fires after dismiss sets stage 110 (WantsToTalk=2)
-            // Sets stage 406 on end; stage 406 fragment keeps WantsToTalk=2 for admiration
+            // FRIENDSHIP GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // Vanilla quirk: Wants==1 greeting has no stage trigger; Wants==2 greeting sets stage 406.
             var friendshipGreeting = new DialogResponses(FK(FriendshipGreeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = 0 } };
             friendshipGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "I've been watching your choices. Why do you help people?"),
@@ -1280,16 +1587,11 @@ namespace CompanionClaude
             });
             friendshipGreeting.StartScene.SetTo(friendshipScene);
             friendshipGreeting.StartScenePhase = "";
-            friendshipGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 406 };
-            friendshipGreeting.Conditions.Add(WantsCheck(2));
-            friendshipGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 406 }
-            });
+            friendshipGreeting.Conditions.Add(WantsCheck(1));
+            friendshipGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Friendship_FK));
             greetingTopic.Responses.Add(friendshipGreeting);
 
-            // FRIENDSHIP GREETING 2: alternate line after stage 406 is done
+            // FRIENDSHIP GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
             var friendshipGreeting2 = new DialogResponses(FK(FriendshipGreeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = 0 } };
             friendshipGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "You keep taking risks for strangers. What drives that?"),
@@ -1299,15 +1601,11 @@ namespace CompanionClaude
             friendshipGreeting2.StartScenePhase = "";
             friendshipGreeting2.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 406 };
             friendshipGreeting2.Conditions.Add(WantsCheck(2));
-            friendshipGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 406 }
-            });
+            friendshipGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Friendship_FK));
             greetingTopic.Responses.Add(friendshipGreeting2);
 
-            // ADMIRATION GREETING - TEST CHAIN: Wants=2, stage 406 done, stage 410 not done
-            // Sets stage 410 on end; stage 410 fragment keeps WantsToTalk=2 for confidant
+            // ADMIRATION GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // Sets stage 410 (Forcegreeted) on end; stage 410 fragment sets WantsToTalk=2 for reminder
             var admirationGreeting = new DialogResponses(FK(Adm_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             admirationGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Heuristic analysis indicates an evolving trend in our relationship."),
@@ -1316,20 +1614,11 @@ namespace CompanionClaude
             admirationGreeting.StartScene.SetTo(admirationScene);
             admirationGreeting.StartScenePhase = "Loop01";
             admirationGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 410 };
-            admirationGreeting.Conditions.Add(WantsCheck(2));
-            admirationGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 406 }
-            });
-            admirationGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 410 }
-            });
+            admirationGreeting.Conditions.Add(WantsCheck(1));
+            admirationGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Admiration_FK));
             greetingTopic.Responses.Add(admirationGreeting);
 
-            // ADMIRATION GREETING 2: alternate line (same conditions)
+            // ADMIRATION GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
             var admirationGreeting2 = new DialogResponses(FK(Adm_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             admirationGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "There's something about how you move through this world that I can't ignore."),
@@ -1337,22 +1626,12 @@ namespace CompanionClaude
             });
             admirationGreeting2.StartScene.SetTo(admirationScene);
             admirationGreeting2.StartScenePhase = "Loop01";
-            admirationGreeting2.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 410 };
             admirationGreeting2.Conditions.Add(WantsCheck(2));
-            admirationGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 406 }
-            });
-            admirationGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 410 }
-            });
+            admirationGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Admiration_FK));
             greetingTopic.Responses.Add(admirationGreeting2);
 
-            // CONFIDANT GREETING - TEST CHAIN: Wants=2, stage 410 done, stage 440 not done
-            // Sets stage 440 on end; stage 440 fragment keeps WantsToTalk=2 for infatuation
+            // CONFIDANT GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // Sets stage 496 (Confidant forcegreeted) on end.
             var confidantGreeting = new DialogResponses(FK(Conf_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             confidantGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Data security protocols have been adjusted. I have information to share."),
@@ -1360,21 +1639,12 @@ namespace CompanionClaude
             });
             confidantGreeting.StartScene.SetTo(confidantScene);
             confidantGreeting.StartScenePhase = "Loop01";
-            confidantGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 440 };
-            confidantGreeting.Conditions.Add(WantsCheck(2));
-            confidantGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 410 }
-            });
-            confidantGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 440 }
-            });
+            confidantGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 496 };
+            confidantGreeting.Conditions.Add(WantsCheck(1));
+            confidantGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Confidant_FK));
             greetingTopic.Responses.Add(confidantGreeting);
 
-            // CONFIDANT GREETING 2: alternate line (same conditions)
+            // CONFIDANT GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
             var confidantGreeting2 = new DialogResponses(FK(Conf_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             confidantGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "You've earned access to the parts of me I keep hidden."),
@@ -1382,22 +1652,12 @@ namespace CompanionClaude
             });
             confidantGreeting2.StartScene.SetTo(confidantScene);
             confidantGreeting2.StartScenePhase = "Loop01";
-            confidantGreeting2.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 440 };
             confidantGreeting2.Conditions.Add(WantsCheck(2));
-            confidantGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 410 }
-            });
-            confidantGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 440 }
-            });
+            confidantGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Confidant_FK));
             greetingTopic.Responses.Add(confidantGreeting2);
 
-            // INFATUATION GREETING - TEST CHAIN: Wants=2, stage 440 done, stage 496 not done
-            // Sets stage 496 on end; stage 496 fragment keeps WantsToTalk=2 for romance complete
+            // INFATUATION GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // Sets stage 510 (Infatuation forcegreeted) on end.
             var infatuationGreeting = new DialogResponses(FK(Inf_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             infatuationGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "I have a non-critical logic-reconciliation required. Do you have a moment?"),
@@ -1405,21 +1665,12 @@ namespace CompanionClaude
             });
             infatuationGreeting.StartScene.SetTo(infatuationScene);
             infatuationGreeting.StartScenePhase = "Loop01";
-            infatuationGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 496 };
-            infatuationGreeting.Conditions.Add(WantsCheck(2));
-            infatuationGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 440 }
-            });
-            infatuationGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 496 }
-            });
+            infatuationGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 510 };
+            infatuationGreeting.Conditions.Add(WantsCheck(1));
+            infatuationGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Infatuation_FK));
             greetingTopic.Responses.Add(infatuationGreeting);
 
-            // INFATUATION GREETING 2: alternate line (same conditions)
+            // INFATUATION GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
             var infatuationGreeting2 = new DialogResponses(FK(Inf_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             infatuationGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Every time you choose me, I learn what forever means."),
@@ -1427,21 +1678,11 @@ namespace CompanionClaude
             });
             infatuationGreeting2.StartScene.SetTo(infatuationScene);
             infatuationGreeting2.StartScenePhase = "Loop01";
-            infatuationGreeting2.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 496 };
             infatuationGreeting2.Conditions.Add(WantsCheck(2));
-            infatuationGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 440 }
-            });
-            infatuationGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 496 }
-            });
+            infatuationGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Infatuation_FK));
             greetingTopic.Responses.Add(infatuationGreeting2);
 
-            // DISDAIN GREETINGS: Wants=2, stage 200 done, stage 220 not done/done
+            // DISDAIN GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
             var disdainGreeting = new DialogResponses(FK(Dis_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             disdainGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "We need to talk. Our alignment is drifting."),
@@ -1449,20 +1690,12 @@ namespace CompanionClaude
             });
             disdainGreeting.StartScene.SetTo(disdainScene);
             disdainGreeting.StartScenePhase = "";
-            disdainGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 220 };
-            disdainGreeting.Conditions.Add(WantsCheck(2));
-            disdainGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 200 }
-            });
-            disdainGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 220 }
-            });
+            disdainGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 210 };
+            disdainGreeting.Conditions.Add(WantsCheck(1));
+            disdainGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Disdain_FK));
             greetingTopic.Responses.Add(disdainGreeting);
 
+            // DISDAIN GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
             var disdainGreeting2 = new DialogResponses(FK(Dis_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             disdainGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "I can't ignore this anymore. We need to recalibrate."),
@@ -1470,21 +1703,11 @@ namespace CompanionClaude
             });
             disdainGreeting2.StartScene.SetTo(disdainScene);
             disdainGreeting2.StartScenePhase = "";
-            disdainGreeting2.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 220 };
             disdainGreeting2.Conditions.Add(WantsCheck(2));
-            disdainGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 200 }
-            });
-            disdainGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 220 }
-            });
+            disdainGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Disdain_FK));
             greetingTopic.Responses.Add(disdainGreeting2);
 
-            // HATRED GREETINGS: Wants=2, stage 100 done, stage 120 not done/done
+            // HATRED GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
             var hatredGreeting = new DialogResponses(FK(Hat_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             hatredGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "This is a warning. My core directives are in conflict."),
@@ -1492,20 +1715,12 @@ namespace CompanionClaude
             });
             hatredGreeting.StartScene.SetTo(hatredScene);
             hatredGreeting.StartScenePhase = "";
-            hatredGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 120 };
-            hatredGreeting.Conditions.Add(WantsCheck(2));
-            hatredGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 100 }
-            });
-            hatredGreeting.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 0,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 120 }
-            });
+            hatredGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 110 };
+            hatredGreeting.Conditions.Add(WantsCheck(1));
+            hatredGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Hatred_FK));
             greetingTopic.Responses.Add(hatredGreeting);
 
+            // HATRED GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
             var hatredGreeting2 = new DialogResponses(FK(Hat_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             hatredGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "If this continues, I will leave."),
@@ -1513,43 +1728,96 @@ namespace CompanionClaude
             });
             hatredGreeting2.StartScene.SetTo(hatredScene);
             hatredGreeting2.StartScenePhase = "";
-            hatredGreeting2.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 120 };
             hatredGreeting2.Conditions.Add(WantsCheck(2));
-            hatredGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 100 }
-            });
-            hatredGreeting2.Conditions.Add(new ConditionFloat {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 120 }
-            });
+            hatredGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Hatred_FK));
             greetingTopic.Responses.Add(hatredGreeting2);
 
-            // ROMANCE COMPLETE GREETING - TEST CHAIN: fires when stage 496 is done (end of chain)
+            // ROMANCE COMPLETE GREETING â€” Idle post-romance (fires when stage 525 done, WantsToTalk irrelevant)
             var romanceCompleteGreeting = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             romanceCompleteGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Synchronization levels are at maximum efficiency. Ready to proceed, my love?"),
                 ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
             });
+            romanceCompleteGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 1));
             romanceCompleteGreeting.Conditions.Add(new ConditionFloat {
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 1,
-                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 496 }
+                Data = new FunctionConditionData { Function = Condition.Function.GetStageDone, ParameterOneRecord = mainQuestFK.ToLink<IQuestGetter>(), ParameterTwoNumber = 525 }
             });
             greetingTopic.Responses.Add(romanceCompleteGreeting);
 
-            var dismissGreeting = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            // Dismiss fallback from greeting path for command-wheel Talk reliability.
+            // Keep Scene/Enter routing as primary parity path.
+            var dismissGreeting = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 }
+            };
             dismissGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Processing. What is your requirement?"),
-                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+                ResponseNumber = 1,
+                Unknown = 1,
+                Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
+                InterruptPercentage = 0,
+                CameraTargetAlias = -1,
+                CameraLocationAlias = -1,
+                StopOnSceneEnd = false
             });
             dismissGreeting.StartScene.SetTo(dismissScene);
-            dismissGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 110 }; // TEST CHAIN: stage 110 sets WantsToTalk=2, kicks off friendship
+            dismissGreeting.StartScenePhase = "Loop01";
             dismissGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 1));
-            dismissGreeting.Conditions.Add(WantsCheck(0));
             greetingTopic.Responses.Add(dismissGreeting);
+
+            // Piper-style dismiss routing: Scene/Enter topic starts dismiss scene at Loop01.
+            // Keep this separate from greeting-based starts.
+            var dismissEnterTopic = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                EditorID = "COMAstraDismissEnter",
+                Quest = new FormLink<IQuestGetter>(mainQuestFK),
+                Category = DialogTopic.CategoryEnum.Scene,
+                Subtype = DialogTopic.SubtypeEnum.Enter,
+                SubtypeName = "SCEN",
+                Priority = 50
+            };
+            var dismissEnterInfo = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                Flags = new DialogResponseFlags { Flags = 0 }
+            };
+            dismissEnterInfo.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "I don't know. You think you can make it without me watching your back?"),
+                ResponseNumber = 1,
+                Unknown = 1,
+                Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
+                InterruptPercentage = 0,
+                CameraTargetAlias = -1,
+                CameraLocationAlias = -1,
+                StopOnSceneEnd = false
+            });
+            dismissEnterInfo.StartScene.SetTo(dismissScene);
+            dismissEnterInfo.StartScenePhase = "Loop01";
+            dismissEnterTopic.Responses.Add(dismissEnterInfo);
+            topics.Add(dismissEnterTopic);
+
+            // ===== REORDER GREETINGS: Vanilla-accurate priority =====
+            // Negative (most severe first) â†’ Positive (highest tier first) â†’ Pickup
+            // This matches COMPiper ordering where hatred/disdain greetings take priority
+            var orderedGreetings = new DialogResponses[] {
+                hatredGreeting,             // Wants==1 (negative, highest priority)
+                hatredGreeting2,            // Wants==2 (reminder)
+                disdainGreeting,            // Wants==1
+                disdainGreeting2,           // Wants==2 (reminder)
+                infatuationGreeting,        // Wants==1
+                infatuationGreeting2,       // Wants==2 (reminder)
+                confidantGreeting,          // Wants==1
+                confidantGreeting2,         // Wants==2 (reminder)
+                admirationGreeting,         // Wants==1
+                admirationGreeting2,        // Wants==2 (reminder)
+                friendshipGreeting,         // Wants==1
+                friendshipGreeting2,        // Wants==2 (reminder)
+                romanceCompleteGreeting,    // StageDone(525) - idle post-romance
+                formerPickupGreeting,       // HasBeen=1, Current=0, Wants=0
+                pickupGreeting,             // HasBeen=0, Current=0, Wants=0
+                dismissGreeting             // Fallback Talk->Dismiss when Current=1
+            };
+            greetingTopic.Responses.Clear();
+            foreach (var g in orderedGreetings) greetingTopic.Responses.Add(g);
+
             topics.Add(greetingTopic);
 
             // 7. QUEST
@@ -1580,13 +1848,21 @@ namespace CompanionClaude
             quest.Aliases.Add(new QuestReferenceAlias {
                 ID = 1,
                 Name = "Companion",
-                Flags = QuestReferenceAlias.Flag.Optional | QuestReferenceAlias.Flag.AllowDisabled | QuestReferenceAlias.Flag.AllowReserved
+                Flags = QuestReferenceAlias.Flag.Optional | QuestReferenceAlias.Flag.ExternalAliasLinked | QuestReferenceAlias.Flag.OptionalAllScenes,
+                External = new ExternalAliasReference {
+                    Quest = new FormLinkNullable<IQuestGetter>(followersQuest.FormKey),
+                    AliasID = 0
+                }
             });
 
             quest.Aliases.Add(new QuestReferenceAlias {
                 ID = 2,
-                Name = "dogmeat",
-                Flags = QuestReferenceAlias.Flag.Optional | QuestReferenceAlias.Flag.AllowDisabled | QuestReferenceAlias.Flag.AllowReserved
+                Name = "Dogmeat",
+                Flags = QuestReferenceAlias.Flag.Optional | QuestReferenceAlias.Flag.ExternalAliasLinked | QuestReferenceAlias.Flag.OptionalAllScenes,
+                External = new ExternalAliasReference {
+                    Quest = new FormLinkNullable<IQuestGetter>(followersQuest.FormKey),
+                    AliasID = 5
+                }
             });
 
             quest.Scenes.Add(recruitScene);
@@ -1598,6 +1874,7 @@ namespace CompanionClaude
             quest.Scenes.Add(disdainScene);
             quest.Scenes.Add(hatredScene);
             quest.Scenes.Add(recoveryScene);
+            quest.Scenes.Add(infatuationRepeaterRegularScene);
             quest.Scenes.Add(murderScene);
 
             // Create Repeater Helper (must be after quest initialization)
@@ -1616,6 +1893,153 @@ namespace CompanionClaude
             CreateRepeater("COMClaude_07_RepeatAdmirationToNeutral", 4, 330, "Resetting", "Data inconsistency detected. Reverting to neutral status.");
             CreateRepeater("COMClaude_08_RepeatNeutralToDisdain", 4, 250, "Degrading", "System degradation. Relationship integrity dropping to Disdain.");
             CreateRepeater("COMClaude_09_RepeatDisdainToHatred", 2, 160, "Critical", "Critical failure. Moving from Disdain to Hatred.");
+
+            // REPEATER GREETINGS (Piper parity: scenes 06/07/08/09/10)
+            var repeatInfToAdmScene = quest.Scenes.First(s => s.EditorID == "COMClaude_06_RepeatInfatuationToAdmiration");
+            var repeatAdmToNeutralScene = quest.Scenes.First(s => s.EditorID == "COMClaude_07_RepeatAdmirationToNeutral");
+            var repeatNeutralToDisdainScene = quest.Scenes.First(s => s.EditorID == "COMClaude_08_RepeatNeutralToDisdain");
+            var repeatDisdainToHatredScene = quest.Scenes.First(s => s.EditorID == "COMClaude_09_RepeatDisdainToHatred");
+
+            var repeatInfatuationToAdmirationGreeting1 = new DialogResponses(FK(Rep_AdmDown_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatInfatuationToAdmirationGreeting1.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "We need to recalibrate before this gets worse."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatInfatuationToAdmirationGreeting1.StartScene.SetTo(repeatInfToAdmScene);
+            repeatInfatuationToAdmirationGreeting1.StartScenePhase = "";
+            repeatInfatuationToAdmirationGreeting1.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 440 };
+            repeatInfatuationToAdmirationGreeting1.Conditions.Add(WantsCheck(1));
+            repeatInfatuationToAdmirationGreeting1.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Admiration_Downward_FK));
+
+            var repeatInfatuationToAdmirationGreeting2 = new DialogResponses(FK(Rep_AdmDown_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatInfatuationToAdmirationGreeting2.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "Still waiting on that recalibration."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatInfatuationToAdmirationGreeting2.StartScene.SetTo(repeatInfToAdmScene);
+            repeatInfatuationToAdmirationGreeting2.StartScenePhase = "";
+            repeatInfatuationToAdmirationGreeting2.Conditions.Add(WantsCheck(2));
+            repeatInfatuationToAdmirationGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Admiration_Downward_FK));
+
+            var repeatAdmirationToNeutralGreeting1 = new DialogResponses(FK(Rep_NeutralDown_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatAdmirationToNeutralGreeting1.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "We're slipping out of sync. We need to talk."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatAdmirationToNeutralGreeting1.StartScene.SetTo(repeatAdmToNeutralScene);
+            repeatAdmirationToNeutralGreeting1.StartScenePhase = "";
+            repeatAdmirationToNeutralGreeting1.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 320 };
+            repeatAdmirationToNeutralGreeting1.Conditions.Add(WantsCheck(1));
+            repeatAdmirationToNeutralGreeting1.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Neutral_Downward_FK));
+
+            var repeatAdmirationToNeutralGreeting2 = new DialogResponses(FK(Rep_NeutralDown_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatAdmirationToNeutralGreeting2.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "You're still avoiding this conversation."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatAdmirationToNeutralGreeting2.StartScene.SetTo(repeatAdmToNeutralScene);
+            repeatAdmirationToNeutralGreeting2.StartScenePhase = "";
+            repeatAdmirationToNeutralGreeting2.Conditions.Add(WantsCheck(2));
+            repeatAdmirationToNeutralGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Neutral_Downward_FK));
+
+            var repeatNeutralToDisdainGreeting1 = new DialogResponses(FK(Rep_DisdainDown_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatNeutralToDisdainGreeting1.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "This is your warning. Change course now."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatNeutralToDisdainGreeting1.StartScene.SetTo(repeatNeutralToDisdainScene);
+            repeatNeutralToDisdainGreeting1.StartScenePhase = "";
+            repeatNeutralToDisdainGreeting1.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 240 };
+            repeatNeutralToDisdainGreeting1.Conditions.Add(WantsCheck(1));
+            repeatNeutralToDisdainGreeting1.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Disdain_Downward_FK));
+
+            var repeatNeutralToDisdainGreeting2 = new DialogResponses(FK(Rep_DisdainDown_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatNeutralToDisdainGreeting2.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "I said we need to talk. Now."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatNeutralToDisdainGreeting2.StartScene.SetTo(repeatNeutralToDisdainScene);
+            repeatNeutralToDisdainGreeting2.StartScenePhase = "";
+            repeatNeutralToDisdainGreeting2.Conditions.Add(WantsCheck(2));
+            repeatNeutralToDisdainGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Disdain_Downward_FK));
+
+            var repeatDisdainToHatredGreeting = new DialogResponses(FK(Rep_HatredDown_GreetingId), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatDisdainToHatredGreeting.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "No. No more warnings."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatDisdainToHatredGreeting.StartScene.SetTo(repeatDisdainToHatredScene);
+            repeatDisdainToHatredGreeting.StartScenePhase = "";
+            repeatDisdainToHatredGreeting.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 150 };
+            repeatDisdainToHatredGreeting.Conditions.Add(WantsAtLeastCheck(1));
+            repeatDisdainToHatredGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Hatred_Downward_FK));
+
+            var repeatAdmirationToInfatuationGreeting1 = new DialogResponses(FK(Rep_InfUp_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatAdmirationToInfatuationGreeting1.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "You and I need to revisit what we are."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatAdmirationToInfatuationGreeting1.StartScene.SetTo(recoveryScene);
+            repeatAdmirationToInfatuationGreeting1.StartScenePhase = "";
+            repeatAdmirationToInfatuationGreeting1.SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 540 };
+            repeatAdmirationToInfatuationGreeting1.Conditions.Add(WantsCheck(1));
+            repeatAdmirationToInfatuationGreeting1.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Infatuation_Upward_FK));
+            repeatAdmirationToInfatuationGreeting1.Conditions.Add(StageDoneCheck(420));
+
+            var repeatAdmirationToInfatuationGreeting2 = new DialogResponses(FK(Rep_InfUp_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            repeatAdmirationToInfatuationGreeting2.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "Don't make me ask again. We need that talk."),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            repeatAdmirationToInfatuationGreeting2.StartScene.SetTo(recoveryScene);
+            repeatAdmirationToInfatuationGreeting2.StartScenePhase = "";
+            repeatAdmirationToInfatuationGreeting2.Conditions.Add(WantsCheck(2));
+            repeatAdmirationToInfatuationGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Repeat_Infatuation_Upward_FK));
+            repeatAdmirationToInfatuationGreeting2.Conditions.Add(StageDoneCheck(420));
+
+            // Piper parity: COMPiper_11_InfatuationRepeaterRegular
+            // Condition shape: CA_WantsToTalkRomanceRetry == 1 AND CA_CurrentThreshold == CA_T1_Infatuation
+            var infatuationRepeaterRegularGreeting = new DialogResponses(FK(Inf_RepeatRegular_GreetingId), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
+            infatuationRepeaterRegularGreeting.Responses.Add(new DialogResponse {
+                Text = new TranslatedString(Language.English, "I've been replaying that conversation in my head. Did I sound ridiculous?"),
+                ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
+            });
+            infatuationRepeaterRegularGreeting.StartScene.SetTo(infatuationRepeaterRegularScene);
+            infatuationRepeaterRegularGreeting.StartScenePhase = "Loop01";
+            infatuationRepeaterRegularGreeting.Conditions.Add(WantsRomanceRetryCheck(1));
+            infatuationRepeaterRegularGreeting.Conditions.Add(CurrentThresholdCheck(ca_T1_Infatuation.FormKey));
+
+            // Final greeting ordering with full affinity repeater coverage (Piper parity shape).
+            var orderedGreetingsFinal = new DialogResponses[] {
+                repeatDisdainToHatredGreeting,           // 09 repeat (single, Wants>=1)
+                repeatAdmirationToInfatuationGreeting1,  // 10 repeat (Wants==1)
+                repeatAdmirationToInfatuationGreeting2,  // 10 repeat (Wants==2)
+                infatuationGreeting,                     // 03 main
+                infatuationGreeting2,
+                infatuationRepeaterRegularGreeting,      // 11 repeater regular (RomanceRetry)
+                repeatInfatuationToAdmirationGreeting1,  // 06 repeat
+                repeatInfatuationToAdmirationGreeting2,
+                confidantGreeting,                       // 02a main
+                confidantGreeting2,
+                friendshipGreeting2,                     // 01 main (Piper quirk: Wants==2 first)
+                friendshipGreeting,
+                repeatAdmirationToNeutralGreeting1,      // 07 repeat
+                repeatAdmirationToNeutralGreeting2,
+                repeatNeutralToDisdainGreeting1,         // 08 repeat
+                repeatNeutralToDisdainGreeting2,
+                disdainGreeting,                         // 04 main
+                disdainGreeting2,
+                hatredGreeting,                          // 05 main
+                hatredGreeting2,
+                admirationGreeting,                      // 02 main
+                admirationGreeting2,
+                romanceCompleteGreeting,                 // post-romance idle
+                formerPickupGreeting,
+                pickupGreeting,
+                dismissGreeting
+            };
+            greetingTopic.Responses.Clear();
+            foreach (var g in orderedGreetingsFinal) greetingTopic.Responses.Add(g);
 
             foreach (var t in topics) quest.DialogTopics.Add(t);
 
@@ -1684,10 +2108,11 @@ namespace CompanionClaude
             // Add Fragments for all stages that have scripts in Piper
             foreach (var idx in piperNotes.Keys)
             {
-                // Stages like 100, 140, 200 etc. had no scripts in the scan
+                // Stages like 100, 140, 200 etc. have no fragments in the stage script set.
+                // Keep this list aligned with the actual fragment coverage to avoid VMAD runtime errors.
                 if (idx == 100 || idx == 140 || idx == 200 || idx == 230 || idx == 300 || idx == 310 || idx == 340 || 
                     idx == 400 || idx == 405 || idx == 430 || idx == 460 || idx == 495 || idx == 500 || idx == 530 || 
-                    idx == 560 || idx == 630 || idx == 1010) continue;
+                    idx == 540 || idx == 560 || idx == 600 || idx == 1000) continue;
 
                 vmad.Fragments.Add(new QuestScriptFragment {
                     Stage = (ushort)idx,
@@ -1702,7 +2127,13 @@ namespace CompanionClaude
                 Name = "AffinitySceneHandlerScript",
                 Properties = new ExtendedList<ScriptProperty> {
                     new ScriptObjectProperty { Name = "CompanionAlias", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>(), Alias = 0 },
-                    new ScriptObjectProperty { Name = "CA_TCustom2_Friend", Object = ca_TCustom2_Friend!.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+                    new ScriptObjectProperty { Name = "CA_T1_Infatuation", Object = ca_T1_Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                    new ScriptObjectProperty { Name = "CA_T2_Admiration", Object = ca_T2_Admiration.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                    new ScriptObjectProperty { Name = "CA_T3_Neutral", Object = ca_T3_Neutral.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                    new ScriptObjectProperty { Name = "CA_T4_Disdain", Object = ca_T4_Disdain.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                    new ScriptObjectProperty { Name = "CA_T5_Hatred", Object = ca_T5_Hatred.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                    new ScriptObjectProperty { Name = "CA_TCustom1_Confidant", Object = ca_TCustom1_Confidant.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                    new ScriptObjectProperty { Name = "CA_TCustom2_Friend", Object = ca_TCustom2_Friend.FormKey.ToLink<IFallout4MajorRecordGetter>() }
                 }
             });
 
@@ -1710,7 +2141,101 @@ namespace CompanionClaude
             mod.Quests.Add(quest);
 
             // 8. GUARDRAIL VALIDATION
-            Guardrail.Validate(mod);
+            Guardrail.Validate(mod, forbiddenCompiperLinks);
+
+            // 8.5 TEST ADVANCER QUEST (Quest 2 â€” development only)
+            // Added AFTER guardrail so it doesn't trigger main quest assertions.
+            // Enabled by default; pass --disable-test-quest to omit.
+            // Usage: SetStage COMAstra_Test 10 â†’ friendship fires, etc.
+            if (!HasArg("--disable-test-quest"))
+            {
+                Console.WriteLine("Creating Test Advancer Quest (COMAstra_Test)...");
+                var testQuestFK = mod.GetNextFormKey();
+                string testPscName = $"QF_COMAstra_Test_{testQuestFK.ID:X8}";
+                var testQuest = new Quest(testQuestFK, Fallout4Release.Fallout4) {
+                    EditorID = "COMAstra_Test",
+                    Name = new TranslatedString(Language.English, "Astra Test Advancer"),
+                    Data = new QuestData {
+                        Flags = Quest.Flag.StartGameEnabled | Quest.Flag.AllowRepeatedStages,
+                        Priority = 10,
+                        Type = Quest.TypeEnum.None
+                    },
+                    Stages = new ExtendedList<QuestStage>()
+                };
+
+                var testStages = new (int idx, string note)[] {
+                    (10, "Friendship: SceneToPlay=Friendship + WantsToTalk=2"),
+                    (20, "Admiration: SceneToPlay=Admiration + stage 406 + WantsToTalk=1"),
+                    (30, "Confidant: SceneToPlay=Confidant + stages 406+410 + WantsToTalk=1"),
+                    (40, "Infatuation: SceneToPlay=Infatuation + stages 406+410+440 + WantsToTalk=1"),
+                    (50, "Disdain: SceneToPlay=Disdain + stage 200 + WantsToTalk=1"),
+                    (60, "Hatred: SceneToPlay=Hatred + stages 200+100 + WantsToTalk=1"),
+                    (70, "Repeat 06: SceneToPlay=Repeat_Admiration_Downward + WantsToTalk=1"),
+                    (71, "Repeat 07: SceneToPlay=Repeat_Neutral_Downward + WantsToTalk=1"),
+                    (72, "Repeat 08: SceneToPlay=Repeat_Disdain_Downward + WantsToTalk=1"),
+                    (73, "Repeat 09: SceneToPlay=Repeat_Hatred_Downward + WantsToTalk=1"),
+                    (74, "Repeat 10 ask: SceneToPlay=Repeat_Infatuation_Upward + stage 420 + WantsToTalk=1"),
+                    (75, "Repeat 10 reminder: SceneToPlay=Repeat_Infatuation_Upward + stage 420 + WantsToTalk=2"),
+                    (76, "Repeat 06 reminder: SceneToPlay=Repeat_Admiration_Downward + WantsToTalk=2"),
+                    (77, "Repeat 07 reminder: SceneToPlay=Repeat_Neutral_Downward + WantsToTalk=2"),
+                    (78, "Repeat 08 reminder: SceneToPlay=Repeat_Disdain_Downward + WantsToTalk=2"),
+                    (79, "Repeat 09 reminder: SceneToPlay=Repeat_Hatred_Downward + WantsToTalk=2"),
+                    (80, "Repeat 11 regular: WantsToTalkRomanceRetry=1 + CurrentThreshold=T1"),
+                    (99, "Reset: WantsToTalk=0 + SceneToPlay=0")
+                };
+
+                foreach (var (idx, note) in testStages) {
+                    var stage = new QuestStage { Index = (ushort)idx, Flags = 0 };
+                    stage.LogEntries.Add(new QuestLogEntry {
+                        Flags = 0,
+                        Conditions = new ExtendedList<Condition>(),
+                        Note = note,
+                        Entry = new TranslatedString(Language.English, note)
+                    });
+                    testQuest.Stages.Add(stage);
+                }
+
+                var testVmad = new QuestAdapter {
+                    Version = 6, ObjectFormat = 2,
+                    Script = new ScriptEntry {
+                        Name = "Fragments:Quests:" + testPscName,
+                        Properties = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "COMAstraQuest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "Alias_Astra", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>(), Alias = 0 },
+                            new ScriptObjectProperty { Name = "CA_WantsToTalk", Object = ca_WantsToTalk_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_WantsToTalkRomanceRetry", Object = ca_WantsToTalkRomanceRetry_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_CurrentThreshold", Object = ca_CurrentThreshold_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_AffinitySceneToPlay", Object = ca_AffinitySceneToPlay_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_T1_Infatuation", Object = ca_T1_Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Friendship", Object = ca_Scene_Friendship_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Admiration", Object = ca_Scene_Admiration_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Confidant", Object = ca_Scene_Confidant_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Infatuation", Object = ca_Scene_Infatuation_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Disdain", Object = ca_Scene_Disdain_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Hatred", Object = ca_Scene_Hatred_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Repeat_Admiration_Downward", Object = ca_Scene_Repeat_Admiration_Downward_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Repeat_Neutral_Downward", Object = ca_Scene_Repeat_Neutral_Downward_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Repeat_Disdain_Downward", Object = ca_Scene_Repeat_Disdain_Downward_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Repeat_Hatred_Downward", Object = ca_Scene_Repeat_Hatred_Downward_FK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_Scene_Repeat_Infatuation_Upward", Object = ca_Scene_Repeat_Infatuation_Upward_FK.ToLink<IFallout4MajorRecordGetter>() }
+                        }
+                    }
+                };
+
+                foreach (var (idx, _) in testStages) {
+                    testVmad.Fragments.Add(new QuestScriptFragment {
+                        Stage = (ushort)idx, StageIndex = 0, Unknown2 = 1,
+                        FragmentName = $"Fragment_Stage_{idx:D4}_Item_00",
+                        ScriptName = "Fragments:Quests:" + testPscName
+                    });
+                }
+
+                testQuest.VirtualMachineAdapter = testVmad;
+                mod.Quests.Add(testQuest);
+                Console.WriteLine($"  Test quest added: COMAstra_Test (FormKey {testQuestFK.ID:X6})");
+                Console.WriteLine($"  Papyrus script name: {testPscName}");
+                Console.WriteLine("  Usage: SetStage COMAstra_Test 10/20/30/40/50/60 + repeater tests 70-80.");
+            }
 
             // 9. WRITE ESP
             string outputPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "CompanionAstra.esp");
@@ -1724,18 +2249,180 @@ namespace CompanionClaude
             Console.WriteLine("=== COPYING VOICE FILES ===");
             // Prefer permanent extracted voice source under the project.
             // Allow override via --voice-src, fallback to the old temp path if needed.
-            string srcBase = GetArgValue("--voice-src") ?? @"E:\CompanionGeminiFeb26\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm";
+            string srcBase = GetArgValue("--voice-src") ?? System.IO.Path.Combine(repoRoot, "VoiceFiles", "piper_voice", "Sound", "Voice", "Fallout4.esm");
             if (!System.IO.Directory.Exists(srcBase))
             {
                 srcBase = @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm";
             }
-            string dstBase = GetArgValue("--voice-dst") ?? @"D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp";
+            string dstBase = GetArgValue("--voice-dst")
+                ?? System.IO.Path.Combine(DetectFallout4DataPath() ?? @"E:\SteamLibrary\steamapps\common\Fallout 4\Data", "Sound", "Voice", "CompanionAstra.esp");
             int copied = 0;
+
+            bool TryEnsureDirectory(string path, string label)
+            {
+                try
+                {
+                    if (!System.IO.Directory.Exists(path))
+                    {
+                        System.IO.Directory.CreateDirectory(path);
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Skipping voice copy/TTS: unable to prepare {label} directory '{path}': {ex.Message}");
+                    return false;
+                }
+            }
+
+            bool IsLikelyValidFuz(string path)
+            {
+                try
+                {
+                    if (!System.IO.File.Exists(path))
+                    {
+                        return false;
+                    }
+
+                    var bytes = System.IO.File.ReadAllBytes(path);
+                    if (bytes.Length < 16)
+                    {
+                        return false;
+                    }
+
+                    if (bytes[0] != 0x46 || bytes[1] != 0x55 || bytes[2] != 0x5A || bytes[3] != 0x45) // FUZE
+                    {
+                        return false;
+                    }
+
+                    long audioSize = BitConverter.ToUInt32(bytes, 4);
+                    if (audioSize <= 0)
+                    {
+                        return false;
+                    }
+
+                    long lipSizeOffset = 8L + audioSize;
+                    if (lipSizeOffset + 4L > bytes.Length)
+                    {
+                        return false;
+                    }
+
+                    long lipSize = BitConverter.ToUInt32(bytes, (int)lipSizeOffset);
+                    if (lipSize <= 0)
+                    {
+                        return false;
+                    }
+
+                    long lipDataOffset = lipSizeOffset + 4L;
+                    if (lipDataOffset + lipSize > bytes.Length)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            bool TryReadFuzAudioAndLip(string path, out byte[] audioData, out byte[] lipData)
+            {
+                audioData = Array.Empty<byte>();
+                lipData = Array.Empty<byte>();
+                try
+                {
+                    if (!System.IO.File.Exists(path))
+                    {
+                        return false;
+                    }
+
+                    var bytes = System.IO.File.ReadAllBytes(path);
+                    if (bytes.Length < 16)
+                    {
+                        return false;
+                    }
+
+                    if (bytes[0] != 0x46 || bytes[1] != 0x55 || bytes[2] != 0x5A || bytes[3] != 0x45) // FUZE
+                    {
+                        return false;
+                    }
+
+                    // Preferred Fallout 4 layout: FUZE + audioSize + audio + lipSize + lip
+                    long audioSize = BitConverter.ToUInt32(bytes, 4);
+                    long lipSizeOffset = 8L + audioSize;
+                    if (audioSize > 0 && lipSizeOffset + 4L <= bytes.Length)
+                    {
+                        long lipSize = BitConverter.ToUInt32(bytes, (int)lipSizeOffset);
+                        long lipDataOffset = lipSizeOffset + 4L;
+                        if (lipSize > 0 && lipDataOffset + lipSize <= bytes.Length)
+                        {
+                            audioData = bytes.AsSpan(8, (int)audioSize).ToArray();
+                            lipData = bytes.AsSpan((int)lipDataOffset, (int)lipSize).ToArray();
+                            return true;
+                        }
+                    }
+
+                    // Legacy layout seen in this workspace: FUZE + version(1) + lipSize + lip + audio
+                    long version = BitConverter.ToUInt32(bytes, 4);
+                    if (version == 1 && bytes.Length >= 12)
+                    {
+                        long legacyLipSize = BitConverter.ToUInt32(bytes, 8);
+                        long legacyLipOffset = 12L;
+                        long legacyAudioOffset = legacyLipOffset + legacyLipSize;
+                        long legacyAudioSize = bytes.Length - legacyAudioOffset;
+                        if (legacyLipSize > 0 && legacyAudioSize > 0 && legacyAudioOffset <= bytes.Length)
+                        {
+                            lipData = bytes.AsSpan((int)legacyLipOffset, (int)legacyLipSize).ToArray();
+                            audioData = bytes.AsSpan((int)legacyAudioOffset, (int)legacyAudioSize).ToArray();
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            bool TryCopyNormalizedFuz(string srcFile, string dstFile)
+            {
+                if (!TryReadFuzAudioAndLip(srcFile, out var audioData, out var lipData))
+                {
+                    return false;
+                }
+
+                using var ms = new System.IO.MemoryStream();
+                using var bw = new System.IO.BinaryWriter(ms);
+                bw.Write(new byte[] { 0x46, 0x55, 0x5A, 0x45 }); // FUZE
+                bw.Write((uint)audioData.Length);
+                bw.Write(audioData);
+                bw.Write((uint)lipData.Length);
+                bw.Write(lipData);
+                bw.Flush();
+                System.IO.File.WriteAllBytes(dstFile, ms.ToArray());
+                return true;
+            }
+
+            if (!TryEnsureDirectory(dstBase, "voice output base"))
+            {
+                Console.WriteLine($"\nCopied {copied} voice files total.");
+                Console.WriteLine("Done.");
+                return;
+            }
 
             // NPC VOICE (Piper/Claude speaking)
             string srcNpc = System.IO.Path.Combine(srcBase, "NPCFPiper");
             string dstNpc = System.IO.Path.Combine(dstBase, "NPCFAstra");
-            if (!System.IO.Directory.Exists(dstNpc)) System.IO.Directory.CreateDirectory(dstNpc);
+            if (!TryEnsureDirectory(dstNpc, "NPC voice output"))
+            {
+                Console.WriteLine($"\nCopied {copied} voice files total.");
+                Console.WriteLine("Done.");
+                return;
+            }
 
             bool allowGreetingVoiceOverwrite = HasArg("--allow-greeting-voice-overwrite");
             bool allowFriendshipVoiceOverwrite = HasArg("--allow-friendship-voice-overwrite");
@@ -1837,23 +2524,22 @@ namespace CompanionClaude
             Console.WriteLine("  NPC Voice (Multiple Companions):");
             // Check multiple companion voice directories for voice files
             var companionDirs = new[] { "NPCFPiper", "NPCFCait", "NPCMPrestonGarvey", "NPCMNickValentine", "NPCFCurie" };
-            foreach (var (piperINFO, ourINFO) in npcVoiceMap) {
-                bool found = false;
-                foreach (var compDir in companionDirs) {
-                    string srcFile = System.IO.Path.Combine(srcBase, compDir, $"{piperINFO:X8}_1.fuz");
-                    string dstFile = System.IO.Path.Combine(dstNpc, $"{ourINFO.ID:X8}_1.fuz");
-                    if (System.IO.File.Exists(srcFile)) {
-                        System.IO.File.Copy(srcFile, dstFile, true);
-                        Console.WriteLine($"    {piperINFO:X6} ({compDir}) -> {ourINFO.ID:X6}");
-                        copied++;
-                        found = true;
-                        break;
+                foreach (var (piperINFO, ourINFO) in npcVoiceMap) {
+                    bool found = false;
+                    foreach (var compDir in companionDirs) {
+                        string srcFile = System.IO.Path.Combine(srcBase, compDir, $"{piperINFO:X8}_1.fuz");
+                        string dstFile = System.IO.Path.Combine(dstNpc, $"{ourINFO.ID:X8}_1.fuz");
+                        if (TryCopyNormalizedFuz(srcFile, dstFile)) {
+                            Console.WriteLine($"    {piperINFO:X6} ({compDir}) -> {ourINFO.ID:X6}");
+                            copied++;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        Console.WriteLine($"    MISSING: {piperINFO:X6}");
                     }
                 }
-                if (!found) {
-                    Console.WriteLine($"    MISSING: {piperINFO:X6}");
-                }
-            }
 
             // PLAYER VOICE (Male and Female)
             var playerVoiceMap = new (uint piperINFO, FormKey ourINFO)[] {
@@ -1902,11 +2588,11 @@ namespace CompanionClaude
                 (0x0537A1, conf2_PPos.Responses[0].FormKey),  // "What are you hiding?"
                 (0x128CC7, conf2_PNeu.Responses[0].FormKey),  // "If you have something to say I'm listening."
                 (0x02E122, conf2_PNeg.Responses[0].FormKey),  // "You don't need to know the details."
-                (0x08B428, conf2_PQue.Responses[0].FormKey),  // "Restricted section" (closest)
+                (0x0994E8, conf2_PQue.Responses[0].FormKey),  // "What do you mean?" (cleaner fit than "Restricted section")
                 (0x056A39, conf3_PPos.Responses[0].FormKey),  // "I consider you to be family... together."
                 (0x140B00, conf3_PNeu.Responses[0].FormKey),  // "Because you're special to me..."
                 (0x0B17BD, conf3_PNeg.Responses[0].FormKey),  // "It's nothing special."
-                (0x01DC6D, conf3_PQue.Responses[0].FormKey),  // "What makes that ... so special?"
+                (0x0994E8, conf3_PQue.Responses[0].FormKey),  // "What do you mean?" (avoids "Power Armor" noun mismatch)
                 (0x07FBEB, conf4_PPos.Responses[0].FormKey),  // "We're working together, yeah."
                 (0x0ED477, conf4_PNeu.Responses[0].FormKey),  // "We'll work on this together."
                 (0x0B0FAE, conf4_PNeg.Responses[0].FormKey),  // "Let's not over-complicate this."
@@ -1919,7 +2605,7 @@ namespace CompanionClaude
                 (0x0A1707, inf2_PPos.Responses[0].FormKey),  // "We're leaving this place. Together."
                 (0x0ED477, inf2_PNeu.Responses[0].FormKey),  // "We'll work on this together."
                 (0x07FBEB, inf2_PNeg.Responses[0].FormKey),  // "We're working together, yeah."
-                (0x08B428, inf2_PQue.Responses[0].FormKey),  // "Restricted section" (closest)
+                (0x0994E8, inf2_PQue.Responses[0].FormKey),  // "What do you mean?" (cleaner fit than "Restricted section")
                 (0x04737E, inf3_PPos.Responses[0].FormKey),  // "How do you feel now?"
                 (0x0329C2, inf3_PNeu.Responses[0].FormKey),  // "I'm listening."
                 (0x10027F, inf3_PNeg.Responses[0].FormKey),  // "This needs to wait. We've got more important things to do."
@@ -1935,7 +2621,7 @@ namespace CompanionClaude
                 (0x072FFB, inf6_PPos.Responses[0].FormKey),  // "We made a good team."
                 (0x02672C, inf6_PNeu.Responses[0].FormKey),  // "Sounds good."
                 (0x0B0FAE, inf6_PNeg.Responses[0].FormKey),  // "Let's not over-complicate this."
-                (0x0781F1, inf6_PQue.Responses[0].FormKey),  // "stay young forever" (closest)
+                (0x0179E4, inf6_PQue.Responses[0].FormKey),  // "Really?" (cleaner fit than "stay young forever")
                 // === DISDAIN SCENE PLAYER VOICE (text-first, closest vanilla) ===
                 (0x0E7631, dis1_P.Responses[0].FormKey),  // "So, what's the issue?"
                 // === HATRED SCENE PLAYER VOICE (text-first, closest vanilla) ===
@@ -1949,14 +2635,18 @@ namespace CompanionClaude
             foreach (var voiceType in new[] { "PlayerVoiceMale01", "PlayerVoiceFemale01" }) {
                 string srcPlayer = System.IO.Path.Combine(srcBase, voiceType);
                 string dstPlayer = System.IO.Path.Combine(dstBase, voiceType);
-                if (!System.IO.Directory.Exists(dstPlayer)) System.IO.Directory.CreateDirectory(dstPlayer);
+                if (!TryEnsureDirectory(dstPlayer, $"player voice output ({voiceType})"))
+                {
+                    Console.WriteLine($"\nCopied {copied} voice files total.");
+                    Console.WriteLine("Done.");
+                    return;
+                }
 
                 Console.WriteLine($"  Player Voice ({voiceType}):");
                 foreach (var (piperINFO, ourINFO) in playerVoiceMap) {
                     string srcFile = System.IO.Path.Combine(srcPlayer, $"{piperINFO:X8}_1.fuz");
                     string dstFile = System.IO.Path.Combine(dstPlayer, $"{ourINFO.ID:X8}_1.fuz");
-                    if (System.IO.File.Exists(srcFile)) {
-                        System.IO.File.Copy(srcFile, dstFile, true);
+                    if (TryCopyNormalizedFuz(srcFile, dstFile)) {
                         Console.WriteLine($"    {piperINFO:X6} -> {ourINFO.ID:X6}");
                         copied++;
                     } else {
@@ -1968,7 +2658,35 @@ namespace CompanionClaude
             // Generate Astra pickup voice lines via Windows TTS and write FO4 .fuz files
             try
             {
-                bool enableAstraPickupTts = HasArg("--enable-greeting-tts");
+                string pickupSceneVoiceDir = System.IO.Path.Combine(dstBase, "NPCFAstra");
+                var pickupSceneVoiceInfos = new[] {
+                    astraPickup_Dialog2.Responses[0].FormKey, // action 2
+                    astraPickup_Dialog3.Responses[0].FormKey, // action 3
+                    astraPickup_Dialog4.Responses[0].FormKey, // action 4
+                    astraPickup_Dialog5.Responses[0].FormKey, // action 5
+                };
+                bool pickupSceneVoiceMissing = pickupSceneVoiceInfos.Any(fk =>
+                    !IsLikelyValidFuz(System.IO.Path.Combine(pickupSceneVoiceDir, $"{fk.ID:X8}_1.fuz")));
+
+                var dismissSceneVoiceInfos = new[] {
+                    dismiss_Dialog1.Responses[0].FormKey,
+                    dismiss_NPos.Responses[0].FormKey,
+                    dismiss_NNeg.Responses[0].FormKey,
+                    dismiss_NNeu.Responses[0].FormKey,
+                    dismiss_NQue.Responses[0].FormKey,
+                    dismiss_Dialog3.Responses[0].FormKey,
+                    dismiss_Dialog4.Responses[0].FormKey,
+                    dismissGreeting.FormKey,
+                    dismissEnterInfo.FormKey,
+                    romanceCompleteGreeting.FormKey,
+                };
+                bool dismissSceneVoiceMissing = dismissSceneVoiceInfos.Any(fk =>
+                    !IsLikelyValidFuz(System.IO.Path.Combine(pickupSceneVoiceDir, $"{fk.ID:X8}_1.fuz")));
+
+                bool enableAstraPickupTts = HasArg("--enable-greeting-tts")
+                    || (pickupSceneVoiceMissing && !HasArg("--disable-greeting-tts"));
+                bool enableAstraDismissTts = HasArg("--enable-dismiss-tts")
+                    || (dismissSceneVoiceMissing && !HasArg("--disable-dismiss-tts"));
                 bool enableAstraFriendshipTts = HasArg("--enable-friendship-tts");
                 bool enableAstraAdmirationTts = HasArg("--enable-admiration-tts");
                 bool enableAstraConfidantTts = HasArg("--enable-confidant-tts");
@@ -1977,14 +2695,39 @@ namespace CompanionClaude
                 bool enableAstraHatredTts = HasArg("--enable-hatred-tts");
                 bool enableAstraRecoveryTts = HasArg("--enable-recovery-tts");
                 bool enableAstraMurderTts = HasArg("--enable-murder-tts");
-                if (!enableAstraPickupTts && !enableAstraFriendshipTts && !enableAstraAdmirationTts && !enableAstraConfidantTts && !enableAstraInfatuationTts && !enableAstraDisdainTts && !enableAstraHatredTts && !enableAstraRecoveryTts && !enableAstraMurderTts)
+                if (!enableAstraPickupTts && !enableAstraDismissTts && !enableAstraFriendshipTts && !enableAstraAdmirationTts && !enableAstraConfidantTts && !enableAstraInfatuationTts && !enableAstraDisdainTts && !enableAstraHatredTts && !enableAstraRecoveryTts && !enableAstraMurderTts)
                 {
-                    Console.WriteLine("Astra pickup TTS generation disabled (using Piper reference).");
+                    Console.WriteLine("Astra TTS generation disabled.");
                     Console.WriteLine($"\nCopied {copied} voice files total.");
                     Console.WriteLine("Done.");
                     return;
                 }
-                string toolsRoot = @"E:\CompanionGeminiFeb26\Tools";
+                string toolsRoot = GetArgValue("--tools-root") ?? System.IO.Path.Combine(globalRoot, "Tools");
+                if (!System.IO.Directory.Exists(toolsRoot))
+                {
+                    toolsRoot = System.IO.Path.Combine(workspaceRoot, "Tools");
+                }
+                if (!System.IO.Directory.Exists(toolsRoot))
+                {
+                    toolsRoot = System.IO.Path.Combine(repoRoot, "Tools");
+                }
+                if (!System.IO.Directory.Exists(toolsRoot))
+                {
+                    toolsRoot = System.IO.Path.Combine(workspaceRoot, "Claude", "CompanionClaude_v13_GreetingFix", "Tools");
+                }
+                if (!System.IO.Directory.Exists(toolsRoot))
+                {
+                    toolsRoot = System.IO.Path.Combine(workspaceRoot, "Gemini", "CompanionClaude_v13_GreetingFix", "Tools");
+                }
+                string projectsRoot = System.IO.Directory.GetParent(globalRoot)?.FullName ?? globalRoot;
+                if (!System.IO.Directory.Exists(toolsRoot))
+                {
+                    toolsRoot = System.IO.Path.Combine(projectsRoot, "Claude", "CompanionClaude_v13_GreetingFix", "Tools");
+                }
+                if (!System.IO.Directory.Exists(toolsRoot))
+                {
+                    toolsRoot = System.IO.Path.Combine(projectsRoot, "Gemini", "CompanionClaude_v13_GreetingFix", "Tools");
+                }
                 string lipGen = System.IO.Path.Combine(toolsRoot, "LipGenerator.exe");
                 string xwmEncode = System.IO.Path.Combine(toolsRoot, "xwmaencode.exe");
                 if (System.IO.File.Exists(lipGen) && System.IO.File.Exists(xwmEncode))
@@ -2018,11 +2761,23 @@ namespace CompanionClaude
                         Run("powershell", $"-Command \"{ps}\"");
                     }
 
-                    string dstNpcPickup = System.IO.Path.Combine(dstBase, "NPCFAstra");
-                    if (!System.IO.Directory.Exists(dstNpcPickup)) System.IO.Directory.CreateDirectory(dstNpcPickup);
-
-                    void WriteFuz(FormKey formKey, string text, string prefix)
+                    string dstNpcPickup = pickupSceneVoiceDir;
+                    if (!TryEnsureDirectory(dstNpcPickup, "Astra TTS output"))
                     {
+                        Console.WriteLine($"\nCopied {copied} voice files total.");
+                        Console.WriteLine("Done.");
+                        return;
+                    }
+
+                    void WriteFuz(FormKey formKey, string text, string prefix, string outputVoiceDir, string voiceFolderTag)
+                    {
+                        if (string.IsNullOrWhiteSpace(text))
+                        {
+                            return;
+                        }
+
+                        TryEnsureDirectory(outputVoiceDir, $"TTS output ({voiceFolderTag})");
+
                         string id = formKey.ID.ToString("X8");
                         string wavPath = System.IO.Path.Combine(toolsRoot, $"{prefix}_{id}.wav");
                         string lipPath = System.IO.Path.Combine(toolsRoot, $"{prefix}_{id}.lip");
@@ -2036,30 +2791,95 @@ namespace CompanionClaude
                         {
                             var lipData = System.IO.File.ReadAllBytes(lipPath);
                             var audioData = System.IO.File.ReadAllBytes(xwmPath);
-                            string outFuz = System.IO.Path.Combine(dstNpcPickup, $"{id}_1.fuz");
+                            string outFuz = System.IO.Path.Combine(outputVoiceDir, $"{id}_1.fuz");
 
                             using var ms = new System.IO.MemoryStream();
                             using var bw = new System.IO.BinaryWriter(ms);
                             bw.Write(new byte[] { 0x46, 0x55, 0x5A, 0x45 }); // FUZE
-                            bw.Write((uint)1);
+                            // Fallout 4 layout: FUZE + audioSize + audio + lipSize + lip
+                            bw.Write((uint)audioData.Length);
+                            bw.Write(audioData);
                             bw.Write((uint)lipData.Length);
                             bw.Write(lipData);
-                            bw.Write(audioData);
                             bw.Flush();
                             System.IO.File.WriteAllBytes(outFuz, ms.ToArray());
-                            Console.WriteLine($"Astra voice written: {outFuz}");
+                            Console.WriteLine($"TTS voice written ({voiceFolderTag}): {outFuz}");
                         }
                     }
 
                     if (enableAstraPickupTts)
                     {
-                        var pickupLines = new (FormKey formKey, string text)[] {
-                            (pickupGreeting.FormKey, "You're the one they call the Survivor. I'm Astra. Ready to move out?"),
-                            (formerPickupGreeting.FormKey, "Back again? I'm ready when you are.")
+                        var pickupLines = new (FormKey formKey, string text, string prefix)[] {
+                            (pickupGreeting.FormKey, "You're the one they call the Survivor. I'm Astra. Ready to move out?", "astra_pickup_greet"),
+                            (formerPickupGreeting.FormKey, "Back again? I'm ready when you are.", "astra_pickup_greet"),
+                            // Pickup scene action lines (fixes silent handoff in-game when these IDs are missing)
+                            (astraPickup_Dialog2.Responses[0].FormKey, "Ready for assignment.", "astra_pickup_scene"),
+                            (astraPickup_Dialog3.Responses[0].FormKey, "Lead the way.", "astra_pickup_scene"),
+                            (astraPickup_Dialog4.Responses[0].FormKey, "Sorry, boy. Time for you to head home.", "astra_pickup_scene")
                         };
-                        foreach (var (formKey, text) in pickupLines)
+                        foreach (var (formKey, text, prefix) in pickupLines)
                         {
-                            WriteFuz(formKey, text, "astra_pickup");
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
+                        }
+
+                        // Some deployed builds still reference GreetingReturn as response #2.
+                        // Keep a mirrored _2 file so CK/game don't fail when that metadata appears.
+                        try
+                        {
+                            string formerId = formerPickupGreeting.FormKey.ID.ToString("X8");
+                            string formerFuz1 = System.IO.Path.Combine(dstNpcPickup, $"{formerId}_1.fuz");
+                            string formerFuz2 = System.IO.Path.Combine(dstNpcPickup, $"{formerId}_2.fuz");
+                            if (System.IO.File.Exists(formerFuz1))
+                            {
+                                System.IO.File.Copy(formerFuz1, formerFuz2, true);
+                                Console.WriteLine($"TTS alias written (NPCFAstra): {formerFuz2}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Greeting return alias write failed: {ex.Message}");
+                        }
+
+                        // Action 2 uses alias 1 (current companion). Provide fallback audio in common companion folders.
+                        var companionFallbackDirs = new[] {
+                            "NPCFPiper",
+                            "NPCFCait",
+                            "NPCFCurie",
+                            "NPCMPrestonGarvey",
+                            "NPCMNickValentine",
+                            "NPCMMacCready",
+                            "NPCMHancock",
+                            "NPCMDeacon",
+                            "NPCMPaladinDanse",
+                            "NPCMStrong",
+                            "NPCMX6-88",
+                            "RobotMrHandy"
+                        };
+                        var companionLineInfo = astraPickup_Dialog2.Responses[0].FormKey;
+                        foreach (var dir in companionFallbackDirs)
+                        {
+                            var outDir = System.IO.Path.Combine(dstBase, dir);
+                            WriteFuz(companionLineInfo, "Ready for assignment.", "astra_pickup_companion", outDir, dir);
+                        }
+                    }
+
+                    if (enableAstraDismissTts)
+                    {
+                        var dismissLines = new (FormKey formKey, string text, string prefix)[] {
+                            (dismiss_Dialog1.Responses[0].FormKey, "So. This where we go our separate ways?", "astra_dismiss_scene"),
+                            (dismiss_NPos.Responses[0].FormKey, "Okay. I'll be seeing you.", "astra_dismiss_scene"),
+                            (dismiss_NNeg.Responses[0].FormKey, "I knew you couldn't bear to be without me.", "astra_dismiss_scene"),
+                            (dismiss_NNeu.Responses[0].FormKey, "If that's what ya want...", "astra_dismiss_scene"),
+                            (dismiss_NQue.Responses[0].FormKey, "I don't know. You think you can make it without me?", "astra_dismiss_scene"),
+                            (dismiss_Dialog3.Responses[0].FormKey, "Just don't keep me waiting, okay?", "astra_dismiss_scene"),
+                            (dismiss_Dialog4.Responses[0].FormKey, "Guess I'll head home, then.", "astra_dismiss_scene"),
+                            (dismissGreeting.FormKey, "Processing. What is your requirement?", "astra_dismiss_scene"),
+                            (dismissEnterInfo.FormKey, "I don't know. You think you can make it without me watching your back?", "astra_dismiss_scene"),
+                            (romanceCompleteGreeting.FormKey, "Synchronization levels are at maximum efficiency. Ready to proceed, my love?", "astra_romance_greet")
+                        };
+                        foreach (var (formKey, text, prefix) in dismissLines)
+                        {
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2091,7 +2911,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in friendshipLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2109,7 +2929,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in admirationLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2129,7 +2949,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in confidantLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2153,7 +2973,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in infatuationLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2166,7 +2986,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in disdainLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2179,7 +2999,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in hatredLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2190,7 +3010,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in recoveryLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
 
@@ -2201,7 +3021,7 @@ namespace CompanionClaude
                         };
                         foreach (var (formKey, text, prefix) in murderLines)
                         {
-                            WriteFuz(formKey, text, prefix);
+                            WriteFuz(formKey, text, prefix, dstNpcPickup, "NPCFAstra");
                         }
                     }
                 }
@@ -2216,3 +3036,4 @@ namespace CompanionClaude
         }
     }
 }
+

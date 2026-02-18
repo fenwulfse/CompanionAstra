@@ -70,7 +70,7 @@ FormKey is the Fallout4.esm INFO used for audio. Text is the source of truth.
 - 00F506 -> 000A1707 "We're leaving this place. Together."
 - 00F508 -> 000ED477 "We'll work on this together."
 - 00F509 -> 0007FBEB "We're working together, yeah."
-- 00F50A -> 0008B428 "Restricted section" (closest)
+- 00F50A -> 000994E8 "What do you mean?" (cleaner fit)
 
 ### Exchange 3
 - 00F50C -> 0004737E "How do you feel now?"
@@ -94,7 +94,7 @@ FormKey is the Fallout4.esm INFO used for audio. Text is the source of truth.
 - 00F51E -> 00072FFB "We made a good team."
 - 00F520 -> 0002672C "Sounds good."
 - 00F521 -> 000B0FAE "Let's not over-complicate this."
-- 00F522 -> 000781F1 "stay young forever" (closest)
+- 00F522 -> 000179E4 "Really?" (cleaner fit)
 
 ## TTS Generation
 To generate Astra TTS for the infatuation NPC lines and greetings, run:

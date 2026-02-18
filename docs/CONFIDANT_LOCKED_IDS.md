@@ -54,13 +54,13 @@ FormKey is the Fallout4.esm INFO used for audio. Text is the source of truth.
 - 00F406 -> 000537A1 "What are you hiding?"
 - 00F408 -> 00128CC7 "If you have something to say I'm listening."
 - 00F409 -> 0002E122 "You don't need to know the details."
-- 00F40A -> 0008B428 "Restricted section" (closest match)
+- 00F40A -> 000994E8 "What do you mean?" (cleaner fit)
 
 ### Exchange 3
 - 00F40C -> 00056A39 "I consider you to be family... together."
 - 00F40E -> 00140B00 "Because you're special to me..."
 - 00F40F -> 000B17BD "It's nothing special."
-- 00F410 -> 0001DC6D "What makes that Power Armor so special?"
+- 00F410 -> 000994E8 "What do you mean?" (avoids noun mismatch)
 
 ### Exchange 4
 - 00F412 -> 0007FBEB "We're working together, yeah."

@@ -6,7 +6,8 @@ obj/
 # Generated voice and game assets
 VoiceFiles/
 Backups/
-Tools/
+_experiments/
+Tools/*
 GeminiVoiceGen/
 FaceFXWrapper-0.41/
 FaceFXWrapper-0.41.tar
@@ -14,6 +15,7 @@ FaceFXWrapper-0.41.tar.gz
 
 # Allow xEdit automation scripts
 !Tools/run_xedit_dump.ps1
+!Tools/run_autopilot_cycle.ps1
 !Tools/FO4Edit/
 !Tools/FO4Edit/Edit Scripts/
 !Tools/FO4Edit/Edit Scripts/DumpDialogueToCSV_Astra.pas
@@ -22,6 +24,12 @@ FaceFXWrapper-0.41.tar.gz
 fallout4_all_dialogue.csv
 player_voice_dialogue.csv
 player_voice_matches_*.txt
+docs/AUTOPILOT_LAST_RUN.md
+docs/Fallout4Custom.ini
+CLAUDE.md
+COLLABORATION_LOG.md
+COMM_*.md
+HANDOVER_*.md
 *.wav
 *.xwm
 *.lip

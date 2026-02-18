@@ -35,6 +35,7 @@ E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp
 - `docs/COMPANION_CREATION_BIBLE.md`
 - `docs/PAPYRUS_WORKFLOW.md`
 - `docs/BACKUP_WORKFLOW.md`
+- `docs/GIT_OPERATING_MODEL.md`
 - `docs/ACTOR_SCRIPT_PROPERTY_AUDIT.md`
 - `docs/GREETING_VOICE_ID_STABILITY.md`
 - `docs/NEUTRAL_FRIENDSHIP_LOCKED_IDS.md`
