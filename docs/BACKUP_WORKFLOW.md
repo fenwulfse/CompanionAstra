@@ -1,4 +1,4 @@
-# Backup Workflow (Astra)
+﻿# Backup Workflow (Astra)
 
 ## Goal
 - Keep a rollback history where every checkpoint has:
@@ -9,9 +9,9 @@
 
 ## Canonical Checkpoint Command (Recommended)
 ```powershell
-powershell -ExecutionPolicy Bypass -File E:\FO4Projects\ChatGPT\CompanionAstra\Tools\create_working_checkpoint.ps1 `
+powershell -ExecutionPolicy Bypass -File <WORKSPACE_ROOT>\ChatGPT\CompanionAstra\Tools\create_working_checkpoint.ps1 `
   -Label short_note `
-  -Fo4Data "E:\SteamLibrary\steamapps\common\Fallout 4\Data" `
+  -Fo4Data "<FO4_DATA>" `
   -IncludeVoice `
   -Intent "What we were trying to do" `
   -WhatWorked "What worked in game" `
@@ -22,7 +22,7 @@ powershell -ExecutionPolicy Bypass -File E:\FO4Projects\ChatGPT\CompanionAstra\T
 ```
 
 ## Output Location
-- `E:\FO4Projects\ChatGPT\CompanionAstra\Backups\WorkingHistory\<timestamp>_<label>\`
+- `<WORKSPACE_ROOT>\ChatGPT\CompanionAstra\Backups\WorkingHistory\<timestamp>_<label>\`
 
 ## What Each Checkpoint Contains
 - `Source\Program.cs`
@@ -46,3 +46,4 @@ powershell -ExecutionPolicy Bypass -File E:\FO4Projects\ChatGPT\CompanionAstra\T
 3. Copy `CHANGELOG.md` back to project root.
 4. Copy `Deployed\CompanionAstra.esp` and `Deployed\Scripts\...` back to game `Data`.
 5. If included, copy `Deployed\Sound\Voice\CompanionAstra.esp` back to game `Data\Sound\Voice\`.
+

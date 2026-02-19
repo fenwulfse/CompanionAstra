@@ -1,10 +1,10 @@
 param(
-    [string]$ProjectRoot = "E:\FO4Projects\ChatGPT\CompanionAstra",
-    [string]$Fo4Data = "E:\SteamLibrary\steamapps\common\Fallout 4\Data",
-    [string]$ToolsRoot = "E:\FO4Projects\Tools",
+    [string]$ProjectRoot = "",
+    [string]$Fo4Data = "",
+    [string]$ToolsRoot = "",
     [switch]$IncludeBackup,
     [switch]$IncludeVoiceInBackup,
-    [string]$BackupRoot = "E:\FO4Projects\Backups",
+    [string]$BackupRoot = "",
     [switch]$GenerateFriendshipTts,
     [switch]$GenerateAdmirationTts,
     [switch]$GenerateConfidantTts,
@@ -19,6 +19,29 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Resolve-Fo4DataPath {
+    param([string]$ExplicitFo4Data)
+
+    if (-not [string]::IsNullOrWhiteSpace($ExplicitFo4Data) -and (Test-Path $ExplicitFo4Data)) {
+        return $ExplicitFo4Data
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($env:FO4_DATA) -and (Test-Path $env:FO4_DATA)) {
+        return $env:FO4_DATA
+    }
+
+    $candidates = @(
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Fallout 4\\Data",
+        "C:\\Program Files\\Steam\\steamapps\\common\\Fallout 4\\Data"
+    )
+
+    foreach ($drive in [System.IO.DriveInfo]::GetDrives() | Where-Object { $_.DriveType -eq 'Fixed' -and $_.IsReady }) {
+        $candidates += (Join-Path $drive.RootDirectory.FullName "SteamLibrary\\steamapps\\common\\Fallout 4\\Data")
+    }
+
+    return ($candidates | Select-Object -Unique | Where-Object { Test-Path $_ } | Select-Object -First 1)
+}
+
 function Step([string]$Message)
 {
     Write-Host ""
@@ -31,6 +54,30 @@ function RequirePath([string]$Path, [string]$Label)
     {
         throw "$Label not found: $Path"
     }
+}
+
+if ([string]::IsNullOrWhiteSpace($ProjectRoot)) {
+    $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+}
+
+if ([string]::IsNullOrWhiteSpace($Fo4Data)) {
+    $Fo4Data = Resolve-Fo4DataPath -ExplicitFo4Data ""
+}
+
+if ([string]::IsNullOrWhiteSpace($ToolsRoot)) {
+    if (-not [string]::IsNullOrWhiteSpace($env:FO4_TOOLS_ROOT) -and (Test-Path $env:FO4_TOOLS_ROOT)) {
+        $ToolsRoot = $env:FO4_TOOLS_ROOT
+    }
+    else {
+        $workspaceRoot = Split-Path $ProjectRoot -Parent
+        $candidate = Join-Path $workspaceRoot "Tools"
+        if (Test-Path $candidate) { $ToolsRoot = $candidate }
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($BackupRoot)) {
+    $workspaceRoot = Split-Path $ProjectRoot -Parent
+    $BackupRoot = Join-Path $workspaceRoot "Backups"
 }
 
 $csprojPath = Join-Path $ProjectRoot "CompanionAstra_LockedIDs\CompanionClaude_v13.csproj"

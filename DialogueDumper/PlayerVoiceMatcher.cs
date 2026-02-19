@@ -8,6 +8,27 @@ namespace PlayerVoiceMatcher
 {
     class Program
     {
+        static string ResolveRepoRoot()
+        {
+            string dir = AppContext.BaseDirectory;
+            for (int i = 0; i < 8; i++)
+            {
+                if (Directory.Exists(Path.Combine(dir, "DialogueDumper")))
+                {
+                    return dir;
+                }
+
+                var parent = Directory.GetParent(dir);
+                if (parent == null)
+                {
+                    break;
+                }
+                dir = parent.FullName;
+            }
+
+            return Directory.GetCurrentDirectory();
+        }
+
         static IEnumerable<string> Tokens(string s)
         {
             return Regex.Matches(s.ToLowerInvariant(), "[a-z]+").Select(m => m.Value);
@@ -28,7 +49,9 @@ namespace PlayerVoiceMatcher
 
         static void Main()
         {
-            string csvPath = @"E:\CompanionGeminiFeb26\player_voice_dialogue.csv";
+            string repoRoot = ResolveRepoRoot();
+            string csvPath = Environment.GetEnvironmentVariable("PLAYER_VOICE_CSV")
+                ?? Path.Combine(repoRoot, "player_voice_dialogue.csv");
             if (!File.Exists(csvPath))
             {
                 Console.WriteLine($"Missing {csvPath}");
@@ -65,7 +88,8 @@ namespace PlayerVoiceMatcher
                 ("00F21E","What does that mean to you?")
             };
 
-            string outPath = @"E:\CompanionGeminiFeb26\player_voice_matches_neutral_friendship.txt";
+            string outPath = Environment.GetEnvironmentVariable("PLAYER_VOICE_MATCH_OUT")
+                ?? Path.Combine(repoRoot, "player_voice_matches_neutral_friendship.txt");
             using var sw = new StreamWriter(outPath);
 
             foreach (var t in targets)

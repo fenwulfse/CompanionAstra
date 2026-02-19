@@ -12,7 +12,7 @@
 # (AI TTS, recording, etc.) → dialogue.wav
 
 # Step 2: Generate LIP file using Bethesda's official tool
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 LipGenerator.exe dialogue.wav "The dialogue text spoken in the audio"
 # Creates: dialogue.lip
 
@@ -21,7 +21,7 @@ LipGenerator.exe dialogue.wav "The dialogue text spoken in the audio"
 # OR implement custom C# packer (see below)
 
 # Step 4: Name with FormKey and copy to voice directory
-# 000009F7_1.fuz → D:\...\Fallout 4\Data\Sound\Voice\CompanionClaude.esp\NPCFClaude\
+# 000009F7_1.fuz → <FO4_DATA>\\Sound\\Voice\\CompanionClaude.esp\\NPCFClaude\\
 ```
 
 **Status:**
@@ -91,11 +91,11 @@ unfuzer.exe input.fuz output_folder/
 ### 2A. LipGenerator.exe (Bethesda Official Tool) ✅ FOUND!
 **Purpose:** WAV + Text → LIP
 
-**Location:** `E:\CompanionClaude_v13_GreetingFix\Tools\LipGenerator.exe`
+**Location:** `<WORKSPACE_ROOT>\Tools\LipGenerator.exe`
 
 **Also found in:**
-- `D:\SteamLibrary\steamapps\common\Fallout 4\Tools\LipGen\LipGenerator\`
-- `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\Processing\FonixData.cdf`
+- `<FO4_INSTALL>\Tools\LipGen\LipGenerator\`
+- `<FO4_DATA>\Sound\Voice\Processing\FonixData.cdf`
 
 **Usage:**
 ```bash
@@ -405,7 +405,7 @@ FaceFXWrapper.exe -i test.wav -o test.lip
 ```csharp
 public class VoiceGenerator
 {
-    private static string LipGeneratorPath = @"E:\CompanionClaude_v13_GreetingFix\Tools\LipGenerator.exe";
+    private static string LipGeneratorPath = @"<WORKSPACE_ROOT>\Tools\LipGenerator.exe";
 
     public static string GenerateLipFile(string wavPath, string dialogueText)
     {
@@ -584,3 +584,4 @@ public class FuzPacker
 
 *Last updated: 2026-02-06*
 *Status: Phase 1 - Research & Tool Discovery*
+

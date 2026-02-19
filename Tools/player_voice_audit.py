@@ -2,9 +2,10 @@ import os
 import re
 import sys
 
-ROOT = r"E:\CompanionGeminiFeb26"
-PROGRAM = r"E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\Program.cs"
-OUT = r"E:\CompanionGeminiFeb26\Tools\PlayerVoice_Audit.txt"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(SCRIPT_DIR)
+PROGRAM = os.path.join(ROOT, "CompanionAstra_LockedIDs", "Program.cs")
+OUT = os.path.join(SCRIPT_DIR, "PlayerVoice_Audit.txt")
 
 if not os.path.exists(PROGRAM):
     print(f"Missing Program.cs: {PROGRAM}")

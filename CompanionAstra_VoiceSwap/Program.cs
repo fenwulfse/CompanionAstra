@@ -194,6 +194,7 @@ namespace CompanionClaude
         static void Main(string[] args)
         {
             Console.WriteLine("=== CompanionAstra v14 - Actor Record Sync ===");
+            string repoRoot = System.IO.Directory.GetCurrentDirectory();
 
             string? GetArgValue(string name)
             {
@@ -1368,12 +1369,15 @@ namespace CompanionClaude
             Console.WriteLine("=== COPYING VOICE FILES ===");
             // Prefer permanent extracted voice source under the project.
             // Allow override via --voice-src, fallback to the old temp path if needed.
-            string srcBase = GetArgValue("--voice-src") ?? @"E:\CompanionGeminiFeb26\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm";
+            string srcBase = GetArgValue("--voice-src") ?? System.IO.Path.Combine(repoRoot, "VoiceFiles", "piper_voice", "Sound", "Voice", "Fallout4.esm");
             if (!System.IO.Directory.Exists(srcBase))
             {
-                srcBase = @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm";
+                srcBase = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "claude", "piper_voice", "Sound", "Voice", "Fallout4.esm");
             }
-            string dstBase = GetArgValue("--voice-dst") ?? @"D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp";
+            string fo4Data = GetArgValue("--fo4-data")
+                ?? Environment.GetEnvironmentVariable("FO4_DATA")
+                ?? "Data";
+            string dstBase = GetArgValue("--voice-dst") ?? System.IO.Path.Combine(fo4Data, "Sound", "Voice", "CompanionAstra.esp");
             int copied = 0;
 
             // NPC VOICE (Piper/Claude speaking)
@@ -1586,7 +1590,9 @@ namespace CompanionClaude
                     Console.WriteLine("Done.");
                     return;
                 }
-                string toolsRoot = @"E:\CompanionGeminiFeb26\Tools";
+                string toolsRoot = GetArgValue("--tools-root")
+                    ?? Environment.GetEnvironmentVariable("FO4_TOOLS_ROOT")
+                    ?? System.IO.Path.Combine(repoRoot, "Tools");
                 string lipGen = System.IO.Path.Combine(toolsRoot, "LipGenerator.exe");
                 string xwmEncode = System.IO.Path.Combine(toolsRoot, "xwmaencode.exe");
                 if (System.IO.File.Exists(lipGen) && System.IO.File.Exists(xwmEncode))

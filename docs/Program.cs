@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Fallout4;
@@ -1320,8 +1320,8 @@ namespace CompanionClaude
 
             // 10. COPY VOICE FILES (Piper's .fuz files renamed to our FormKeys)
             Console.WriteLine("=== COPYING VOICE FILES ===");
-            string srcBase = @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm";
-            string dstBase = @"D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionClaude.esp";
+            string srcBase = @"<USER_HOME>\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm";
+            string dstBase = @"<FO4_DATA>\Sound\Voice\CompanionClaude.esp";
             int copied = 0;
 
             // NPC VOICE (Piper/Claude speaking)

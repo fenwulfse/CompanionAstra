@@ -1,4 +1,4 @@
-# CompanionAstra
+﻿# CompanionAstra
 
 Fallout 4 companion plugin generator (Mutagen). The generator builds `CompanionAstra.esp` and manages stable dialogue INFO IDs so voice files never break.
 
@@ -11,18 +11,18 @@ Fallout 4 companion plugin generator (Mutagen). The generator builds `CompanionA
 1. Open a terminal in the repo root.
 2. Build/run:
 ```
-dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
+dotnet run --project <WORKSPACE_ROOT>\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
 ```
 
 Optional: generate Astra TTS lines for specific scenes:
 ```
-dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --enable-friendship-tts
+dotnet run --project <WORKSPACE_ROOT>\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --enable-friendship-tts
 ```
 
 ## Where The ESP Is Written
 The generator writes here:
 ```
-E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp
+<WORKSPACE_ROOT>\ChatGPT\CompanionAstra\CompanionAstra.esp
 ```
 
 ## Core Rules (Do Not Break These)
@@ -36,6 +36,7 @@ E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp
 - `docs/COMPANION_CREATION_BIBLE.md`
 - `docs/PAPYRUS_WORKFLOW.md`
 - `docs/BACKUP_WORKFLOW.md`
+- `docs/TEAM_COLLAB_PROTOCOL.md`
 - `docs/GIT_OPERATING_MODEL.md`
 - `docs/ACTOR_SCRIPT_PROPERTY_AUDIT.md`
 - `docs/GREETING_VOICE_ID_STABILITY.md`
@@ -49,17 +50,22 @@ E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp
 ## Snapshot Backup
 Create a known-good rollback point:
 ```
-powershell -ExecutionPolicy Bypass -File E:\FO4Projects\Tools\create_build_snapshot.ps1 -Label your_label
+powershell -ExecutionPolicy Bypass -File <WORKSPACE_ROOT>\Tools\create_build_snapshot.ps1 -Label your_label
 ```
 
 Create a compact disaster-recovery zip (fits small backup drives):
 ```
-powershell -ExecutionPolicy Bypass -File E:\FO4Projects\Tools\create_disaster_backup.ps1 -ProjectRoot E:\FO4Projects\ChatGPT\CompanionAstra -BackupRoot E:\FO4Projects\Backups -Fo4Data "E:\SteamLibrary\steamapps\common\Fallout 4\Data"
+powershell -ExecutionPolicy Bypass -File <WORKSPACE_ROOT>\Tools\create_disaster_backup.ps1 -ProjectRoot <WORKSPACE_ROOT>\ChatGPT\CompanionAstra -BackupRoot <WORKSPACE_ROOT>\Backups -Fo4Data "<FO4_DATA>"
 ```
 
 Include deployed voice files in the disaster zip:
 ```
-powershell -ExecutionPolicy Bypass -File E:\FO4Projects\Tools\create_disaster_backup.ps1 -ProjectRoot E:\FO4Projects\ChatGPT\CompanionAstra -BackupRoot E:\FO4Projects\Backups -Fo4Data "E:\SteamLibrary\steamapps\common\Fallout 4\Data" -IncludeVoice
+powershell -ExecutionPolicy Bypass -File <WORKSPACE_ROOT>\Tools\create_disaster_backup.ps1 -ProjectRoot <WORKSPACE_ROOT>\ChatGPT\CompanionAstra -BackupRoot <WORKSPACE_ROOT>\Backups -Fo4Data "<FO4_DATA>" -IncludeVoice
+```
+
+Create a human playtest packet (hashes + checklist + deploy artifacts):
+```powershell
+powershell -ExecutionPolicy Bypass -File <WORKSPACE_ROOT>\ChatGPT\CompanionAstra\Tools\create_playtest_packet.ps1 -ProjectRoot <WORKSPACE_ROOT>\ChatGPT\CompanionAstra -Fo4Data "<FO4_DATA>" -Label "candidate_name"
 ```
 
 ## Contributing
@@ -71,3 +77,4 @@ See `CONTRIBUTING.md`.
 - `docs/agents/CHATGPT_README.md`
 - `docs/agents/CLAUDE_README.md`
 - `docs/agents/GEMINI_README.md`
+

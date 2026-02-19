@@ -1,4 +1,4 @@
-# Companion Creation Bible (Astra Pattern)
+﻿# Companion Creation Bible (Astra Pattern)
 
 ## Core Rule
 - Use vanilla companions (currently Piper) as a mechanics template only.
@@ -31,7 +31,7 @@
 
 ## Papyrus Baseline
 - Source-of-truth vanilla fragment reference:
-  - `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Scripts\Source\Base\Fragments\Quests\QF_COMPiper_000BBD96.psc`
+  - `<FO4_DATA>\Scripts\Source\Base\Fragments\Quests\QF_COMPiper_000BBD96.psc`
 - Reuse strategy:
   - Copy structure.
   - Rename quest/alias/script identifiers (`Piper` -> `Astra`).
@@ -42,3 +42,4 @@
 - Matching `.psc/.pex` fragment pair deployed for current test quest FormID.
 - Changelog and session log updated.
 - Snapshot backup created for known-good build.
+

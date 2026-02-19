@@ -1,7 +1,7 @@
-# CompanionAstra Helper Brief (Claude)
+﻿# CompanionAstra Helper Brief (Claude)
 
 ## Active Repo
-- `E:\FO4Projects\ChatGPT\CompanionAstra`
+- `<WORKSPACE_ROOT>\ChatGPT\CompanionAstra`
 
 ## Branch Lane
 - `agent/claude/quest-prototype`
@@ -24,3 +24,4 @@ Build Claude-owned quest and affinity prototype content in an isolated lane whil
 2. Behavior summary.
 3. CK validation status.
 4. Risks/open questions.
+

@@ -56,7 +56,7 @@ dotnet build
 dotnet run
 ```
 
-**Output:** `D:\SteamLibrary\steamapps\common\Fallout 4\Data\CompanionClaude.esp`
+**Output:** `<FO4_DATA>\CompanionClaude.esp`
 
 **Voice Files:** Automatically copied from extracted vanilla voice files to mod directory
 
@@ -133,7 +133,7 @@ CK displays warnings: "The index for the start phase on info X does not match th
 - **SESSION_SUMMARY_2026-02-05_FINAL.md** - Complete session details with code locations
 - **HANDOVER_2026-02-05.md** - Outstanding issues and next steps
 - **Memory System** - `~/.claude/projects/.../memory/MEMORY.md` - Project knowledge base
-- **Voice Mapping Docs** - `E:\Gemini\docs\CLAUDE_*_VOICE_IDS.md` - Voice selection methodology
+- **Voice Mapping Docs** - `<ARCHIVE_ROOT>\docs\CLAUDE_*_VOICE_IDS.md` - Voice selection methodology
 
 ## Reference
 
@@ -161,3 +161,4 @@ This is a fan-made mod for Fallout 4. Uses programmatic ESP generation via Mutag
 - **Voice Files** - Bethesda Softworks (Fallout 4 vanilla companions)
 - **Dialogue Structure** - Based on Piper companion quest analysis
 - **Development** - Created with assistance from Claude (Anthropic)
+

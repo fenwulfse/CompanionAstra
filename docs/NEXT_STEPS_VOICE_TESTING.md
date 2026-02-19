@@ -19,7 +19,7 @@
 1. Go to https://elevenlabs.io/text-to-speech (free tier available)
 2. Enter test text: "This is a test voice line for CompanionClaude"
 3. Generate and download as WAV
-4. Save to: `E:\CompanionClaude_v13_GreetingFix\Tools\test.wav`
+4. Save to: `<WORKSPACE_ROOT>\Tools\test.wav`
 
 ### Option 2: Record Your Own Voice
 **Use Windows Voice Recorder:**
@@ -27,7 +27,7 @@
 1. Open Windows Voice Recorder
 2. Record: "This is a test voice line for CompanionClaude"
 3. Export/save as WAV
-4. Copy to: `E:\CompanionClaude_v13_GreetingFix\Tools\test.wav`
+4. Copy to: `<WORKSPACE_ROOT>\Tools\test.wav`
 
 ### Option 3: Extract from .fuz File
 **Extract vanilla voice file (requires unfuzer):**
@@ -44,19 +44,19 @@ Once you have a WAV file:
 
 ### Method 1: Using Test Script (Easiest)
 ```bash
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 test_lipgen.bat test.wav "This is a test voice line for CompanionClaude"
 ```
 
 ### Method 2: Direct Command
 ```bash
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 LipGenerator.exe test.wav "This is a test voice line for CompanionClaude"
 ```
 
 ### Method 3: From PowerShell
 ```powershell
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 .\LipGenerator.exe test.wav "This is a test voice line for CompanionClaude"
 ```
 
@@ -84,7 +84,7 @@ After LIP generation, check:
 
 1. **File exists:**
    ```bash
-   ls -lh E:\CompanionClaude_v13_GreetingFix\Tools\test.lip
+   ls -lh <WORKSPACE_ROOT>\Tools\test.lip
    ```
 
 2. **File size reasonable:**
@@ -123,7 +123,7 @@ After LIP generation, check:
 ### Error: "FonixData.cdf not found"
 **Solution:** Copy FonixData.cdf to same directory as LipGenerator.exe
 ```bash
-cp "D:/SteamLibrary/steamapps/common/Fallout 4/Data/Sound/Voice/Processing/FonixData.cdf" E:/CompanionClaude_v13_GreetingFix/Tools/
+cp "<FO4_DATA>/Sound/Voice/Processing/FonixData.cdf" E:/CompanionClaude_v13_GreetingFix/Tools/
 ```
 
 ### Error: "Invalid WAV format"
@@ -183,3 +183,4 @@ This helps troubleshoot issues and optimize the pipeline!
 ---
 
 *Ready to test when you have a sample WAV file!*
+

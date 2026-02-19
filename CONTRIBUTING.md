@@ -10,7 +10,7 @@ This project is sensitive to record stability. Small mistakes can break voice pl
 
 ## Build / Run
 ```powershell
-dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
+dotnet run --project <WORKSPACE_ROOT>\ChatGPT\CompanionAstra\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj
 ```
 
 ## Branch + PR Flow
@@ -42,3 +42,6 @@ dotnet run --project E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra_Locked
 ## Testing + Reporting
 - Use `TESTING.md` for CK checks.
 - Use `docs/TESTER_GUIDE.md` and `docs/BUG_REPORT_TEMPLATE.md` for in-game reports.
+- For external playtests, open a GitHub issue from `.github/ISSUE_TEMPLATE/playtest-run.md`.
+- Generate a reproducible tester packet with `Tools/create_playtest_packet.ps1`.
+

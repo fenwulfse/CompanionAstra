@@ -25,7 +25,7 @@ LipGenerator.exe test.wav "This is a test voice line for CompanionClaude"
 
 **Files created:**
 ```
-E:\CompanionClaude_v13_GreetingFix\Tools\
+<WORKSPACE_ROOT>\Tools\
 ├── test.wav (17KB) - Input audio
 ├── test.lip (2KB) - Generated lip-sync data ✅
 ├── LipGenerator.exe - Bethesda's official tool
@@ -138,13 +138,13 @@ E:\CompanionClaude_v13_GreetingFix\Tools\
 
 **Generate LIP from WAV:**
 ```bash
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 LipGenerator.exe input.wav "Dialogue text here"
 ```
 
 **Using test script:**
 ```bash
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 test_lipgen.bat input.wav "Dialogue text"
 ```
 

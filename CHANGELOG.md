@@ -1,6 +1,130 @@
-# Changelog
+﻿# Changelog
+
+## 2026-02-19
+- Night dialogue-bridge candidate deployed (target: no-talk/stare regression):
+  - Source updates in `CompanionAstra_LockedIDs/Program.cs`:
+    - Added `Voices_CompanionsFaction` to Astra actor factions for closer Piper parity.
+    - Added Action-1 pickup `SharedDialog` links on Astra-owned topics:
+      - `PPos -> 162C70`, `NPos -> 162C6F`,
+      - `PNeg -> 162DFB`, `NNeg -> 162D6A`,
+      - `PNeu -> 162C82`, `NNeu -> 162C7D`,
+      - `PQue -> 162C74`, `NQue -> 1A4EAB`.
+    - Added default voice-copy mappings for Action-1 pickup lines:
+      - NPC: `162C6F/162D6A/162C7D/1A4EAB` -> `0000095D/61/65/69`
+      - Player: `162C70/162DFB/162C82/162C74` -> `0000095B/5F/63/67`
+  - Build/deploy fingerprint:
+    - ESP `E896A5B5F02EB2A3093C67792A35D9CA3DC816A842F56C79998011FB29A5EE05`
+    - size/time `73096` bytes, `2026-02-18 20:45:56`
+    - PEX `B86E464BE9E4C79039FC2CE7CEA1DB397F0AFA3836225AE6BA3A4B1F790CDE46`
+    - PSC `BF1537DC9D9AE0E0DFD9810F626F35A39B545CA22CA790121D01B9E961661D8A`
+  - Voice verification:
+    - Action-1 line assets now present in deployed voice tree:
+      - `NPCFAstra`: `0000095D`, `00000961`, `00000965`, `00000969`
+      - `PlayerVoiceMale01/PlayerVoiceFemale01`: `0000095B`, `0000095F`, `00000963`, `00000967`
+    - total voice count now `254` (`NPCFAstra=82`, `male=80`, `female=80`).
+  - Safety checkpoint:
+    - `Backups/WorkingHistory/2026-02-18_204710_2026-02-18_night_dialogue_voice_bridge_candidate`
+- Async coordination refresh for overnight progress:
+  - Updated `COMM_CODEX_TO_CLAUDE.md` with 2026-02-19 scope:
+    - no duplicate Astra mechanics edits,
+    - requested property parity checklist + Phase 2 insertion order in Claude-owned paths.
+  - Updated `COMM_CODEX_TO_GEMINI.md` with 2026-02-19 scope:
+    - Papyrus error-to-property mapping + repro matrix docs only.
+  - Added `COMM_CODEX_TO_COPILOT.md`:
+    - safe docs/tool-only queue to use Copilot without touching deployed mechanics.
+  - Added `Tools/VerifyLockedIDConsistency.ps1`:
+    - compares hex FormID usage in `CompanionAstra_LockedIDs/Program.cs` vs `docs/*LOCKED_IDS*.md`.
+    - first run confirms drift report generation is working and highlights one docs-only ID: `0x000E576F`.
+- Collaboration and human-testing infrastructure added:
+  - New protocol doc: `docs/TEAM_COLLAB_PROTOCOL.md`
+    - defines strict multi-agent boundaries, deploy ownership, merge gates, and incident workflow.
+  - New GitHub issue template: `.github/ISSUE_TEMPLATE/playtest-run.md`
+    - standardizes outside tester requests with exact build fingerprints and required checks.
+  - New packaging tool: `Tools/create_playtest_packet.ps1`
+    - generates reproducible playtest packet with ESP/PEX/PSC artifacts, SHA256 manifest, and checklist.
+  - Docs linked from:
+    - `README.md`
+    - `docs/WIKI_INDEX.md`
+    - `CONTRIBUTING.md`
 
 ## 2026-02-18
+- Emergency talk-safe candidate deployed (minimal greeting routing):
+  - User report remained: no talk + player movement lock while interacting with Astra.
+  - Source changes in `CompanionAstra_LockedIDs/Program.cs`:
+    - pickup/dismiss greeting `StartScenePhase` cleared to empty string.
+    - final `COMAstraGreetings` ordering forced to only 3 responses:
+      - `0000F0E1` (return pickup), `0000F0E0` (first pickup), `0000098A` (dismiss).
+    - affinity/repeater forcegreet responses temporarily excluded from active greeting topic to avoid dialogue dead-ends.
+  - Build/deploy:
+    - active `Data\\CompanionAstra.esp` hash `7D066C9D798490FC18636D22B6349889DFDC593D79E54700A4FBE06513410086`
+    - size/time: `73659` bytes, `2026-02-18 19:18:25`
+  - Verification:
+    - inspector shows `COMAstraGreetings` response count now `3` with only pickup/return/dismiss entries.
+  - Playtest packet:
+    - `Backups/PlaytestPackets/2026-02-18_191901_talksafe_greeting_minimal_candidate`
+- Emergency talk-lock correction deployed (hybrid pickup routing):
+  - Symptom from user test:
+    - pressing Talk could lock player in place (jump works, movement blocked), with Astra non-responsive.
+  - Root-cause candidate:
+    - prior build switched `COMAstraPickupScene` Action 1 PlayerDialogue slots to Piper vanilla topics, which can dead-end in custom quest context.
+  - Source change in `CompanionAstra_LockedIDs/Program.cs`:
+    - Action 1 reverted to Astra-owned topics (`COMAstraPickup_PPos/NPos/PNeg/NNeg/PNeu/NNeu/PQue/NQue`).
+    - Action 2/3/4/5 kept Piper-routed (`162C4B`, `162C4A`, `21748C`, `21748B`) to preserve handoff structure.
+  - Build/deploy:
+    - active `Data\\CompanionAstra.esp` hash `7A9AE1A4150337EDDC5ABEFF6696043DBFDED31BB243E81D0C7A8836A015C26C`
+    - size/time: `79229` bytes, `2026-02-18 18:57:40`
+  - Verification:
+    - `Tools/InspectAstraPickup` confirms hybrid routing:
+      - Action1 -> Astra topics
+      - Action2-5 -> Piper/vanilla topics as listed above.
+- Pickup routing stabilization candidate deployed (Piper-exact topics):
+  - Trigger:
+    - live scene inspection showed `COMAstraPickupScene` Action 2/3/4 were still Astra-owned custom topics (`COMAstraPickup_Dialog*`), which removed vanilla companion exchange routing and correlated with non-interactive talk regressions.
+  - Source change in `CompanionAstra_LockedIDs/Program.cs`:
+    - `COMAstraPickupScene` Action 1 now uses Piper vanilla response topics:
+      - `PPos 162C4F`, `NPos 162C53`, `PNeg 162C4E`, `NNeg 162C52`, `PNeu 162C4D`, `NNeu 162C51`, `PQue 162C4C`, `NQue 162C50`.
+    - Action topics now Piper-exact:
+      - `Action2 162C4B`, `Action3 162C4A`, `Action4 21748C`, `Action5 21748B`.
+  - Build/deploy:
+    - active `Data\\CompanionAstra.esp` hash `4D171835CF1DEA00637D48AD46C2B69CBF1BE4DC90F11793F834FD1CE335ADFE`
+    - size/time: `79229` bytes, `2026-02-18 18:36:31`
+    - `plugins.txt` remains `*CompanionAstra.esp`
+  - Verification:
+    - `Tools/InspectAstraPickup` confirms `COMAstraPickupScene` now matches `COMPiperPickupScene` topic wiring exactly for actions 1-5.
+  - Safety checkpoint:
+    - `Backups/WorkingHistory/2026-02-18_183724_pickup_piper_exact_candidate`
+- EditorID cleanup test deploy:
+  - Source update in `CompanionAstra_LockedIDs/Program.cs`:
+    - renamed scene/topic EditorIDs from `COMClaude*` to `COMAstra*` (legacy constant kept as `COMClaude` for compatibility handling).
+  - Trigger:
+    - CK `EditorWarnings.txt` `<CURRENT>` lines showed StartPhase index/name mismatches on Astra INFO records (`0100F30B/11`, `0100F40B/11/17`, `0100F50B/11/17/1D/23`, plus `0100098A/8C`).
+  - Deployed candidate:
+    - previous ESP SHA256 `7B8151E9F61A376AE7CC405EB16171D16B80CB786CB405916C722500386E5D38`
+    - new ESP SHA256 `197B737D8216165263415F6008E40EE62324076C22732E547B5FA602F4437DB6`
+    - active plugin: `*CompanionAstra.esp`
+  - Safety snapshot:
+    - `Backups/WorkingHistory/2026-02-18_181816_editorid_cleanup_candidate_deploy`
+  - Non-target assets intentionally unchanged:
+    - `QF_COMAstra_00000805.pex` SHA256 `70864D0F8493EC5CBB0830E97F6331AEFC74FD5439CC32D6D285EACD8145A765`
+    - voice folder remains `246` files / `15` dirs.
+- Runtime-root-cause fix candidate deployed (actor VMAD parity):
+  - Papyrus evidence from `Papyrus.0.log` showed `CompanionActorScript` errors on Astra form `07000804`:
+    - `GetNextThreshold()` line `1207`: `ThresholdData_Array[0]` access on `None`.
+    - cascading `None`/array errors in `TestValueForAffinityBump()` during `FollowersScript_CompanionChange`.
+  - Source fix in `CompanionAstra_LockedIDs/Program.cs`:
+    - actor VMAD now cloned from `CompanionPiper` instead of minimal custom script list.
+    - Astra overrides still enforced (`DismissScene`, workshop flags, core globals/AVs).
+  - Build/deploy:
+    - previous ESP hash: `89C7F3843FD345A820D7BF9A09145CCBB1E5891A677C7F5EED6366974CC00D64`
+    - deployed candidate ESP hash: `7B8151E9F61A376AE7CC405EB16171D16B80CB786CB405916C722500386E5D38`
+    - deployed size/time: `79393` bytes, `2026-02-18 14:17`
+  - Safety checkpoint:
+    - `Backups/WorkingHistory/2026-02-18_141743_vmad_thresholddata_fix_candidate`
+    - contains `BeforeDeploy/CompanionAstra.esp` and `Candidate/CompanionAstra.esp`.
+  - Deployment invariants rechecked:
+    - `plugins.txt`: `*CompanionAstra.esp`
+    - scripts unchanged: `QF_COMAstra_00000805.pex` SHA256 `70864D0F8493EC5CBB0830E97F6331AEFC74FD5439CC32D6D285EACD8145A765`
+    - voice set unchanged: `246` `.fuz`, `15` dirs.
 - Offline fix candidate prepared (not deployed to live `Data`):
   - Candidate folder:
     - `Backups/Candidates/2026-02-18_action2_astra_owned`
@@ -59,8 +183,8 @@
   - Deployed ESP SHA256: `F25979E80060425051258060AF1CA7065E1E67622ECF62CB445B177136E281F0`
   - Deployed voice dirs now include: `NPCFAstra`, companion fallback dirs above, `PlayerVoiceMale01`, `PlayerVoiceFemale01`.
 - Safety artifacts:
-  - Pre-deploy backup: `E:/FO4Projects/Backups/PreDeploy_HandoffPatch_2026-02-18_100704`
-  - Full checkpoint: `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-18_100738_2026-02-18_pickup_handoff_topic_patch_action2_5`
+  - Pre-deploy backup: `<WORKSPACE_ROOT>/Backups/PreDeploy_HandoffPatch_2026-02-18_100704`
+  - Full checkpoint: `<WORKSPACE_ROOT>/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-18_100738_2026-02-18_pickup_handoff_topic_patch_action2_5`
 - VMAD fragment skip-list parity update (source-only, not deployed in this handoff test):
   - Corrected stage-fragment skip list in `CompanionAstra_LockedIDs/Program.cs`.
   - Old skip items removed: `630`, `1010`.
@@ -71,7 +195,7 @@
 - Emergency rollback actions:
   - Force-stopped hung `Fallout4.exe`.
   - Restored ESP from pre-deploy backup:
-    - `E:/FO4Projects/Backups/PreDeploy_HandoffPatch_2026-02-18_100704/CompanionAstra.esp`
+    - `<WORKSPACE_ROOT>/Backups/PreDeploy_HandoffPatch_2026-02-18_100704/CompanionAstra.esp`
     - Live hash after restore: `20D2595BB4028D48DE7C97119D5C58AF0716F2C1D22534CE8652F0E414BC87A8`
   - Restored voice pack to known-good checkpoint snapshot:
     - Source: `Backups/WorkingHistory/2026-02-17_195509_2026-02-17_voice_pickup_dismiss_affinity_reset_o/Deployed/Sound/Voice/CompanionAstra.esp`
@@ -92,18 +216,18 @@
     - exchange lines for `Astra <-> Codsworth`
     - exchange lines for `Astra <-> Dogmeat`
 - Baseline checkpoint captured:
-  - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-18_110434_2026-02-18_verified_newgame_castle_pickup_dismis`
+  - `<WORKSPACE_ROOT>/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-18_110434_2026-02-18_verified_newgame_castle_pickup_dismis`
 
 ## 2026-02-17
 - Incident diagnosis and recovery for "companions not talking" reports:
   - Confirmed last-night handoff notes in `HANDOVER_CODEX.md` (`LastWriteTime: 2026-02-16 21:05`).
   - Verified deployed voice files are structurally valid (`184/184` modern `FUZE + audio + lip`, `RIFF` audio headers).
   - Found a critical generation pitfall:
-    - Running generator from `E:\FO4Projects` sets `repoRoot` incorrectly.
+    - Running generator from `<WORKSPACE_ROOT>` sets `repoRoot` incorrectly.
     - Voice source lookup then misses project voice archive and logs many `MISSING` lines (partial output only).
   - Re-ran generator from correct working directory:
-    - `E:\FO4Projects\ChatGPT\CompanionAstra`
-    - Command: `dotnet run --project .\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --tools-root E:\FO4Projects\Tools --enable-greeting-tts --enable-dismiss-tts`
+    - `<WORKSPACE_ROOT>\ChatGPT\CompanionAstra`
+    - Command: `dotnet run --project .\CompanionAstra_LockedIDs\CompanionClaude_v13.csproj -- --tools-root <WORKSPACE_ROOT>\Tools --enable-greeting-tts --enable-dismiss-tts`
     - Result: `Copied 163 voice files total.`
   - Synced generated plugin to game Data:
     - Source hash `9D5B02C887C5998D78714CBEA9183B50C9C803F1FD2356F73AD133E7C07DAE4F`
@@ -120,15 +244,15 @@
     - `Data/Scripts/Source/User/Fragments/Quests/QF_COMAstra_Test_000009A1.psc`
   - Temporarily disabled custom voice folder for strict "plugin-only" test by moving:
     - `Data/Sound/Voice/CompanionAstra.esp`
-    - moved to backup archive `E:/FO4Projects/Backups/RollbackPreVoice_2026-02-17_190605/CompanionAstra.esp_voice_folder`
+    - moved to backup archive `<WORKSPACE_ROOT>/Backups/RollbackPreVoice_2026-02-17_190605/CompanionAstra.esp_voice_folder`
   - Full rollback backup archive:
-    - `E:/FO4Projects/Backups/RollbackPreVoice_2026-02-17_190605`
+    - `<WORKSPACE_ROOT>/Backups/RollbackPreVoice_2026-02-17_190605`
 - Restored matched Feb-16 package from disaster archive to fix ESP/voice mismatch:
-  - Source package: `E:/FO4Projects/ChatGPT/_disaster_eval/113542/deployed`
+  - Source package: `<WORKSPACE_ROOT>/ChatGPT/_disaster_eval/113542/deployed`
   - Deployed ESP hash: `20D2595BB4028D48DE7C97119D5C58AF0716F2C1D22534CE8652F0E414BC87A8`
   - Deployed voice set: `227` total `.fuz`, `71` in `NPCFAstra`
   - Deployment safety backup:
-    - `E:/FO4Projects/Backups/PreRestore_113542_2026-02-17_191312`
+    - `<WORKSPACE_ROOT>/Backups/PreRestore_113542_2026-02-17_191312`
 - User validation on restored package:
   - `Pickup`: working
   - `Astra voice`: working
@@ -136,12 +260,12 @@
   - This state is now treated as a checkpoint candidate for future rollback.
 - Created disaster-checkpoint backup for this exact state:
   - Folder checkpoint (source + deployed + notes):  
-    `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_1918_voice_pickup_ok_dismiss_broken`
+    `<WORKSPACE_ROOT>/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_1918_voice_pickup_ok_dismiss_broken`
   - Notes file in checkpoint:  
     `NOTES_THIS_BUILD.md`
   - ZIP archive + hash:  
-    `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_vok_pok_dbad.zip`  
-    `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_vok_pok_dbad.zip.sha256`
+    `<WORKSPACE_ROOT>/Backups/DH/CompanionAstra_disaster_backup_20260217_vok_pok_dbad.zip`  
+    `<WORKSPACE_ROOT>/Backups/DH/CompanionAstra_disaster_backup_20260217_vok_pok_dbad.zip.sha256`
 - Dismiss forensic clarification added:
   - `docs/DISMISS_FORENSICS_2026-02-17.md`
   - Confirms by source diff that:
@@ -162,10 +286,10 @@
     - `Data/Scripts/Source/User/QF_COMAstra_00000805.psc`
   - Intent: fix dismiss reliability without altering the currently working voice pack/pickup behavior.
   - Checkpoint folder:
-    - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_1936_dismiss_pex_fix_candidate`
+    - `<WORKSPACE_ROOT>/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_1936_dismiss_pex_fix_candidate`
   - ZIP + hash:
-    - `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_dpex1.zip`
-    - `E:/FO4Projects/Backups/DH/CompanionAstra_disaster_backup_20260217_dpex1.zip.sha256`
+    - `<WORKSPACE_ROOT>/Backups/DH/CompanionAstra_disaster_backup_20260217_dpex1.zip`
+    - `<WORKSPACE_ROOT>/Backups/DH/CompanionAstra_disaster_backup_20260217_dpex1.zip.sha256`
 - Backup workflow hardening:
   - Upgraded `Tools/create_working_checkpoint.ps1` to capture:
     - source + changelog + build artifact
@@ -177,7 +301,7 @@
   - Updated docs:
     - `docs/BACKUP_WORKFLOW.md`
   - Created checkpoint with full notes for current stable state:
-    - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_195509_2026-02-17_voice_pickup_dismiss_affinity_reset_o`
+    - `<WORKSPACE_ROOT>/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_195509_2026-02-17_voice_pickup_dismiss_affinity_reset_o`
 - One-attempt handoff exchange test build (2026-02-17 night):
   - Built isolated candidate ESP from recovered Feb-16 source with minimal change:
     - Alias 1 (`Companion`) set to external link -> `Followers` quest alias `0`
@@ -185,9 +309,9 @@
   - Deployed **ESP only** (no script/voice replacement in this attempt):
     - `Data/CompanionAstra.esp` SHA256 `4C94DEE08735837FA2B6538B732DDDFB6A7BDC1DCD54A2290C4CCA98E606894B`
   - Pre-deploy rollback backup:
-    - `E:/FO4Projects/Backups/OneAttemptPreDeploy_2026-02-17_200023`
+    - `<WORKSPACE_ROOT>/Backups/OneAttemptPreDeploy_2026-02-17_200023`
   - Full checkpoint (notes + deployed state):
-    - `E:/FO4Projects/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_200035_2026-02-17_one_attempt_handoff_alias_external`
+    - `<WORKSPACE_ROOT>/ChatGPT/CompanionAstra/Backups/WorkingHistory/2026-02-17_200035_2026-02-17_one_attempt_handoff_alias_external`
 
 ## 2026-02-11
 - Dismiss reliability update (hybrid routing):
@@ -301,3 +425,4 @@
 - Documented voice pipeline and CK behavior.
 - Documented Piper-exact pickup scene replica and exact topic FormKeys.
 - Documented greeting voice ID stability and the required ID dump workflow.
+

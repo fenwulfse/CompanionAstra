@@ -3,8 +3,8 @@
 This guide documents how to verify CompanionAstra's dialogue in the Fallout 4 Creation Kit (CK). CK is used for validation only. Do not edit or save changes to the plugin.
 
 ## Prerequisites
-- Latest ESP at `E:\CompanionGeminiFeb26\CompanionAstra_LockedIDs\CompanionAstra.esp`
-- Voice files at `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp\NPCFAstra`
+- Latest ESP at `<WORKSPACE_ROOT>\CompanionAstra_LockedIDs\CompanionAstra.esp`
+- Voice files at `<FO4_DATA>\Sound\Voice\CompanionAstra.esp\NPCFAstra`
 - Creation Kit installed and working
 
 ## 1) Open the ESP in CK
@@ -72,3 +72,4 @@ These IDs are the filename contract for `.fuz` files.
 ## Notes
 - Do not edit or save the ESP in CK.
 - If you find issues, open a GitHub issue with the scene name, INFO ID, and a short description.
+

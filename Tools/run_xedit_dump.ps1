@@ -1,6 +1,11 @@
 param(
-    [string]$XEditPath = "E:\CompanionGeminiFeb26\Tools\FO4Edit\xFOEdit.exe"
+    [string]$XEditPath = ""
 )
+
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+if ([string]::IsNullOrWhiteSpace($XEditPath)) {
+    $XEditPath = Join-Path $scriptDir "FO4Edit\\xFOEdit.exe"
+}
 
 $scriptName = "DumpDialogueToCSV_Astra"
 if (!(Test-Path $XEditPath)) {

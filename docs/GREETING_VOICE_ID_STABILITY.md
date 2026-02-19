@@ -24,7 +24,7 @@ These IDs are fixed in code, so the `.fuz` filenames are stable.
 Use the `InspectTopicDetails` tool to confirm IDs if needed:
 
 ```powershell
-dotnet run --project E:\Gemini\Inspectors\InspectTopicDetails\InspectTopicDetails.csproj
+dotnet run --project <ARCHIVE_ROOT>\Inspectors\InspectTopicDetails\InspectTopicDetails.csproj
 ```
 
 Expected output example:
@@ -41,8 +41,8 @@ These two IDs are the only files that matter for greetings:
 ### Step 2: Write Greeting Audio to the Correct IDs
 Write `.fuz` files to:
 ```
-D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp\NPCFAstra\0000F0E0_1.fuz
-D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp\NPCFAstra\0000F0E1_1.fuz
+<FO4_DATA>\Sound\Voice\CompanionAstra.esp\NPCFAstra\0000F0E0_1.fuz
+<FO4_DATA>\Sound\Voice\CompanionAstra.esp\NPCFAstra\0000F0E1_1.fuz
 ```
 
 ## Why This Solves It
@@ -88,3 +88,4 @@ To generate Astra TTS for Neutral -> Friendship NPC lines, pass:
 ```
 --enable-friendship-tts
 ```
+

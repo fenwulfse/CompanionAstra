@@ -42,7 +42,7 @@ This project is an external C# application that generates a Fallout 4 mod (`Comp
 *   **FormKeys:** Enforce 6-digit hex padding (e.g., `005DE4`).
 *   **Papyrus Fragments:** Must have **explicit newlines** between function calls.
 *   **Versioning:**
-    *   Use alphabetical folders for major iterations (current: `E:\CompanionGeminiFeb26`).
+    *   Use alphabetical folders for major iterations (current: `<WORKSPACE_ROOT>`).
     *   **Do not** label builds as "Golden" or "Final".
     *   Maintain `CHANGELOG.md` (or detailed `SESSION_SUMMARY`).
 *   **Tools:**
@@ -69,7 +69,7 @@ This project is an external C# application that generates a Fallout 4 mod (`Comp
     dotnet build
     dotnet run
     ```
-    *Output:* `D:\SteamLibrary\steamapps\common\Fallout 4\Data\CompanionGemini.esp`.
+    *Output:* `<FO4_DATA>\CompanionGemini.esp`.
 3.  **Voice Generation:** Use `FuzPacker` to process `.wav` files into `.fuz` files.
 4.  **Validate:** Check against `docs/VANILLA_AFFINITY_PATTERNS.md`.
 5.  **Backup:** Periodically copy `Program.cs` to `Backups/`.
@@ -78,3 +78,4 @@ This project is an external C# application that generates a Fallout 4 mod (`Comp
 1.  **Integrate FuzPacker:** Move `FuzPacker.cs` logic into `CompanionGemini` project.
 2.  **Test Voice Pipeline:** Verify `WAV -> FUZ` creation end-to-end.
 3.  **Refactor Scenes:** Update Admiration, Confidant, and Infatuation scenes to match vanilla blueprints.
+

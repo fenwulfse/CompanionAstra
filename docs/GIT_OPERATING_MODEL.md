@@ -1,7 +1,7 @@
-# Git Operating Model (CompanionAstra)
+﻿# Git Operating Model (CompanionAstra)
 
 ## Ownership
-- Repo owner: user (`fenwulfse`).
+- Repo owner: user (`<GITHUB_OWNER>`).
 - Astra maintenance lane: ChatGPT/Codex.
 - Other agents/humans can contribute by branch + PR.
 
@@ -34,3 +34,4 @@
 - If a test build regresses, restore from:
   - Git tag (`git checkout <tag>`) for source state.
   - Working checkpoint (`Backups/WorkingHistory/...`) for deployed runtime state.
+

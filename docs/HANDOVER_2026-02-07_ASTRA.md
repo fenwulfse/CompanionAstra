@@ -12,14 +12,14 @@
   - Voice path: `Data\Sound\Voice\CompanionAstra.esp\NPCFPiper`
 
 ## Key Files
-- `E:\CompanionGeminiFeb26\CompanionClaude\Program.cs`
+- `<WORKSPACE_ROOT>\CompanionClaude\Program.cs`
   - Pickup scene Astra text (greetings + responses).
   - TTS generation and FO4 `.fuz` packing for pickup NPC lines.
-- `E:\CompanionGeminiFeb26\CompanionGemini_v14_Synthesis\FuzPacker.cs`
+- `<WORKSPACE_ROOT>\CompanionGemini_v14_Synthesis\FuzPacker.cs`
   - Updated to FO4 `.fuz` layout.
-- `E:\CompanionGeminiFeb26\docs\ASTRA_VOICE_PIPELINE_2026-02-07.md`
+- `<WORKSPACE_ROOT>\docs\ASTRA_VOICE_PIPELINE_2026-02-07.md`
   - Pipeline details.
-- `E:\CompanionGeminiFeb26\docs\CLAUDE_HANDOVER_2026-02-06.md`
+- `<WORKSPACE_ROOT>\docs\CLAUDE_HANDOVER_2026-02-06.md`
   - Added 2026-02-07 update.
 
 ## Known Constraints
@@ -27,6 +27,6 @@
 - CK can appear unchanged if old ESP is loaded; verify by quest EditorID (`COMAstra`) and pickup greeting text.
 
 ## Next Task (Requested)
-- Locate historical docs/code under `E:\Gemini` to see how Claude/Gemini recreated Neutral→Friendship scene to match Piper.
+- Locate historical docs/code under `<ARCHIVE_ROOT>` to see how Claude/Gemini recreated Neutral→Friendship scene to match Piper.
 - Work backward from most recent dates.
 

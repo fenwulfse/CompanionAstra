@@ -4,9 +4,9 @@ Use this when validating a build in the Creation Kit.
 
 ## Before You Start
 - Confirm you loaded the newest `CompanionAstra.esp` from:
-  `E:\FO4Projects\ChatGPT\CompanionAstra\CompanionAstra.esp`
+  `<WORKSPACE_ROOT>\ChatGPT\CompanionAstra\CompanionAstra.esp`
 - Confirm audio files exist in:
-  `E:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp\NPCFAstra`
+  `<FO4_DATA>\Sound\Voice\CompanionAstra.esp\NPCFAstra`
 
 ## Pickup Scene (COMAstraPickupScene)
 - Greeting 1 plays Astra voice and matches text.
@@ -42,3 +42,4 @@ Use this when validating a build in the Creation Kit.
 ## Report Issues
 - Append findings to `COLLABORATION_LOG.md`.
 - If needed, add actionable follow-ups to `COMM_CODEX_TO_CLAUDE.md` or `COMM_CODEX_TO_GEMINI.md`.
+

@@ -12,9 +12,34 @@ namespace PlayerVoiceDump
 {
     class Program
     {
+        static string ResolveRepoRoot()
+        {
+            string dir = AppContext.BaseDirectory;
+            for (int i = 0; i < 8; i++)
+            {
+                if (Directory.Exists(Path.Combine(dir, "DialogueDumper")))
+                {
+                    return dir;
+                }
+
+                var parent = Directory.GetParent(dir);
+                if (parent == null)
+                {
+                    break;
+                }
+                dir = parent.FullName;
+            }
+
+            return Directory.GetCurrentDirectory();
+        }
+
         static void Main(string[] args)
         {
-            string voiceRoot = args.Length > 0 ? args[0] : @"E:\CompanionGeminiFeb26\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm";
+            string repoRoot = ResolveRepoRoot();
+            string defaultVoiceRoot = Path.Combine(repoRoot, "VoiceFiles", "piper_voice", "Sound", "Voice", "Fallout4.esm");
+            string voiceRoot = args.Length > 0
+                ? args[0]
+                : (Environment.GetEnvironmentVariable("PIPER_VOICE_ROOT") ?? defaultVoiceRoot);
             string maleDir = Path.Combine(voiceRoot, "PlayerVoiceMale01");
             string femaleDir = Path.Combine(voiceRoot, "PlayerVoiceFemale01");
 

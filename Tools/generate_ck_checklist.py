@@ -2,9 +2,10 @@ import csv
 import os
 import sys
 
-ROOT = r"E:\CompanionGeminiFeb26"
-DUMP = r"E:\CompanionGeminiFeb26\Tools\FO4Edit\Astra_DialogueDump.csv"
-OUT = r"E:\CompanionGeminiFeb26\Tools\CK_Checklist_Astra.txt"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(SCRIPT_DIR)
+DUMP = os.path.join(SCRIPT_DIR, "FO4Edit", "Astra_DialogueDump.csv")
+OUT = os.path.join(SCRIPT_DIR, "CK_Checklist_Astra.txt")
 
 if not os.path.exists(DUMP):
     print(f"Missing dump: {DUMP}")

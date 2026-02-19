@@ -5,8 +5,8 @@
 Document the structural patterns used by ALL vanilla Fallout 4 companions in their affinity progression scenes. Goal: Identify common blueprints to apply to Claude's affinity arc.
 
 ## Research Sources
-- PIPER_BIBLE.md (E:\Gemini\GeminiCompanions\docs\PIPER_BIBLE.md)
-- **fo4_dump.json** (D:\FO4Edit\dumps\fo4_dump.json) - 63MB xEdit export
+- PIPER_BIBLE.md (<ARCHIVE_ROOT>\GeminiCompanions\docs\PIPER_BIBLE.md)
+- **fo4_dump.json** (<FO4_DUMP_JSON>) - 63MB xEdit export
 - xEdit manual analysis (needed for phase/action details)
 
 ## Research Status

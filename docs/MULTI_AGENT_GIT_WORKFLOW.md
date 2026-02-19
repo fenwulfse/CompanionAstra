@@ -27,6 +27,15 @@ Keep one shared project stable (`CompanionAstra`) while letting each agent build
 - `astra-build-YYYYMMDD-HHMM`
 - Example: `astra-build-20260216-1435`
 
+## Human Playtest Loop
+1. Build candidate and deploy locally.
+2. Generate packet:
+   - `Tools/create_playtest_packet.ps1`
+3. Open GitHub issue from:
+   - `.github/ISSUE_TEMPLATE/playtest-run.md`
+4. Attach packet fingerprint and checklist.
+5. Merge only after reproducible tester feedback is logged.
+
 ## Commit Prefixes
 - `chatgpt: ...`
 - `claude: ...`

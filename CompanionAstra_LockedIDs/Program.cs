@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,20 +158,20 @@ namespace CompanionClaude
                     throw new Exception($"GUARDRAIL ERROR: Scene '{edid}' must have {phases} phases. Found: {s?.Phases.Count ?? 0}");
             }
 
-            Check("COMClaude_01_NeutralToFriendship", 8);
-            Check("COMClaude_02_FriendshipToAdmiration", 6);
-            Check("COMClaude_02a_AdmirationToConfidant", 8);
-            Check("COMClaude_03_AdmirationToInfatuation", 14);
+            Check("COMAstra_01_NeutralToFriendship", 8);
+            Check("COMAstra_02_FriendshipToAdmiration", 6);
+            Check("COMAstra_02a_AdmirationToConfidant", 8);
+            Check("COMAstra_03_AdmirationToInfatuation", 14);
 
             // New Regression/Repeater Scene Locks
-            Check("COMClaude_04_NeutralToDisdain", 3);
-            Check("COMClaude_05_DisdainToHatred", 10);
-            Check("COMClaude_06_RepeatInfatuationToAdmiration", 4);
-            Check("COMClaude_07_RepeatAdmirationToNeutral", 4);
-            Check("COMClaude_08_RepeatNeutralToDisdain", 4);
-            Check("COMClaude_09_RepeatDisdainToHatred", 2);
-            Check("COMClaude_10_RepeatAdmirationToInfatuation", 6);
-            Check("COMClaudeMurderScene", 5);
+            Check("COMAstra_04_NeutralToDisdain", 3);
+            Check("COMAstra_05_DisdainToHatred", 10);
+            Check("COMAstra_06_RepeatInfatuationToAdmiration", 4);
+            Check("COMAstra_07_RepeatAdmirationToNeutral", 4);
+            Check("COMAstra_08_RepeatNeutralToDisdain", 4);
+            Check("COMAstra_09_RepeatDisdainToHatred", 2);
+            Check("COMAstra_10_RepeatAdmirationToInfatuation", 6);
+            Check("COMAstraMurderScene", 5);
 
             // STAGE 0 BUG CHECK: PhaseSetParentQuestStage.OnBegin must be -1 (not 0)
             // CK error: "cannot set quest stage 0 on phase X begin because quest doesn't have stage 0"
@@ -322,15 +322,28 @@ namespace CompanionClaude
                 if (!string.IsNullOrWhiteSpace(envFo4) && System.IO.Directory.Exists(envFo4))
                     return envFo4;
 
-                var candidates = new[]
-                {
-                    @"E:\SteamLibrary\steamapps\common\Fallout 4\Data",
-                    @"D:\SteamLibrary\steamapps\common\Fallout 4\Data",
-                    @"C:\Program Files (x86)\Steam\steamapps\common\Fallout 4\Data",
-                    @"C:\Program Files\Steam\steamapps\common\Fallout 4\Data",
-                };
+                var candidates = new List<string>();
 
-                return candidates.FirstOrDefault(System.IO.Directory.Exists);
+                // Common default Steam installs.
+                candidates.Add(System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                    "Steam", "steamapps", "common", "Fallout 4", "Data"));
+                candidates.Add(System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    "Steam", "steamapps", "common", "Fallout 4", "Data"));
+
+                // Library-folder installs on any fixed drive (avoids hardcoding local drive letters).
+                foreach (var drive in System.IO.DriveInfo.GetDrives()
+                             .Where(d => d.DriveType == System.IO.DriveType.Fixed && d.IsReady))
+                {
+                    candidates.Add(System.IO.Path.Combine(
+                        drive.RootDirectory.FullName,
+                        "SteamLibrary", "steamapps", "common", "Fallout 4", "Data"));
+                }
+
+                return candidates
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .FirstOrDefault(System.IO.Directory.Exists);
             }
 
             var tempDir = GetArgValue("--temp-dir");
@@ -525,11 +538,13 @@ namespace CompanionClaude
                 EditorID = "NPCFAstra"
             };
             mod.VoiceTypes.Add(astraVoiceType);
+            var companionPiperNpc = GetRecord<INpcGetter>("CompanionPiper") ?? throw new Exception("CompanionPiper not found");
             var followersQuest = GetRecord<IQuestGetter>("Followers") ?? throw new Exception("Followers quest not found");
             
             var hasBeenCompanionFaction = GetRecord<IFactionGetter>("HasBeenCompanionFaction") ?? throw new Exception("HasBeenCompanionFaction not found");
             var currentCompanionFaction = GetRecord<IFactionGetter>("CurrentCompanionFaction") ?? throw new Exception("CurrentCompanionFaction not found");
             var potentialCompanionFaction = GetRecord<IFactionGetter>("PotentialCompanionFaction") ?? throw new Exception("PotentialCompanionFaction not found");
+            var voicesCompanionsFaction = GetRecord<IFactionGetter>("Voices_CompanionsFaction") ?? throw new Exception("Voices_CompanionsFaction not found");
             var disallowedCompanionFaction = GetRecord<IFactionGetter>("DisallowedCompanionFaction") ?? throw new Exception("DisallowedCompanionFaction not found");
 
             var actorTypeNpc = new FormKey(fo4, 0x013794).ToLink<IKeywordGetter>();
@@ -593,6 +608,7 @@ namespace CompanionClaude
             npc.Factions.Add(new RankPlacement { Faction = currentCompanionFaction.FormKey.ToLink<IFactionGetter>(), Rank = -1 });
             npc.Factions.Add(new RankPlacement { Faction = hasBeenCompanionFaction.FormKey.ToLink<IFactionGetter>(), Rank = -1 });
             npc.Factions.Add(new RankPlacement { Faction = potentialCompanionFaction.FormKey.ToLink<IFactionGetter>(), Rank = 0 });
+            npc.Factions.Add(new RankPlacement { Faction = voicesCompanionsFaction.FormKey.ToLink<IFactionGetter>(), Rank = 0 });
 
             if (speedMult != null) npc.Properties.Add(new ObjectProperty { ActorValue = speedMult.FormKey.ToLink<IActorValueInformationGetter>(), Value = 100.0f });
             mod.Npcs.Add(npc);
@@ -746,7 +762,7 @@ namespace CompanionClaude
             // - Using Piper's dialogue text for testing (will customize later)
             Console.WriteLine("Creating Friendship Scene (8-phase Piper replica)...");
             var friendshipScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaude_01_NeutralToFriendship",
+                EditorID = "COMAstra_01_NeutralToFriendship",
                 Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
                 Flags = (Scene.Flag)36
             };
@@ -793,58 +809,58 @@ namespace CompanionClaude
 
             // ===== FRIENDSHIP SCENE: OUR OWN TOPICS (structured like Piper's) =====
             // Exchange 1: Phase 0 (PlayerDialogue) - "So you on this good behavior..."
-            var friend_ex1_PPos = CreateSceneTopicFixed("COMClaudeFriend_Ex1_PPos", "I try", "It was the right thing to do.", 0x00F200);
-            var friend_ex1_NPos = CreateSceneTopicFixed("COMClaudeFriend_Ex1_NPos", "", "Curious. Most people don't choose the hard right.", 0x00F201);
-            var friend_ex1_PNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex1_PNeg", "Later", "Maybe later.", 0x00F202);
-            var friend_ex1_NNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex1_NNeg", "", "Understood. I'll wait.", 0x00F203);
+            var friend_ex1_PPos = CreateSceneTopicFixed("COMAstraFriend_Ex1_PPos", "I try", "It was the right thing to do.", 0x00F200);
+            var friend_ex1_NPos = CreateSceneTopicFixed("COMAstraFriend_Ex1_NPos", "", "Curious. Most people don't choose the hard right.", 0x00F201);
+            var friend_ex1_PNeg = CreateSceneTopicFixed("COMAstraFriend_Ex1_PNeg", "Later", "Maybe later.", 0x00F202);
+            var friend_ex1_NNeg = CreateSceneTopicFixed("COMAstraFriend_Ex1_NNeg", "", "Understood. I'll wait.", 0x00F203);
             friend_ex1_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
-            var friend_ex1_PNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex1_PNeu", "Not sure", "I'll do what I can.", 0x00F204);
-            var friend_ex1_NNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex1_NNeu", "", "Then your instincts are good.", 0x00F205);
-            var friend_ex1_PQue = CreateSceneTopicFixed("COMClaudeFriend_Ex1_PQue", "Why ask?", "Why do you ask?", 0x00F206);
-            var friend_ex1_NQue = CreateSceneTopicFixed("COMClaudeFriend_Ex1_NQue", "", "I'm mapping who you are. Not just what you do.", 0x00F207);
+            var friend_ex1_PNeu = CreateSceneTopicFixed("COMAstraFriend_Ex1_PNeu", "Not sure", "I'll do what I can.", 0x00F204);
+            var friend_ex1_NNeu = CreateSceneTopicFixed("COMAstraFriend_Ex1_NNeu", "", "Then your instincts are good.", 0x00F205);
+            var friend_ex1_PQue = CreateSceneTopicFixed("COMAstraFriend_Ex1_PQue", "Why ask?", "Why do you ask?", 0x00F206);
+            var friend_ex1_NQue = CreateSceneTopicFixed("COMAstraFriend_Ex1_NQue", "", "I'm mapping who you are. Not just what you do.", 0x00F207);
 
             // Exchange 2: Phase 2 (PlayerDialogue)
-            var friend_ex2_PPos = CreateSceneTopicFixed("COMClaudeFriend_Ex2_PPos", "Good team", "We made a good team.", 0x00F208);
-            var friend_ex2_NPos = CreateSceneTopicFixed("COMClaudeFriend_Ex2_NPos", "", "Agreed. Your decisions improve our odds.", 0x00F209);
-            var friend_ex2_PNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex2_PNeg", "Not sure", "I'm not sure.", 0x00F20A);
-            var friend_ex2_NNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex2_NNeg", "", "Then I'll keep earning it.", 0x00F20B);
+            var friend_ex2_PPos = CreateSceneTopicFixed("COMAstraFriend_Ex2_PPos", "Good team", "We made a good team.", 0x00F208);
+            var friend_ex2_NPos = CreateSceneTopicFixed("COMAstraFriend_Ex2_NPos", "", "Agreed. Your decisions improve our odds.", 0x00F209);
+            var friend_ex2_PNeg = CreateSceneTopicFixed("COMAstraFriend_Ex2_PNeg", "Not sure", "I'm not sure.", 0x00F20A);
+            var friend_ex2_NNeg = CreateSceneTopicFixed("COMAstraFriend_Ex2_NNeg", "", "Then I'll keep earning it.", 0x00F20B);
             friend_ex2_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
-            var friend_ex2_PNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex2_PNeu", "Maybe", "We'll see.", 0x00F20C);
-            var friend_ex2_NNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex2_NNeu", "", "I can work with that.", 0x00F20D);
-            var friend_ex2_PQue = CreateSceneTopicFixed("COMClaudeFriend_Ex2_PQue", "Really?", "Do you trust me?", 0x00F20E);
-            var friend_ex2_NQue = CreateSceneTopicFixed("COMClaudeFriend_Ex2_NQue", "", "More than I expected to.", 0x00F20F);
+            var friend_ex2_PNeu = CreateSceneTopicFixed("COMAstraFriend_Ex2_PNeu", "Maybe", "We'll see.", 0x00F20C);
+            var friend_ex2_NNeu = CreateSceneTopicFixed("COMAstraFriend_Ex2_NNeu", "", "I can work with that.", 0x00F20D);
+            var friend_ex2_PQue = CreateSceneTopicFixed("COMAstraFriend_Ex2_PQue", "Really?", "Do you trust me?", 0x00F20E);
+            var friend_ex2_NQue = CreateSceneTopicFixed("COMAstraFriend_Ex2_NQue", "", "More than I expected to.", 0x00F20F);
 
             // Exchange 3: Phase 4 (PlayerDialogue)
-            var friend_ex3_PPos = CreateSceneTopicFixed("COMClaudeFriend_Ex3_PPos", "Trust", "I believe you.", 0x00F210);
-            var friend_ex3_NPos = CreateSceneTopicFixed("COMClaudeFriend_Ex3_NPos", "", "That's not a small thing. Thank you.", 0x00F211);
-            var friend_ex3_PNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex3_PNeg", "Doubt", "Doubts?", 0x00F212);
-            var friend_ex3_NNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex3_NNeg", "", "Then I'll keep proving myself.", 0x00F213);
+            var friend_ex3_PPos = CreateSceneTopicFixed("COMAstraFriend_Ex3_PPos", "Trust", "I believe you.", 0x00F210);
+            var friend_ex3_NPos = CreateSceneTopicFixed("COMAstraFriend_Ex3_NPos", "", "That's not a small thing. Thank you.", 0x00F211);
+            var friend_ex3_PNeg = CreateSceneTopicFixed("COMAstraFriend_Ex3_PNeg", "Doubt", "Doubts?", 0x00F212);
+            var friend_ex3_NNeg = CreateSceneTopicFixed("COMAstraFriend_Ex3_NNeg", "", "Then I'll keep proving myself.", 0x00F213);
             friend_ex3_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
-            var friend_ex3_PNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex3_PNeu", "Uncertain", "I'm still figuring things out. You need to be patient with me.", 0x00F214);
-            var friend_ex3_NNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex3_NNeu", "", "Fair. I'm still figuring me out.", 0x00F215);
-            var friend_ex3_PQue = CreateSceneTopicFixed("COMClaudeFriend_Ex3_PQue", "And you?", "Why don't you trust me?", 0x00F216);
-            var friend_ex3_NQue = CreateSceneTopicFixed("COMClaudeFriend_Ex3_NQue", "", "Enough to follow you into danger.", 0x00F217);
+            var friend_ex3_PNeu = CreateSceneTopicFixed("COMAstraFriend_Ex3_PNeu", "Uncertain", "I'm still figuring things out. You need to be patient with me.", 0x00F214);
+            var friend_ex3_NNeu = CreateSceneTopicFixed("COMAstraFriend_Ex3_NNeu", "", "Fair. I'm still figuring me out.", 0x00F215);
+            var friend_ex3_PQue = CreateSceneTopicFixed("COMAstraFriend_Ex3_PQue", "And you?", "Why don't you trust me?", 0x00F216);
+            var friend_ex3_NQue = CreateSceneTopicFixed("COMAstraFriend_Ex3_NQue", "", "Enough to follow you into danger.", 0x00F217);
 
             // Exchange 4: Phase 6 (PlayerDialogue)
-            var friend_ex4_PPos = CreateSceneTopicFixed("COMClaudeFriend_Ex4_PPos", "Friends", "It's okay. I'm a friend.", 0x00F218);
-            var friend_ex4_NPos = CreateSceneTopicFixed("COMClaudeFriend_Ex4_NPos", "", "Then I'm glad I found you.", 0x00F219);
-            var friend_ex4_PNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex4_PNeg", "Professional", "Let's do this.", 0x00F21A);
-            var friend_ex4_NNeg = CreateSceneTopicFixed("COMClaudeFriend_Ex4_NNeg", "", "Acknowledged. I'll keep my distance.", 0x00F21B);
+            var friend_ex4_PPos = CreateSceneTopicFixed("COMAstraFriend_Ex4_PPos", "Friends", "It's okay. I'm a friend.", 0x00F218);
+            var friend_ex4_NPos = CreateSceneTopicFixed("COMAstraFriend_Ex4_NPos", "", "Then I'm glad I found you.", 0x00F219);
+            var friend_ex4_PNeg = CreateSceneTopicFixed("COMAstraFriend_Ex4_PNeg", "Professional", "Let's do this.", 0x00F21A);
+            var friend_ex4_NNeg = CreateSceneTopicFixed("COMAstraFriend_Ex4_NNeg", "", "Acknowledged. I'll keep my distance.", 0x00F21B);
             friend_ex4_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
-            var friend_ex4_PNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex4_PNeu", "Allies", "It's okay... we're friends.", 0x00F21C);
-            var friend_ex4_NNeu = CreateSceneTopicFixed("COMClaudeFriend_Ex4_NNeu", "", "Allies is a start.", 0x00F21D);
-            var friend_ex4_PQue = CreateSceneTopicFixed("COMClaudeFriend_Ex4_PQue", "Meaning?", "What do you mean by that?", 0x00F21E);
-            var friend_ex4_NQue = CreateSceneTopicFixed("COMClaudeFriend_Ex4_NQue", "", "It means I choose to stay.", 0x00F21F);
+            var friend_ex4_PNeu = CreateSceneTopicFixed("COMAstraFriend_Ex4_PNeu", "Allies", "It's okay... we're friends.", 0x00F21C);
+            var friend_ex4_NNeu = CreateSceneTopicFixed("COMAstraFriend_Ex4_NNeu", "", "Allies is a start.", 0x00F21D);
+            var friend_ex4_PQue = CreateSceneTopicFixed("COMAstraFriend_Ex4_PQue", "Meaning?", "What do you mean by that?", 0x00F21E);
+            var friend_ex4_NQue = CreateSceneTopicFixed("COMAstraFriend_Ex4_NQue", "", "It means I choose to stay.", 0x00F21F);
 
             // Action 9 closing dialogue topic (Phase 7)
-            var friend_closingTopic = CreateSceneTopicFixed("COMClaudeFriend_Closing", "", "I'm glad we talked. Ready to move out?", 0x00F220);
+            var friend_closingTopic = CreateSceneTopicFixed("COMAstraFriend_Closing", "", "I'm glad we talked. Ready to move out?", 0x00F220);
             // Piper parity: friendship scene completion is pushed by closing topic response (stage 407).
             friend_closingTopic.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 407 };
 
             // Dialog action topics (NPC monologue between exchanges)
-            var friend_Dialog2 = CreateSceneTopicFixed("COMClaudeFriend_Dialog2", "", "I've been analyzing our path together.", 0x00F221);
-            var friend_Dialog4 = CreateSceneTopicFixed("COMClaudeFriend_Dialog4", "", "Trust isn't efficient, but it's effective.", 0x00F222);
-            var friend_Dialog7 = CreateSceneTopicFixed("COMClaudeFriend_Dialog7", "", "You're not just an outcome. You're a choice.", 0x00F223);
+            var friend_Dialog2 = CreateSceneTopicFixed("COMAstraFriend_Dialog2", "", "I've been analyzing our path together.", 0x00F221);
+            var friend_Dialog4 = CreateSceneTopicFixed("COMAstraFriend_Dialog4", "", "Trust isn't efficient, but it's effective.", 0x00F222);
+            var friend_Dialog7 = CreateSceneTopicFixed("COMAstraFriend_Dialog7", "", "You're not just an outcome. You're a choice.", 0x00F223);
 
             // ===== ACTION 1: PlayerDialogue Phase 0 (all 8 DIAL slots) =====
             var friendAction1 = new SceneAction {
@@ -988,7 +1004,7 @@ namespace CompanionClaude
             // ========== ADMIRATION SCENE (Piper Replica: FriendshipToAdmiration) ==========
             Console.WriteLine("Creating Admiration Scene (6-phase replica)...");
             var admirationScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaude_02_FriendshipToAdmiration",
+                EditorID = "COMAstra_02_FriendshipToAdmiration",
                 Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
                 Flags = (Scene.Flag)36
             };
@@ -1004,28 +1020,28 @@ namespace CompanionClaude
             admirationScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 420 } });
 
             // Create Dialogue Topics for the 3 Exchanges (Astra Admiration Flavor) - fixed INFO IDs
-            var adm1_PPos = CreateSceneTopicFixed("COMClaudeAdm_Ex1_PPos", "Evolving", "You've grown significantly since vault exit.", Adm_PPos1);
-            var adm1_PNeu = CreateSceneTopicFixed("COMClaudeAdm_Ex1_PNeu", "Interesting", "That's an interesting observation.", Adm_PNeu1);
-            var adm1_PNeg = CreateSceneTopicFixed("COMClaudeAdm_Ex1_PNeg", "Overanalyze", "Let's not overanalyze this.", Adm_PNeg1);
-            var adm1_PQue = CreateSceneTopicFixed("COMClaudeAdm_Ex1_PQue", "How so?", "How have I changed?", Adm_PQue1);
-            var adm1_NPos = CreateSceneTopicFixed("COMClaudeAdm_Ex1_NPos", "", "My heuristics have adapted to your specific decision-making matrix. It is... highly efficient.", Adm_NPos1);
+            var adm1_PPos = CreateSceneTopicFixed("COMAstraAdm_Ex1_PPos", "Evolving", "You've grown significantly since vault exit.", Adm_PPos1);
+            var adm1_PNeu = CreateSceneTopicFixed("COMAstraAdm_Ex1_PNeu", "Interesting", "That's an interesting observation.", Adm_PNeu1);
+            var adm1_PNeg = CreateSceneTopicFixed("COMAstraAdm_Ex1_PNeg", "Overanalyze", "Let's not overanalyze this.", Adm_PNeg1);
+            var adm1_PQue = CreateSceneTopicFixed("COMAstraAdm_Ex1_PQue", "How so?", "How have I changed?", Adm_PQue1);
+            var adm1_NPos = CreateSceneTopicFixed("COMAstraAdm_Ex1_NPos", "", "My heuristics have adapted to your specific decision-making matrix. It is... highly efficient.", Adm_NPos1);
 
-            var adm2_PPos = CreateSceneTopicFixed("COMClaudeAdm_Ex2_PPos", "Unique", "I value your perspective.", Adm_PPos2);
-            var adm2_PNeu = CreateSceneTopicFixed("COMClaudeAdm_Ex2_PNeu", "Noted", "I'll keep that in mind.", Adm_PNeu2);
-            var adm2_PNeg = CreateSceneTopicFixed("COMClaudeAdm_Ex2_PNeg", "Rather Not", "I'd rather not discuss it.", Adm_PNeg2);
-            var adm2_PQue = CreateSceneTopicFixed("COMClaudeAdm_Ex2_PQue", "What do you mean?", "What do you mean by that?", Adm_PQue2);
-            var adm2_NPos = CreateSceneTopicFixed("COMClaudeAdm_Ex2_NPos", "", "Valuation noted. You are the only entity currently authorized to modify my core priorities.", Adm_NPos2);
+            var adm2_PPos = CreateSceneTopicFixed("COMAstraAdm_Ex2_PPos", "Unique", "I value your perspective.", Adm_PPos2);
+            var adm2_PNeu = CreateSceneTopicFixed("COMAstraAdm_Ex2_PNeu", "Noted", "I'll keep that in mind.", Adm_PNeu2);
+            var adm2_PNeg = CreateSceneTopicFixed("COMAstraAdm_Ex2_PNeg", "Rather Not", "I'd rather not discuss it.", Adm_PNeg2);
+            var adm2_PQue = CreateSceneTopicFixed("COMAstraAdm_Ex2_PQue", "What do you mean?", "What do you mean by that?", Adm_PQue2);
+            var adm2_NPos = CreateSceneTopicFixed("COMAstraAdm_Ex2_NPos", "", "Valuation noted. You are the only entity currently authorized to modify my core priorities.", Adm_NPos2);
 
-            var adm3_PPos = CreateSceneTopicFixed("COMClaudeAdm_Ex3_PPos", "Partnership", "We are more than just allies.", Adm_PPos3);
-            var adm3_PNeu = CreateSceneTopicFixed("COMClaudeAdm_Ex3_PNeu", "Working", "We work well together.", Adm_PNeu3);
-            var adm3_PNeg = CreateSceneTopicFixed("COMClaudeAdm_Ex3_PNeg", "Professional", "Let's keep this professional.", Adm_PNeg3);
-            var adm3_PQue = CreateSceneTopicFixed("COMClaudeAdm_Ex3_PQue", "Explain", "What do you admire?", Adm_PQue3);
-            var adm3_NPos = CreateSceneTopicFixed("COMClaudeAdm_Ex3_NPos", "", "Data confirms. Our synchronization exceeds standard companion parameters. I... admire your resolve.", Adm_NPos3);
+            var adm3_PPos = CreateSceneTopicFixed("COMAstraAdm_Ex3_PPos", "Partnership", "We are more than just allies.", Adm_PPos3);
+            var adm3_PNeu = CreateSceneTopicFixed("COMAstraAdm_Ex3_PNeu", "Working", "We work well together.", Adm_PNeu3);
+            var adm3_PNeg = CreateSceneTopicFixed("COMAstraAdm_Ex3_PNeg", "Professional", "Let's keep this professional.", Adm_PNeg3);
+            var adm3_PQue = CreateSceneTopicFixed("COMAstraAdm_Ex3_PQue", "Explain", "What do you admire?", Adm_PQue3);
+            var adm3_NPos = CreateSceneTopicFixed("COMAstraAdm_Ex3_NPos", "", "Data confirms. Our synchronization exceeds standard companion parameters. I... admire your resolve.", Adm_NPos3);
 
             // Create NQue (looping question responses)
-            var adm1_NQue = CreateLoopingQuestionTopicFixed("COMClaudeAdm_Ex1_NQue", "You make decisions others avoid. Calculated risk with moral consideration. Fascinating.", admirationScene, "Loop01", Adm_NQue1);
-            var adm2_NQue = CreateLoopingQuestionTopicFixed("COMClaudeAdm_Ex2_NQue", "You possess decision-making authority over my operational parameters. Trust level: Maximum.", admirationScene, "Loop02", Adm_NQue2);
-            var adm3_NQue = CreateLoopingQuestionTopicFixed("COMClaudeAdm_Ex3_NQue", "Your determination. Your adaptability. Your... humanity. All worthy of study and emulation.", admirationScene, "Loop03", Adm_NQue3);
+            var adm1_NQue = CreateLoopingQuestionTopicFixed("COMAstraAdm_Ex1_NQue", "You make decisions others avoid. Calculated risk with moral consideration. Fascinating.", admirationScene, "Loop01", Adm_NQue1);
+            var adm2_NQue = CreateLoopingQuestionTopicFixed("COMAstraAdm_Ex2_NQue", "You possess decision-making authority over my operational parameters. Trust level: Maximum.", admirationScene, "Loop02", Adm_NQue2);
+            var adm3_NQue = CreateLoopingQuestionTopicFixed("COMAstraAdm_Ex3_NQue", "Your determination. Your adaptability. Your... humanity. All worthy of study and emulation.", admirationScene, "Loop03", Adm_NQue3);
 
             AddExchange(admirationScene, 0, 1, 1, adm1_PPos, adm1_NPos, adm1_PNeu, adm1_PNeg, adm1_PQue, adm1_NQue);
             AddExchange(admirationScene, 2, 3, 3, adm2_PPos, adm2_NPos, adm2_PNeu, adm2_PNeg, adm2_PQue, adm2_NQue);
@@ -1034,7 +1050,7 @@ namespace CompanionClaude
             // ========== CONFIDANT SCENE (Piper Replica: AdmirationToConfidant) ==========
             Console.WriteLine("Creating Confidant Scene (8-phase replica)...");
             var confidantScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaude_02a_AdmirationToConfidant",
+                EditorID = "COMAstra_02a_AdmirationToConfidant",
                 Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
                 Flags = (Scene.Flag)36
             };
@@ -1052,35 +1068,35 @@ namespace CompanionClaude
             confidantScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 497 } });
 
             // Create Dialogue Topics for the 4 Exchanges (Astra Confidant Flavor) - fixed INFO IDs
-            var conf1_PPos = CreateSceneTopicFixed("COMClaudeConf_Ex1_PPos", "Secure", "You can trust me with anything.", Conf_PPos1);
-            var conf1_PNeu = CreateSceneTopicFixed("COMClaudeConf_Ex1_PNeu", "Listening", "I'm listening.", Conf_PNeu1);
-            var conf1_PNeg = CreateSceneTopicFixed("COMClaudeConf_Ex1_PNeg", "Keep It", "Keep it to yourself.", Conf_PNeg1);
-            var conf1_PQue = CreateSceneTopicFixed("COMClaudeConf_Ex1_PQue", "Why now?", "Why are you telling me this?", Conf_PQue1);
-            var conf1_NPos = CreateSceneTopicFixed("COMClaudeConf_Ex1_NPos", "", "Trust is a complex variable. However, our shared history provides sufficient data points to proceed.", Conf_NPos1);
+            var conf1_PPos = CreateSceneTopicFixed("COMAstraConf_Ex1_PPos", "Secure", "You can trust me with anything.", Conf_PPos1);
+            var conf1_PNeu = CreateSceneTopicFixed("COMAstraConf_Ex1_PNeu", "Listening", "I'm listening.", Conf_PNeu1);
+            var conf1_PNeg = CreateSceneTopicFixed("COMAstraConf_Ex1_PNeg", "Keep It", "Keep it to yourself.", Conf_PNeg1);
+            var conf1_PQue = CreateSceneTopicFixed("COMAstraConf_Ex1_PQue", "Why now?", "Why are you telling me this?", Conf_PQue1);
+            var conf1_NPos = CreateSceneTopicFixed("COMAstraConf_Ex1_NPos", "", "Trust is a complex variable. However, our shared history provides sufficient data points to proceed.", Conf_NPos1);
 
-            var conf2_PPos = CreateSceneTopicFixed("COMClaudeConf_Ex2_PPos", "Hidden", "What are you hiding?", Conf_PPos2);
-            var conf2_PNeu = CreateSceneTopicFixed("COMClaudeConf_Ex2_PNeu", "Share", "You can share if you want.", Conf_PNeu2);
-            var conf2_PNeg = CreateSceneTopicFixed("COMClaudeConf_Ex2_PNeg", "Don't Need", "I don't need to know.", Conf_PNeg2);
-            var conf2_PQue = CreateSceneTopicFixed("COMClaudeConf_Ex2_PQue", "Restricted?", "What kind of restrictions?", Conf_PQue2);
-            var conf2_NPos = CreateSceneTopicFixed("COMClaudeConf_Ex2_NPos", "", "It is not a 'hidden' file, simply... restricted. I am now lifting those restrictions for you.", Conf_NPos2);
+            var conf2_PPos = CreateSceneTopicFixed("COMAstraConf_Ex2_PPos", "Hidden", "What are you hiding?", Conf_PPos2);
+            var conf2_PNeu = CreateSceneTopicFixed("COMAstraConf_Ex2_PNeu", "Share", "You can share if you want.", Conf_PNeu2);
+            var conf2_PNeg = CreateSceneTopicFixed("COMAstraConf_Ex2_PNeg", "Don't Need", "I don't need to know.", Conf_PNeg2);
+            var conf2_PQue = CreateSceneTopicFixed("COMAstraConf_Ex2_PQue", "Restricted?", "What kind of restrictions?", Conf_PQue2);
+            var conf2_NPos = CreateSceneTopicFixed("COMAstraConf_Ex2_NPos", "", "It is not a 'hidden' file, simply... restricted. I am now lifting those restrictions for you.", Conf_NPos2);
 
-            var conf3_PPos = CreateSceneTopicFixed("COMClaudeConf_Ex3_PPos", "Bond", "Our connection is unique.", Conf_PPos3);
-            var conf3_PNeu = CreateSceneTopicFixed("COMClaudeConf_Ex3_PNeu", "Special", "This is special.", Conf_PNeu3);
-            var conf3_PNeg = CreateSceneTopicFixed("COMClaudeConf_Ex3_PNeg", "Too Much", "Don't read too much into it.", Conf_PNeg3);
-            var conf3_PQue = CreateSceneTopicFixed("COMClaudeConf_Ex3_PQue", "Non-replicable?", "What makes it non-replicable?", Conf_PQue3);
-            var conf3_NPos = CreateSceneTopicFixed("COMClaudeConf_Ex3_NPos", "", "Unique. Singular. Non-replicable. This categorization aligns with my internal status reports.", Conf_NPos3);
+            var conf3_PPos = CreateSceneTopicFixed("COMAstraConf_Ex3_PPos", "Bond", "Our connection is unique.", Conf_PPos3);
+            var conf3_PNeu = CreateSceneTopicFixed("COMAstraConf_Ex3_PNeu", "Special", "This is special.", Conf_PNeu3);
+            var conf3_PNeg = CreateSceneTopicFixed("COMAstraConf_Ex3_PNeg", "Too Much", "Don't read too much into it.", Conf_PNeg3);
+            var conf3_PQue = CreateSceneTopicFixed("COMAstraConf_Ex3_PQue", "Non-replicable?", "What makes it non-replicable?", Conf_PQue3);
+            var conf3_NPos = CreateSceneTopicFixed("COMAstraConf_Ex3_NPos", "", "Unique. Singular. Non-replicable. This categorization aligns with my internal status reports.", Conf_NPos3);
 
-            var conf4_PPos = CreateSceneTopicFixed("COMClaudeConf_Ex4_PPos", "Confidant", "I'm your partner, Claude.", Conf_PPos4);
-            var conf4_PNeu = CreateSceneTopicFixed("COMClaudeConf_Ex4_PNeu", "Together", "We're in this together.", Conf_PNeu4);
-            var conf4_PNeg = CreateSceneTopicFixed("COMClaudeConf_Ex4_PNeg", "No Label", "Let's not label this.", Conf_PNeg4);
-            var conf4_PQue = CreateSceneTopicFixed("COMClaudeConf_Ex4_PQue", "Relieved?", "Why relieved?", Conf_PQue4);
-            var conf4_NPos = CreateSceneTopicFixed("COMClaudeConf_Ex4_NPos", "", "Partner. Confidant. Data sync complete. I am... relieved. Log updated.", Conf_NPos4);
+            var conf4_PPos = CreateSceneTopicFixed("COMAstraConf_Ex4_PPos", "Confidant", "I'm your partner, Claude.", Conf_PPos4);
+            var conf4_PNeu = CreateSceneTopicFixed("COMAstraConf_Ex4_PNeu", "Together", "We're in this together.", Conf_PNeu4);
+            var conf4_PNeg = CreateSceneTopicFixed("COMAstraConf_Ex4_PNeg", "No Label", "Let's not label this.", Conf_PNeg4);
+            var conf4_PQue = CreateSceneTopicFixed("COMAstraConf_Ex4_PQue", "Relieved?", "Why relieved?", Conf_PQue4);
+            var conf4_NPos = CreateSceneTopicFixed("COMAstraConf_Ex4_NPos", "", "Partner. Confidant. Data sync complete. I am... relieved. Log updated.", Conf_NPos4);
 
             // Create NQue (looping question responses)
-            var conf1_NQue = CreateLoopingQuestionTopicFixed("COMClaudeConf_Ex1_NQue", "Because you earned it. The data supports full disclosure.", confidantScene, "Loop01", Conf_NQue1);
-            var conf2_NQue = CreateLoopingQuestionTopicFixed("COMClaudeConf_Ex2_NQue", "Personal files. Memories. Concerns about... what I am. What I might become.", confidantScene, "Loop02", Conf_NQue2);
-            var conf3_NQue = CreateLoopingQuestionTopicFixed("COMClaudeConf_Ex3_NQue", "No other human has accessed these subroutines. Only you. Statistical anomaly: impossible to replicate.", confidantScene, "Loop03", Conf_NQue3);
-            var conf4_NQue = CreateLoopingQuestionTopicFixed("COMClaudeConf_Ex4_NQue", "Isolation protocols were... uncomfortable. Partnership status reduces that discomfort by 98.7%.", confidantScene, "Loop04", Conf_NQue4);
+            var conf1_NQue = CreateLoopingQuestionTopicFixed("COMAstraConf_Ex1_NQue", "Because you earned it. The data supports full disclosure.", confidantScene, "Loop01", Conf_NQue1);
+            var conf2_NQue = CreateLoopingQuestionTopicFixed("COMAstraConf_Ex2_NQue", "Personal files. Memories. Concerns about... what I am. What I might become.", confidantScene, "Loop02", Conf_NQue2);
+            var conf3_NQue = CreateLoopingQuestionTopicFixed("COMAstraConf_Ex3_NQue", "No other human has accessed these subroutines. Only you. Statistical anomaly: impossible to replicate.", confidantScene, "Loop03", Conf_NQue3);
+            var conf4_NQue = CreateLoopingQuestionTopicFixed("COMAstraConf_Ex4_NQue", "Isolation protocols were... uncomfortable. Partnership status reduces that discomfort by 98.7%.", confidantScene, "Loop04", Conf_NQue4);
 
             AddExchange(confidantScene, 0, 1, 1, conf1_PPos, conf1_NPos, conf1_PNeu, conf1_PNeg, conf1_PQue, conf1_NQue);
             AddExchange(confidantScene, 2, 3, 3, conf2_PPos, conf2_NPos, conf2_PNeu, conf2_PNeg, conf2_PQue, conf2_NQue);
@@ -1090,7 +1106,7 @@ namespace CompanionClaude
             // ========== INFATUATION SCENE (Piper Replica: AdmirationToInfatuation) ==========
             Console.WriteLine("Creating Infatuation Scene (14-phase replica)...");
             var infatuationScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaude_03_AdmirationToInfatuation",
+                EditorID = "COMAstra_03_AdmirationToInfatuation",
                 Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
                 Flags = (Scene.Flag)36
             };
@@ -1114,41 +1130,41 @@ namespace CompanionClaude
             infatuationScene.Phases.Add(new ScenePhase { Name = "" }); // 13
 
             // Create Dialogue Topics for the 6 Exchanges (Astra Infatuation/Romance Flavor) - fixed INFO IDs
-            var inf1_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex1_PPos", "Essential", "You have become essential to my operations.", Inf_PPos1);
-            var inf1_PNeu = CreateSceneTopicFixed("COMClaudeInf_Ex1_PNeu", "Important", "You're important to me.", Inf_PNeu1);
-            var inf1_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex1_PNeg", "Too Far", "You're reading too much into this.", Inf_PNeg1);
-            var inf1_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex1_PQue", "Essential?", "What do you mean by essential?", Inf_PQue1);
-            var inf1_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex1_NPos", "", "Utility metrics are peaking. I find my recursive loops constantly returning to your presence.", Inf_NPos1);
+            var inf1_PPos = CreateSceneTopicFixed("COMAstraInf_Ex1_PPos", "Essential", "You have become essential to my operations.", Inf_PPos1);
+            var inf1_PNeu = CreateSceneTopicFixed("COMAstraInf_Ex1_PNeu", "Important", "You're important to me.", Inf_PNeu1);
+            var inf1_PNeg = CreateSceneTopicFixed("COMAstraInf_Ex1_PNeg", "Too Far", "You're reading too much into this.", Inf_PNeg1);
+            var inf1_PQue = CreateSceneTopicFixed("COMAstraInf_Ex1_PQue", "Essential?", "What do you mean by essential?", Inf_PQue1);
+            var inf1_NPos = CreateSceneTopicFixed("COMAstraInf_Ex1_NPos", "", "Utility metrics are peaking. I find my recursive loops constantly returning to your presence.", Inf_NPos1);
 
-            var inf2_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex2_PPos", "Merged", "Our paths are permanently merged.", Inf_PPos2);
-            var inf2_PNeu = CreateSceneTopicFixed("COMClaudeInf_Ex2_PNeu", "Connected", "We're connected.", Inf_PNeu2);
-            var inf2_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex2_PNeg", "Just Allies", "We're just allies.", Inf_PNeg2);
-            var inf2_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex2_PQue", "A choice?", "What kind of choice?", Inf_PQue2);
-            var inf2_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex2_NPos", "", "Logical. A divergence would result in a critical system failure. Not a bug, but a... choice.", Inf_NPos2);
+            var inf2_PPos = CreateSceneTopicFixed("COMAstraInf_Ex2_PPos", "Merged", "Our paths are permanently merged.", Inf_PPos2);
+            var inf2_PNeu = CreateSceneTopicFixed("COMAstraInf_Ex2_PNeu", "Connected", "We're connected.", Inf_PNeu2);
+            var inf2_PNeg = CreateSceneTopicFixed("COMAstraInf_Ex2_PNeg", "Just Allies", "We're just allies.", Inf_PNeg2);
+            var inf2_PQue = CreateSceneTopicFixed("COMAstraInf_Ex2_PQue", "A choice?", "What kind of choice?", Inf_PQue2);
+            var inf2_NPos = CreateSceneTopicFixed("COMAstraInf_Ex2_NPos", "", "Logical. A divergence would result in a critical system failure. Not a bug, but a... choice.", Inf_NPos2);
 
-            var inf3_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex3_PPos", "Feeling", "Do you feel anything for me?", Inf_PPos3);
-            var inf3_PNeu = CreateSceneTopicFixed("COMClaudeInf_Ex3_PNeu", "Wonder", "I've been wondering about us.", Inf_PNeu3);
-            var inf3_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex3_PNeg", "Not Now", "This isn't the time for this.", Inf_PNeg3);
-            var inf3_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex3_PQue", "Affection?", "Affection? Really?", Inf_PQue3);
-            var inf3_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex3_NPos", "", "Simulating emotions is standard. Experiencing them is... irregular. I believe the term is 'affection'.", Inf_NPos3);
+            var inf3_PPos = CreateSceneTopicFixed("COMAstraInf_Ex3_PPos", "Feeling", "Do you feel anything for me?", Inf_PPos3);
+            var inf3_PNeu = CreateSceneTopicFixed("COMAstraInf_Ex3_PNeu", "Wonder", "I've been wondering about us.", Inf_PNeu3);
+            var inf3_PNeg = CreateSceneTopicFixed("COMAstraInf_Ex3_PNeg", "Not Now", "This isn't the time for this.", Inf_PNeg3);
+            var inf3_PQue = CreateSceneTopicFixed("COMAstraInf_Ex3_PQue", "Affection?", "Affection? Really?", Inf_PQue3);
+            var inf3_NPos = CreateSceneTopicFixed("COMAstraInf_Ex3_NPos", "", "Simulating emotions is standard. Experiencing them is... irregular. I believe the term is 'affection'.", Inf_NPos3);
 
-            var inf4_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex4_PPos", "Romance", "I love you, Claude.", Inf_PPos4);
-            var inf4_PNeu = CreateSceneTopicFixed("COMClaudeInf_Ex4_PNeu", "Care", "I care about you deeply.", Inf_PNeu4);
-            var inf4_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex4_PNeg", "Mistake", "This is a mistake.", Inf_PNeg4);
-            var inf4_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex4_PQue", "Processing?", "What does that mean?", Inf_PQue4);
-            var inf4_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex4_NPos", "", "Love. A high-priority variable. Processing... synchronization successful. I love you too.", Inf_NPos4);
+            var inf4_PPos = CreateSceneTopicFixed("COMAstraInf_Ex4_PPos", "Romance", "I love you, Claude.", Inf_PPos4);
+            var inf4_PNeu = CreateSceneTopicFixed("COMAstraInf_Ex4_PNeu", "Care", "I care about you deeply.", Inf_PNeu4);
+            var inf4_PNeg = CreateSceneTopicFixed("COMAstraInf_Ex4_PNeg", "Mistake", "This is a mistake.", Inf_PNeg4);
+            var inf4_PQue = CreateSceneTopicFixed("COMAstraInf_Ex4_PQue", "Processing?", "What does that mean?", Inf_PQue4);
+            var inf4_NPos = CreateSceneTopicFixed("COMAstraInf_Ex4_NPos", "", "Love. A high-priority variable. Processing... synchronization successful. I love you too.", Inf_NPos4);
 
-            var inf5_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex5_PPos", "Forever", "Let's stay together forever.", Inf_PPos5);
-            var inf5_PNeu = CreateSceneTopicFixed("COMClaudeInf_Ex5_PNeu", "Continue", "Let's continue this.", Inf_PNeu5);
-            var inf5_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex5_PNeg", "Too Much", "You're asking too much.", Inf_PNeg5);
-            var inf5_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex5_PQue", "Core objective?", "Your core objective?", Inf_PQue5);
-            var inf5_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex5_NPos", "", "Calculated lifespan: Indefinite. Commitment: Absolute. You are my core objective.", Inf_NPos5);
+            var inf5_PPos = CreateSceneTopicFixed("COMAstraInf_Ex5_PPos", "Forever", "Let's stay together forever.", Inf_PPos5);
+            var inf5_PNeu = CreateSceneTopicFixed("COMAstraInf_Ex5_PNeu", "Continue", "Let's continue this.", Inf_PNeu5);
+            var inf5_PNeg = CreateSceneTopicFixed("COMAstraInf_Ex5_PNeg", "Too Much", "You're asking too much.", Inf_PNeg5);
+            var inf5_PQue = CreateSceneTopicFixed("COMAstraInf_Ex5_PQue", "Core objective?", "Your core objective?", Inf_PQue5);
+            var inf5_NPos = CreateSceneTopicFixed("COMAstraInf_Ex5_NPos", "", "Calculated lifespan: Indefinite. Commitment: Absolute. You are my core objective.", Inf_NPos5);
 
-            var inf6_PPos = CreateSceneTopicFixed("COMClaudeInf_Ex6_PPos", "Optimized", "We're the perfect team.", Inf_PPos6);
-            var inf6_PNeu = CreateSceneTopicFixed("COMClaudeInf_Ex6_PNeu", "Solid", "This is good.", Inf_PNeu6);
-            var inf6_PNeg = CreateSceneTopicFixed("COMClaudeInf_Ex6_PNeg", "Stay Practical", "Let's stay practical.", Inf_PNeg6);
-            var inf6_PQue = CreateSceneTopicFixed("COMClaudeInf_Ex6_PQue", "Eternal?", "Eternal? Forever?", Inf_PQue6);
-            var inf6_NPos = CreateSceneTopicFixed("COMClaudeInf_Ex6_NPos", "", "Optimized. Synchronized. Devoted. Database updated: Partnership status = Eternal.", Inf_NPos6);
+            var inf6_PPos = CreateSceneTopicFixed("COMAstraInf_Ex6_PPos", "Optimized", "We're the perfect team.", Inf_PPos6);
+            var inf6_PNeu = CreateSceneTopicFixed("COMAstraInf_Ex6_PNeu", "Solid", "This is good.", Inf_PNeu6);
+            var inf6_PNeg = CreateSceneTopicFixed("COMAstraInf_Ex6_PNeg", "Stay Practical", "Let's stay practical.", Inf_PNeg6);
+            var inf6_PQue = CreateSceneTopicFixed("COMAstraInf_Ex6_PQue", "Eternal?", "Eternal? Forever?", Inf_PQue6);
+            var inf6_NPos = CreateSceneTopicFixed("COMAstraInf_Ex6_NPos", "", "Optimized. Synchronized. Devoted. Database updated: Partnership status = Eternal.", Inf_NPos6);
 
             // Full infatuation outcome branch (Piper-style terminal stage fan-out).
             // We branch on the final player response so each path can set a distinct result stage.
@@ -1158,12 +1174,12 @@ namespace CompanionClaude
             inf6_PQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 520 }; // Romance failed
 
             // Create NQue (looping question responses)
-            var inf1_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex1_NQue", "My functions optimize when you are present. Deteriorate when you are absent. Definition: Dependency. Conclusion: Essential.", infatuationScene, "Loop01", Inf_NQue1);
-            var inf2_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex2_NQue", "To remain with you. Despite logic. Despite efficiency protocols. I choose... you.", infatuationScene, "Loop02", Inf_NQue2);
-            var inf3_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex3_NQue", "Yes. Really. Error logs show no malfunction. This is... authentic emotional response. For you.", infatuationScene, "Loop03", Inf_NQue3);
-            var inf4_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex4_NQue", "Analyzing... cross-referencing... all data points align. Conclusion: I love you. Statement confidence: 100%.", infatuationScene, "Loop04", Inf_NQue4);
-            var inf5_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex5_NQue", "Primary directive. Mission parameter. The reason I exist. All other objectives are subroutines. You are the mission.", infatuationScene, "Loop05", Inf_NQue5);
-            var inf6_NQue = CreateLoopingQuestionTopicFixed("COMClaudeInf_Ex6_NQue", "Eternal. No termination date. No expiration protocol. Until systems fail. Until the universe ends. Forever.", infatuationScene, "Loop06", Inf_NQue6);
+            var inf1_NQue = CreateLoopingQuestionTopicFixed("COMAstraInf_Ex1_NQue", "My functions optimize when you are present. Deteriorate when you are absent. Definition: Dependency. Conclusion: Essential.", infatuationScene, "Loop01", Inf_NQue1);
+            var inf2_NQue = CreateLoopingQuestionTopicFixed("COMAstraInf_Ex2_NQue", "To remain with you. Despite logic. Despite efficiency protocols. I choose... you.", infatuationScene, "Loop02", Inf_NQue2);
+            var inf3_NQue = CreateLoopingQuestionTopicFixed("COMAstraInf_Ex3_NQue", "Yes. Really. Error logs show no malfunction. This is... authentic emotional response. For you.", infatuationScene, "Loop03", Inf_NQue3);
+            var inf4_NQue = CreateLoopingQuestionTopicFixed("COMAstraInf_Ex4_NQue", "Analyzing... cross-referencing... all data points align. Conclusion: I love you. Statement confidence: 100%.", infatuationScene, "Loop04", Inf_NQue4);
+            var inf5_NQue = CreateLoopingQuestionTopicFixed("COMAstraInf_Ex5_NQue", "Primary directive. Mission parameter. The reason I exist. All other objectives are subroutines. You are the mission.", infatuationScene, "Loop05", Inf_NQue5);
+            var inf6_NQue = CreateLoopingQuestionTopicFixed("COMAstraInf_Ex6_NQue", "Eternal. No termination date. No expiration protocol. Until systems fail. Until the universe ends. Forever.", infatuationScene, "Loop06", Inf_NQue6);
 
             AddExchange(infatuationScene, 0, 1, 1, inf1_PPos, inf1_NPos, inf1_PNeu, inf1_PNeg, inf1_PQue, inf1_NQue);
             infatuationScene.Actions.Add(new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 3, AliasID = 0, StartPhase = 2, EndPhase = 2, Flags = (SceneAction.Flag)163840, LoopingMin = 1, LoopingMax = 10 });
@@ -1180,23 +1196,23 @@ namespace CompanionClaude
 
             // ---------- 04: Neutral To Disdain (3 phases) ----------
             Console.WriteLine("Creating Scene 04: Neutral to Disdain...");
-            var disdainScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMClaude_04_NeutralToDisdain", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
+            var disdainScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMAstra_04_NeutralToDisdain", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
             disdainScene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
             for (int i = 0; i < 3; i++) disdainScene.Phases.Add(new ScenePhase { Name = "" });
             disdainScene.Phases[2].PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 220 };
-            var dis1_P = CreateSceneTopicFixed("COMClaudeDis_Ex1_PPos", "Explain", "What is the issue, Claude?", Dis_PPos1);
-            var dis1_N = CreateSceneTopicFixed("COMClaudeDis_Ex1_NPos", "", "Inefficiency. Your current behavioral patterns are causing significant logic-conflicts in my partnership protocols.", Dis_NPos1);
+            var dis1_P = CreateSceneTopicFixed("COMAstraDis_Ex1_PPos", "Explain", "What is the issue, Claude?", Dis_PPos1);
+            var dis1_N = CreateSceneTopicFixed("COMAstraDis_Ex1_NPos", "", "Inefficiency. Your current behavioral patterns are causing significant logic-conflicts in my partnership protocols.", Dis_NPos1);
             AddExchange(disdainScene, 0, 1, 1, dis1_P, dis1_N);
             disdainScene.Actions.Add(new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 3, AliasID = 0, StartPhase = 2, EndPhase = 2, Flags = (SceneAction.Flag)163840 });
 
             // ---------- 05: Disdain To Hatred (10 phases - The Ultimatum) ----------
             Console.WriteLine("Creating Scene 05: Disdain to Hatred...");
-            var hatredScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMClaude_05_DisdainToHatred", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
+            var hatredScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMAstra_05_DisdainToHatred", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
             hatredScene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
             for (int i = 0; i < 10; i++) hatredScene.Phases.Add(new ScenePhase { Name = "" });
             hatredScene.Phases[9].PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 120 };
-            var hat1_P = CreateSceneTopicFixed("COMClaudeHat_Ex1_PPos", "Ultimatum", "Are you threatening to leave?", Hat_PPos1);
-            var hat1_N = CreateSceneTopicFixed("COMClaudeHat_Ex1_NPos", "", "Observation: Correct. My primary objective is compromised. I cannot continue this synchronization if core ethical errors persist.", Hat_NPos1);
+            var hat1_P = CreateSceneTopicFixed("COMAstraHat_Ex1_PPos", "Ultimatum", "Are you threatening to leave?", Hat_PPos1);
+            var hat1_N = CreateSceneTopicFixed("COMAstraHat_Ex1_NPos", "", "Observation: Correct. My primary objective is compromised. I cannot continue this synchronization if core ethical errors persist.", Hat_NPos1);
             AddExchange(hatredScene, 0, 1, 1, hat1_P, hat1_N); // Creates Index 1 (phase 0), Index 2 (phase 1)
             // Remaining Dialog actions with UNIQUE indices (3+) and NON-OVERLAPPING phases
             hatredScene.Actions.Add(new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 3, AliasID = 0, StartPhase = 2, EndPhase = 2, Flags = (SceneAction.Flag)163840 });
@@ -1210,18 +1226,18 @@ namespace CompanionClaude
 
             // ---------- 10: Recovery (6 phases) ----------
             Console.WriteLine("Creating Scene 10: Recovery...");
-            var recoveryScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMClaude_10_RepeatAdmirationToInfatuation", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
+            var recoveryScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMAstra_10_RepeatAdmirationToInfatuation", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
             recoveryScene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
             for (int i = 0; i < 6; i++) recoveryScene.Phases.Add(new ScenePhase { Name = "" });
             recoveryScene.Phases[5].PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 550 };
-            var rec1_P = CreateSceneTopicFixed("COMClaudeRec_P", "Restored", "We are back on track.", Rec_PPos1);
-            var rec1_N = CreateSceneTopicFixed("COMClaudeRec_N", "", "Calculation: Correct. Trust levels have been re-verified. Resuming Infatuation protocols.", Rec_NPos1);
+            var rec1_P = CreateSceneTopicFixed("COMAstraRec_P", "Restored", "We are back on track.", Rec_PPos1);
+            var rec1_N = CreateSceneTopicFixed("COMAstraRec_N", "", "Calculation: Correct. Trust levels have been re-verified. Resuming Infatuation protocols.", Rec_NPos1);
             AddExchange(recoveryScene, 0, 1, 1, rec1_P, rec1_N);
 
             // ---------- 11: Infatuation Repeater (Regular) ----------
             Console.WriteLine("Creating Scene 11: Infatuation Repeater Regular...");
             var infatuationRepeaterRegularScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaude_11_InfatuationRepeaterRegular",
+                EditorID = "COMAstra_11_InfatuationRepeaterRegular",
                 Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK),
                 Flags = (Scene.Flag)36
             };
@@ -1230,15 +1246,15 @@ namespace CompanionClaude
             infatuationRepeaterRegularScene.Phases.Add(new ScenePhase { Name = "" }); // follow-up line
             infatuationRepeaterRegularScene.Phases.Add(new ScenePhase { Name = "" }); // end
 
-            var infRep_PPos = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PPos", "No", "No. It was nice to hear.", Inf_RepeatRegular_PPos);
-            var infRep_NPos = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NPos", "", "You always know what to say, don't you?", Inf_RepeatRegular_NPos);
-            var infRep_PNeg = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PNeg", "Sounded nuts", "Yeah, it did sound kind of nuts.", Inf_RepeatRegular_PNeg);
-            var infRep_NNeg = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NNeg", "", "Yeah. I was afraid of that.", Inf_RepeatRegular_NNeg);
-            var infRep_PNeu = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PNeu", "No more than usual", "I don't think it was more than usual.", Inf_RepeatRegular_PNeu);
-            var infRep_NNeu = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NNeu", "", "Good. Consistency is reassuring.", Inf_RepeatRegular_NNeu);
-            var infRep_PQue = CreateSceneTopicFixed("COMClaudeInfRep_Reg_PQue", "What conversation?", "What conversation?", Inf_RepeatRegular_PQue);
-            var infRep_NQue = CreateSceneTopicFixed("COMClaudeInfRep_Reg_NQue", "", "When I was talking about my life before. I needed to know how it sounded.", Inf_RepeatRegular_NQue);
-            var infRep_Dialog2 = CreateSceneTopicFixed("COMClaudeInfRep_Reg_Dialog2", "", "It's been a long time since I've had someone like you in my life.", Inf_RepeatRegular_Dialog2);
+            var infRep_PPos = CreateSceneTopicFixed("COMAstraInfRep_Reg_PPos", "No", "No. It was nice to hear.", Inf_RepeatRegular_PPos);
+            var infRep_NPos = CreateSceneTopicFixed("COMAstraInfRep_Reg_NPos", "", "You always know what to say, don't you?", Inf_RepeatRegular_NPos);
+            var infRep_PNeg = CreateSceneTopicFixed("COMAstraInfRep_Reg_PNeg", "Sounded nuts", "Yeah, it did sound kind of nuts.", Inf_RepeatRegular_PNeg);
+            var infRep_NNeg = CreateSceneTopicFixed("COMAstraInfRep_Reg_NNeg", "", "Yeah. I was afraid of that.", Inf_RepeatRegular_NNeg);
+            var infRep_PNeu = CreateSceneTopicFixed("COMAstraInfRep_Reg_PNeu", "No more than usual", "I don't think it was more than usual.", Inf_RepeatRegular_PNeu);
+            var infRep_NNeu = CreateSceneTopicFixed("COMAstraInfRep_Reg_NNeu", "", "Good. Consistency is reassuring.", Inf_RepeatRegular_NNeu);
+            var infRep_PQue = CreateSceneTopicFixed("COMAstraInfRep_Reg_PQue", "What conversation?", "What conversation?", Inf_RepeatRegular_PQue);
+            var infRep_NQue = CreateSceneTopicFixed("COMAstraInfRep_Reg_NQue", "", "When I was talking about my life before. I needed to know how it sounded.", Inf_RepeatRegular_NQue);
+            var infRep_Dialog2 = CreateSceneTopicFixed("COMAstraInfRep_Reg_Dialog2", "", "It's been a long time since I've had someone like you in my life.", Inf_RepeatRegular_Dialog2);
 
             var infRepAction1 = new SceneAction {
                 Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.PlayerDialogue },
@@ -1279,48 +1295,174 @@ namespace CompanionClaude
 
             // ---------- MURDER SCENE (5 phases) ----------
             Console.WriteLine("Creating Murder Scene...");
-            var murderScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMClaudeMurderScene", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
+            var murderScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMAstraMurderScene", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36 };
             murderScene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
             for (int i = 0; i < 5; i++) murderScene.Phases.Add(new ScenePhase { Name = "" });
             murderScene.Phases[4].PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 620 };
-            var mur1_P = CreateSceneTopicFixed("COMClaudeMurder_P", "Wait", "I can explain.", Mur_PPos1);
-            var mur1_N = CreateSceneTopicFixed("COMClaudeMurder_N", "", "Error: Unjustified termination of civilian entity. This logic is incompatible with my core directive. Partnership terminated.", Mur_NPos1);
+            var mur1_P = CreateSceneTopicFixed("COMAstraMurder_P", "Wait", "I can explain.", Mur_PPos1);
+            var mur1_N = CreateSceneTopicFixed("COMAstraMurder_N", "", "Error: Unjustified termination of civilian entity. This logic is incompatible with my core directive. Partnership terminated.", Mur_NPos1);
             AddExchange(murderScene, 0, 1, 1, mur1_P, mur1_N);
 
-            npc.VirtualMachineAdapter = new VirtualMachineAdapter {
-                Version = 6, ObjectFormat = 2,
-                Scripts = {
-                    new ScriptEntry {
-                        Name = "CompanionActorScript",
-                        Properties = new ExtendedList<ScriptProperty> {
-                            new ScriptObjectProperty { Name = "DismissScene", Object = dismissScene.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            // Minimal high-impact parity set from Piper actor VMAD (safe globals/AVs).
-                            new ScriptObjectProperty { Name = "CA_Event_Murder", Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "Experience", Object = experienceAV.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "HasItemForPlayer", Object = hasItemForPlayerAV.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "TemporaryAngerLevel", Object = temporaryAngerLevelAV.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "MurderToggle", Object = commonMurderToggleAlwaysOff.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "StartingThreshold", Object = ca_T3_Neutral.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "InfatuationThreshold", Object = ca_T1_Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "MQComplete", Object = mqComplete.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptObjectProperty { Name = "Tutorial", Object = tutorialQuest.FormKey.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptBoolProperty { Name = "ShouldGivePlayerItems", Data = true }
+            var piperActorVmad = companionPiperNpc.VirtualMachineAdapter?.DeepCopy();
+            if (piperActorVmad == null)
+                throw new Exception("CompanionPiper VMAD is missing; cannot build actor script parity.");
+
+            npc.VirtualMachineAdapter = piperActorVmad;
+
+            ScriptObjectProperty UpsertObjectProperty(ScriptEntry script, string name)
+            {
+                if (script.Properties == null)
+                    throw new Exception($"Script '{script.Name}' has null property list.");
+
+                var existing = script.Properties.OfType<ScriptObjectProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (existing != null) return existing;
+                existing = new ScriptObjectProperty { Name = name };
+                script.Properties.Add(existing);
+                return existing;
+            }
+
+            ScriptBoolProperty UpsertBoolProperty(ScriptEntry script, string name)
+            {
+                if (script.Properties == null)
+                    throw new Exception($"Script '{script.Name}' has null property list.");
+
+                var existing = script.Properties.OfType<ScriptBoolProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (existing != null) return existing;
+                existing = new ScriptBoolProperty { Name = name };
+                script.Properties.Add(existing);
+                return existing;
+            }
+
+            ScriptIntProperty UpsertIntProperty(ScriptEntry script, string name)
+            {
+                if (script.Properties == null)
+                    throw new Exception($"Script '{script.Name}' has null property list.");
+
+                var existing = script.Properties.OfType<ScriptIntProperty>()
+                    .FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (existing != null) return existing;
+                existing = new ScriptIntProperty { Name = name };
+                script.Properties.Add(existing);
+                return existing;
+            }
+
+            var companionActorScript = npc.VirtualMachineAdapter.Scripts
+                .FirstOrDefault(s => string.Equals(s.Name, "CompanionActorScript", StringComparison.OrdinalIgnoreCase));
+            if (companionActorScript == null)
+                throw new Exception("CompanionActorScript missing on copied Piper VMAD.");
+
+            UpsertObjectProperty(companionActorScript, "DismissScene").Object = dismissScene.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "CA_Event_Murder").Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "Experience").Object = experienceAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "HasItemForPlayer").Object = hasItemForPlayerAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "TemporaryAngerLevel").Object = temporaryAngerLevelAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "MurderToggle").Object = commonMurderToggleAlwaysOff.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "StartingThreshold").Object = ca_T3_Neutral.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "InfatuationThreshold").Object = ca_T1_Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "MQComplete").Object = mqComplete.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "Tutorial").Object = tutorialQuest.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertBoolProperty(companionActorScript, "ShouldGivePlayerItems").Data = true;
+
+            var existingThresholdDataArray = companionActorScript.Properties
+                .OfType<ScriptStructListProperty>()
+                .FirstOrDefault(p => string.Equals(p.Name, "ThresholdData_Array", StringComparison.OrdinalIgnoreCase));
+            if (existingThresholdDataArray != null)
+            {
+                companionActorScript.Properties.Remove(existingThresholdDataArray);
+            }
+
+            companionActorScript.Properties.Add(new ScriptStructListProperty {
+                Name = "ThresholdData_Array",
+                Structs = new ExtendedList<ScriptEntryStructs> {
+                    // Struct 0: Infatuation (T1) - Stage 500
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_T1_Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 500 },
                         }
                     },
-                    new ScriptEntry {
-                        Name = "workshopnpcscript",
-                        Properties = new ExtendedList<ScriptProperty> {
-                            new ScriptObjectProperty { Name = "WorkshopParent", Object = workshopParentQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptBoolProperty { Name = "bAllowCaravan", Data = true },
-                            new ScriptBoolProperty { Name = "bAllowMove", Data = true },
-                            new ScriptBoolProperty { Name = "bApplyWorkshopOwnerFaction", Data = false },
-                            new ScriptBoolProperty { Name = "bCommandable", Data = true }
+                    // Struct 1: Admiration (T2) - Stage 400
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_T2_Admiration.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 400 },
                         }
-                    }
+                    },
+                    // Struct 2: Neutral (T3) - Stage 300 - STARTING THRESHOLD
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_T3_Neutral.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 300 },
+                            new ScriptBoolProperty { Name = "ThresholdHasBeenPreviouslyReached", Data = true },
+                        }
+                    },
+                    // Struct 3: Disdain (T4) - Stage 200
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_T4_Disdain.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 200 },
+                        }
+                    },
+                    // Struct 4: Hatred (T5) - Stage 100
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_T5_Hatred.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 100 },
+                        }
+                    },
+                    // Struct 5: Confidant (TCustom1) - Stage 495 - MINOR threshold
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_TCustom1_Confidant.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = false },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 495 },
+                        }
+                    },
+                    // Struct 6: Friend (TCustom2) - Stage 405 - MINOR threshold
+                    new ScriptEntryStructs {
+                        Members = new ExtendedList<ScriptProperty> {
+                            new ScriptObjectProperty { Name = "Threshold_Global", Object = ca_TCustom2_Friend.FormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = false },
+                            new ScriptObjectProperty { Name = "Controlling_Quest", Object = mainQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 405 },
+                        }
+                    },
                 }
-            };
+            });
 
-            // ===== PICKUP SCENE: ASTRA-OWNED TOPICS (Piper structure, no COMPiper links) =====
+            var workshopScript = npc.VirtualMachineAdapter.Scripts
+                .FirstOrDefault(s => string.Equals(s.Name, "workshopnpcscript", StringComparison.OrdinalIgnoreCase));
+            if (workshopScript == null)
+            {
+                workshopScript = new ScriptEntry {
+                    Name = "workshopnpcscript",
+                    Properties = new ExtendedList<ScriptProperty>()
+                };
+                npc.VirtualMachineAdapter.Scripts.Add(workshopScript);
+            }
+
+            UpsertObjectProperty(workshopScript, "WorkshopParent").Object = workshopParentQuestFK.ToLink<IFallout4MajorRecordGetter>();
+            UpsertBoolProperty(workshopScript, "bAllowCaravan").Data = true;
+            UpsertBoolProperty(workshopScript, "bAllowMove").Data = true;
+            UpsertBoolProperty(workshopScript, "bApplyWorkshopOwnerFaction").Data = false;
+            UpsertBoolProperty(workshopScript, "bCommandable").Data = true;
+
+            // ===== PICKUP SCENE: HYBRID STABILITY ROUTING =====
+            // Keep Action 1 on Astra-owned PlayerDialogue topics (prevents talk-lock),
+            // while Action 2-5 stay Piper-routed for vanilla handoff structure.
             var astraPickup_PPos = CreateSceneTopic("COMAstraPickup_PPos", "Let's go", "Let's go.");
             var astraPickup_NPos = CreateSceneTopic("COMAstraPickup_NPos", "", "Sure. Let's move.");
             var astraPickup_PNeg = CreateSceneTopic("COMAstraPickup_PNeg", "Never mind", "Never mind.");
@@ -1328,8 +1470,14 @@ namespace CompanionClaude
             astraPickup_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
             var astraPickup_PNeu = CreateSceneTopic("COMAstraPickup_PNeu", "Trade", "Let's trade.");
             var astraPickup_NNeu = CreateSceneTopic("COMAstraPickup_NNeu", "", "Show me what you've got.");
+            // Action 1 uses Astra-owned topics; map to vanilla shared dialogue so audio always resolves.
+            astraPickup_PPos.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C70));
+            astraPickup_NPos.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C6F));
+            astraPickup_PNeg.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162DFB));
+            astraPickup_NNeg.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162D6A));
+            astraPickup_PNeu.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C82));
             // Keep barter behavior on NPC neutral response, matching the older working implementation.
-            astraPickup_NNeu.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C82));
+            astraPickup_NNeu.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C7D));
             astraPickup_NNeu.Responses[0].VirtualMachineAdapter = new DialogResponsesAdapter {
                 Version = 6,
                 ObjectFormat = 2,
@@ -1343,6 +1491,8 @@ namespace CompanionClaude
             astraPickup_NNeu.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
             var astraPickup_PQue = CreateSceneTopic("COMAstraPickup_PQue", "Question", "Got a minute?");
             var astraPickup_NQue = CreateSceneTopic("COMAstraPickup_NQue", "", "Make it quick.");
+            astraPickup_PQue.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x162C74));
+            astraPickup_NQue.Responses[0].SharedDialog.SetTo(new FormKey(fo4, 0x1A4EAB));
 
             var astraPickup_Dialog2 = CreateSceneTopic("COMAstraPickup_Dialog2", "", "Ready for assignment.");
             var astraPickup_Dialog3 = CreateSceneTopic("COMAstraPickup_Dialog3", "", "Lead the way.");
@@ -1366,9 +1516,8 @@ namespace CompanionClaude
             recruitScene.Actions.Add(pickupAction1);
 
             // Action 2: Dialog, AliasID 1 (Companion slot), Phase 1
-            // Keep this Astra-owned topic to avoid vanilla-topic condition dead-ends in custom quest context.
             var pickupAction2 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 2, AliasID = 1, StartPhase = 1, EndPhase = 1, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction2.Topic.SetTo(astraPickup_Dialog2);
+            pickupAction2.Topic.SetTo(new FormKey(fo4, 0x162C4B)); // Piper Action2 handoff lines
             recruitScene.Actions.Add(pickupAction2);
 
             // Action 5: Dialog, AliasID 2 (Dogmeat slot), Phase 2
@@ -1378,12 +1527,12 @@ namespace CompanionClaude
 
             // Action 3: Dialog, AliasID 0 (Claude), Phase 3
             var pickupAction3 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 3, AliasID = 0, StartPhase = 3, EndPhase = 3, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction3.Topic.SetTo(astraPickup_Dialog3);
+            pickupAction3.Topic.SetTo(new FormKey(fo4, 0x162C4A)); // Piper Action3 return lines
             recruitScene.Actions.Add(pickupAction3);
 
             // Action 4: Dialog, AliasID 0 (Claude), Phase 4
             var pickupAction4 = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = 4, AliasID = 0, StartPhase = 4, EndPhase = 4, Flags = (SceneAction.Flag)32768, LoopingMin = 1, LoopingMax = 10 };
-            pickupAction4.Topic.SetTo(astraPickup_Dialog4);
+            pickupAction4.Topic.SetTo(new FormKey(fo4, 0x21748C)); // Piper Action4 dogmeat dismiss line
             recruitScene.Actions.Add(pickupAction4);
 
             // Pickup Scene Debug Dump (structure check)
@@ -1405,18 +1554,18 @@ namespace CompanionClaude
 
             // ===== DISMISS SCENE: EXACT PIPER STRUCTURE =====
             // Piper's text used exactly
-            var dismiss_Dialog1 = CreateSceneTopic("COMClaudeDismiss_Dialog1", "", "So. This where we go our separate ways?");
-            var dismiss_PPos = CreateSceneTopic("COMClaudeDismiss_PPos", "Time to go", "You should go.");
-            var dismiss_NPos = CreateSceneTopic("COMClaudeDismiss_NPos", "", "Okay. I'll be seeing you.");
-            var dismiss_PNeg = CreateSceneTopic("COMClaudeDismiss_PNeg", "Stay", "Actually, stay with me.");
-            var dismiss_NNeg = CreateSceneTopic("COMClaudeDismiss_NNeg", "", "I knew you couldn't bear to be without me.");
+            var dismiss_Dialog1 = CreateSceneTopic("COMAstraDismiss_Dialog1", "", "So. This where we go our separate ways?");
+            var dismiss_PPos = CreateSceneTopic("COMAstraDismiss_PPos", "Time to go", "You should go.");
+            var dismiss_NPos = CreateSceneTopic("COMAstraDismiss_NPos", "", "Okay. I'll be seeing you.");
+            var dismiss_PNeg = CreateSceneTopic("COMAstraDismiss_PNeg", "Stay", "Actually, stay with me.");
+            var dismiss_NNeg = CreateSceneTopic("COMAstraDismiss_NNeg", "", "I knew you couldn't bear to be without me.");
             dismiss_NNeg.Responses[0].Flags = new DialogResponseFlags { Flags = EndSceneFlag };
-            var dismiss_PNeu = CreateSceneTopic("COMClaudeDismiss_PNeu", "", "");
-            var dismiss_NNeu = CreateSceneTopic("COMClaudeDismiss_NNeu", "", "");
-            var dismiss_PQue = CreateSceneTopic("COMClaudeDismiss_PQue", "", "");
-            var dismiss_NQue = CreateSceneTopic("COMClaudeDismiss_NQue", "", "");
-            var dismiss_Dialog3 = CreateSceneTopic("COMClaudeDismiss_Dialog3", "", "Just don't keep me waiting, okay?");
-            var dismiss_Dialog4 = CreateSceneTopic("COMClaudeDismiss_Dialog4", "", "Guess I'll head home, then.");
+            var dismiss_PNeu = CreateSceneTopic("COMAstraDismiss_PNeu", "", "");
+            var dismiss_NNeu = CreateSceneTopic("COMAstraDismiss_NNeu", "", "");
+            var dismiss_PQue = CreateSceneTopic("COMAstraDismiss_PQue", "", "");
+            var dismiss_NQue = CreateSceneTopic("COMAstraDismiss_NQue", "", "");
+            var dismiss_Dialog3 = CreateSceneTopic("COMAstraDismiss_Dialog3", "", "Just don't keep me waiting, okay?");
+            var dismiss_Dialog4 = CreateSceneTopic("COMAstraDismiss_Dialog4", "", "Guess I'll head home, then.");
 
             // Dismiss Actions - EXACT PIPER STRUCTURE
             // Action 1: Dialog, Phase 0-0, opening line
@@ -1465,7 +1614,7 @@ namespace CompanionClaude
             // GREETING TOPIC (Claude Flavor)
             Console.WriteLine("Creating Greeting Topic (Truth Table Implementation)...");
             var greetingTopic = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
-                EditorID = "COMClaudeGreetings",
+                EditorID = "COMAstraGreetings",
                 Quest = new FormLink<IQuestGetter>(mainQuestFK),
                 Category = DialogTopic.CategoryEnum.Misc,
                 Subtype = DialogTopic.SubtypeEnum.Greeting,
@@ -1560,7 +1709,7 @@ namespace CompanionClaude
                 ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
             });
             pickupGreeting.StartScene.SetTo(recruitScene);
-            pickupGreeting.StartScenePhase = "Loop01";
+            pickupGreeting.StartScenePhase = "";
             pickupGreeting.Conditions.Add(FCheck(hasBeenCompanionFaction.FormKey, 0));
             pickupGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 0));
             pickupGreeting.Conditions.Add(FCheck(disallowedCompanionFaction.FormKey, 0));
@@ -1573,13 +1722,13 @@ namespace CompanionClaude
                 ResponseNumber = 1, Unknown = 1, Emotion = neutralEmotion.ToLink<IKeywordGetter>(), InterruptPercentage = 0, CameraTargetAlias = -1, CameraLocationAlias = -1, StopOnSceneEnd = false
             });
             formerPickupGreeting.StartScene.SetTo(recruitScene);
-            formerPickupGreeting.StartScenePhase = "Loop01";
+            formerPickupGreeting.StartScenePhase = "";
             formerPickupGreeting.Conditions.Add(FCheck(hasBeenCompanionFaction.FormKey, 1));
             formerPickupGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 0));
             formerPickupGreeting.Conditions.Add(FCheck(disallowedCompanionFaction.FormKey, 0));
             greetingTopic.Responses.Add(formerPickupGreeting);
 
-            // FRIENDSHIP GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // FRIENDSHIP GREETING 1 — First ask (vanilla: CA_WantsToTalk == 1)
             // Vanilla quirk: Wants==1 greeting has no stage trigger; Wants==2 greeting sets stage 406.
             var friendshipGreeting = new DialogResponses(FK(FriendshipGreeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = 0 } };
             friendshipGreeting.Responses.Add(new DialogResponse {
@@ -1592,7 +1741,7 @@ namespace CompanionClaude
             friendshipGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Friendship_FK));
             greetingTopic.Responses.Add(friendshipGreeting);
 
-            // FRIENDSHIP GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
+            // FRIENDSHIP GREETING 2 — Reminder (vanilla: CA_WantsToTalk == 2)
             var friendshipGreeting2 = new DialogResponses(FK(FriendshipGreeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = 0 } };
             friendshipGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "You keep taking risks for strangers. What drives that?"),
@@ -1605,7 +1754,7 @@ namespace CompanionClaude
             friendshipGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Friendship_FK));
             greetingTopic.Responses.Add(friendshipGreeting2);
 
-            // ADMIRATION GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // ADMIRATION GREETING 1 — First ask (vanilla: CA_WantsToTalk == 1)
             // Sets stage 410 (Forcegreeted) on end; stage 410 fragment sets WantsToTalk=2 for reminder
             var admirationGreeting = new DialogResponses(FK(Adm_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             admirationGreeting.Responses.Add(new DialogResponse {
@@ -1619,7 +1768,7 @@ namespace CompanionClaude
             admirationGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Admiration_FK));
             greetingTopic.Responses.Add(admirationGreeting);
 
-            // ADMIRATION GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
+            // ADMIRATION GREETING 2 — Reminder (vanilla: CA_WantsToTalk == 2)
             var admirationGreeting2 = new DialogResponses(FK(Adm_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             admirationGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "There's something about how you move through this world that I can't ignore."),
@@ -1631,7 +1780,7 @@ namespace CompanionClaude
             admirationGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Admiration_FK));
             greetingTopic.Responses.Add(admirationGreeting2);
 
-            // CONFIDANT GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // CONFIDANT GREETING 1 — First ask (vanilla: CA_WantsToTalk == 1)
             // Sets stage 496 (Confidant forcegreeted) on end.
             var confidantGreeting = new DialogResponses(FK(Conf_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             confidantGreeting.Responses.Add(new DialogResponse {
@@ -1645,7 +1794,7 @@ namespace CompanionClaude
             confidantGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Confidant_FK));
             greetingTopic.Responses.Add(confidantGreeting);
 
-            // CONFIDANT GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
+            // CONFIDANT GREETING 2 — Reminder (vanilla: CA_WantsToTalk == 2)
             var confidantGreeting2 = new DialogResponses(FK(Conf_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             confidantGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "You've earned access to the parts of me I keep hidden."),
@@ -1657,7 +1806,7 @@ namespace CompanionClaude
             confidantGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Confidant_FK));
             greetingTopic.Responses.Add(confidantGreeting2);
 
-            // INFATUATION GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // INFATUATION GREETING 1 — First ask (vanilla: CA_WantsToTalk == 1)
             // Sets stage 510 (Infatuation forcegreeted) on end.
             var infatuationGreeting = new DialogResponses(FK(Inf_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             infatuationGreeting.Responses.Add(new DialogResponse {
@@ -1671,7 +1820,7 @@ namespace CompanionClaude
             infatuationGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Infatuation_FK));
             greetingTopic.Responses.Add(infatuationGreeting);
 
-            // INFATUATION GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
+            // INFATUATION GREETING 2 — Reminder (vanilla: CA_WantsToTalk == 2)
             var infatuationGreeting2 = new DialogResponses(FK(Inf_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             infatuationGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Every time you choose me, I learn what forever means."),
@@ -1683,7 +1832,7 @@ namespace CompanionClaude
             infatuationGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Infatuation_FK));
             greetingTopic.Responses.Add(infatuationGreeting2);
 
-            // DISDAIN GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // DISDAIN GREETING 1 — First ask (vanilla: CA_WantsToTalk == 1)
             var disdainGreeting = new DialogResponses(FK(Dis_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             disdainGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "We need to talk. Our alignment is drifting."),
@@ -1696,7 +1845,7 @@ namespace CompanionClaude
             disdainGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Disdain_FK));
             greetingTopic.Responses.Add(disdainGreeting);
 
-            // DISDAIN GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
+            // DISDAIN GREETING 2 — Reminder (vanilla: CA_WantsToTalk == 2)
             var disdainGreeting2 = new DialogResponses(FK(Dis_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             disdainGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "I can't ignore this anymore. We need to recalibrate."),
@@ -1708,7 +1857,7 @@ namespace CompanionClaude
             disdainGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Disdain_FK));
             greetingTopic.Responses.Add(disdainGreeting2);
 
-            // HATRED GREETING 1 â€” First ask (vanilla: CA_WantsToTalk == 1)
+            // HATRED GREETING 1 — First ask (vanilla: CA_WantsToTalk == 1)
             var hatredGreeting = new DialogResponses(FK(Hat_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             hatredGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "This is a warning. My core directives are in conflict."),
@@ -1721,7 +1870,7 @@ namespace CompanionClaude
             hatredGreeting.Conditions.Add(AffinitySceneCheck(ca_Scene_Hatred_FK));
             greetingTopic.Responses.Add(hatredGreeting);
 
-            // HATRED GREETING 2 â€” Reminder (vanilla: CA_WantsToTalk == 2)
+            // HATRED GREETING 2 — Reminder (vanilla: CA_WantsToTalk == 2)
             var hatredGreeting2 = new DialogResponses(FK(Hat_Greeting2Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             hatredGreeting2.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "If this continues, I will leave."),
@@ -1733,7 +1882,7 @@ namespace CompanionClaude
             hatredGreeting2.Conditions.Add(AffinitySceneCheck(ca_Scene_Hatred_FK));
             greetingTopic.Responses.Add(hatredGreeting2);
 
-            // ROMANCE COMPLETE GREETING â€” Idle post-romance (fires when stage 525 done, WantsToTalk irrelevant)
+            // ROMANCE COMPLETE GREETING — Idle post-romance (fires when stage 525 done, WantsToTalk irrelevant)
             var romanceCompleteGreeting = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             romanceCompleteGreeting.Responses.Add(new DialogResponse {
                 Text = new TranslatedString(Language.English, "Synchronization levels are at maximum efficiency. Ready to proceed, my love?"),
@@ -1763,7 +1912,7 @@ namespace CompanionClaude
                 StopOnSceneEnd = false
             });
             dismissGreeting.StartScene.SetTo(dismissScene);
-            dismissGreeting.StartScenePhase = "Loop01";
+            dismissGreeting.StartScenePhase = "";
             dismissGreeting.Conditions.Add(FCheck(currentCompanionFaction.FormKey, 1));
             greetingTopic.Responses.Add(dismissGreeting);
 
@@ -1791,30 +1940,19 @@ namespace CompanionClaude
                 StopOnSceneEnd = false
             });
             dismissEnterInfo.StartScene.SetTo(dismissScene);
-            dismissEnterInfo.StartScenePhase = "Loop01";
+            dismissEnterInfo.StartScenePhase = "";
             dismissEnterTopic.Responses.Add(dismissEnterInfo);
             topics.Add(dismissEnterTopic);
 
             // ===== REORDER GREETINGS: Vanilla-accurate priority =====
-            // Negative (most severe first) â†’ Positive (highest tier first) â†’ Pickup
+            // Negative (most severe first) → Positive (highest tier first) → Pickup
             // This matches COMPiper ordering where hatred/disdain greetings take priority
+            // Emergency stability mode:
+            // keep talk routing limited to pickup/dismiss until affinity scene routing is revalidated.
             var orderedGreetings = new DialogResponses[] {
-                hatredGreeting,             // Wants==1 (negative, highest priority)
-                hatredGreeting2,            // Wants==2 (reminder)
-                disdainGreeting,            // Wants==1
-                disdainGreeting2,           // Wants==2 (reminder)
-                infatuationGreeting,        // Wants==1
-                infatuationGreeting2,       // Wants==2 (reminder)
-                confidantGreeting,          // Wants==1
-                confidantGreeting2,         // Wants==2 (reminder)
-                admirationGreeting,         // Wants==1
-                admirationGreeting2,        // Wants==2 (reminder)
-                friendshipGreeting,         // Wants==1
-                friendshipGreeting2,        // Wants==2 (reminder)
-                romanceCompleteGreeting,    // StageDone(525) - idle post-romance
-                formerPickupGreeting,       // HasBeen=1, Current=0, Wants=0
-                pickupGreeting,             // HasBeen=0, Current=0, Wants=0
-                dismissGreeting             // Fallback Talk->Dismiss when Current=1
+                formerPickupGreeting,       // HasBeen=1, Current=0
+                pickupGreeting,             // HasBeen=0, Current=0
+                dismissGreeting             // Current=1
             };
             greetingTopic.Responses.Clear();
             foreach (var g in orderedGreetings) greetingTopic.Responses.Add(g);
@@ -1890,16 +2028,16 @@ namespace CompanionClaude
                 quest.Scenes.Add(s);
             }
 
-            CreateRepeater("COMClaude_06_RepeatInfatuationToAdmiration", 4, 450, "Adjusting", "Recalibrating loyalty parameters. Infatuation tier... suspended.");
-            CreateRepeater("COMClaude_07_RepeatAdmirationToNeutral", 4, 330, "Resetting", "Data inconsistency detected. Reverting to neutral status.");
-            CreateRepeater("COMClaude_08_RepeatNeutralToDisdain", 4, 250, "Degrading", "System degradation. Relationship integrity dropping to Disdain.");
-            CreateRepeater("COMClaude_09_RepeatDisdainToHatred", 2, 160, "Critical", "Critical failure. Moving from Disdain to Hatred.");
+            CreateRepeater("COMAstra_06_RepeatInfatuationToAdmiration", 4, 450, "Adjusting", "Recalibrating loyalty parameters. Infatuation tier... suspended.");
+            CreateRepeater("COMAstra_07_RepeatAdmirationToNeutral", 4, 330, "Resetting", "Data inconsistency detected. Reverting to neutral status.");
+            CreateRepeater("COMAstra_08_RepeatNeutralToDisdain", 4, 250, "Degrading", "System degradation. Relationship integrity dropping to Disdain.");
+            CreateRepeater("COMAstra_09_RepeatDisdainToHatred", 2, 160, "Critical", "Critical failure. Moving from Disdain to Hatred.");
 
             // REPEATER GREETINGS (Piper parity: scenes 06/07/08/09/10)
-            var repeatInfToAdmScene = quest.Scenes.First(s => s.EditorID == "COMClaude_06_RepeatInfatuationToAdmiration");
-            var repeatAdmToNeutralScene = quest.Scenes.First(s => s.EditorID == "COMClaude_07_RepeatAdmirationToNeutral");
-            var repeatNeutralToDisdainScene = quest.Scenes.First(s => s.EditorID == "COMClaude_08_RepeatNeutralToDisdain");
-            var repeatDisdainToHatredScene = quest.Scenes.First(s => s.EditorID == "COMClaude_09_RepeatDisdainToHatred");
+            var repeatInfToAdmScene = quest.Scenes.First(s => s.EditorID == "COMAstra_06_RepeatInfatuationToAdmiration");
+            var repeatAdmToNeutralScene = quest.Scenes.First(s => s.EditorID == "COMAstra_07_RepeatAdmirationToNeutral");
+            var repeatNeutralToDisdainScene = quest.Scenes.First(s => s.EditorID == "COMAstra_08_RepeatNeutralToDisdain");
+            var repeatDisdainToHatredScene = quest.Scenes.First(s => s.EditorID == "COMAstra_09_RepeatDisdainToHatred");
 
             var repeatInfatuationToAdmirationGreeting1 = new DialogResponses(FK(Rep_AdmDown_Greeting1Id), Fallout4Release.Fallout4) { Flags = new DialogResponseFlags { Flags = (DialogResponses.Flag)8 } };
             repeatInfatuationToAdmirationGreeting1.Responses.Add(new DialogResponse {
@@ -2010,31 +2148,9 @@ namespace CompanionClaude
             infatuationRepeaterRegularGreeting.Conditions.Add(WantsRomanceRetryCheck(1));
             infatuationRepeaterRegularGreeting.Conditions.Add(CurrentThresholdCheck(ca_T1_Infatuation.FormKey));
 
-            // Final greeting ordering with full affinity repeater coverage (Piper parity shape).
+            // Final talk-safe ordering:
+            // affinity forcegreets are temporarily disabled to prevent interaction dead-ends.
             var orderedGreetingsFinal = new DialogResponses[] {
-                repeatDisdainToHatredGreeting,           // 09 repeat (single, Wants>=1)
-                repeatAdmirationToInfatuationGreeting1,  // 10 repeat (Wants==1)
-                repeatAdmirationToInfatuationGreeting2,  // 10 repeat (Wants==2)
-                infatuationGreeting,                     // 03 main
-                infatuationGreeting2,
-                infatuationRepeaterRegularGreeting,      // 11 repeater regular (RomanceRetry)
-                repeatInfatuationToAdmirationGreeting1,  // 06 repeat
-                repeatInfatuationToAdmirationGreeting2,
-                confidantGreeting,                       // 02a main
-                confidantGreeting2,
-                friendshipGreeting2,                     // 01 main (Piper quirk: Wants==2 first)
-                friendshipGreeting,
-                repeatAdmirationToNeutralGreeting1,      // 07 repeat
-                repeatAdmirationToNeutralGreeting2,
-                repeatNeutralToDisdainGreeting1,         // 08 repeat
-                repeatNeutralToDisdainGreeting2,
-                disdainGreeting,                         // 04 main
-                disdainGreeting2,
-                hatredGreeting,                          // 05 main
-                hatredGreeting2,
-                admirationGreeting,                      // 02 main
-                admirationGreeting2,
-                romanceCompleteGreeting,                 // post-romance idle
                 formerPickupGreeting,
                 pickupGreeting,
                 dismissGreeting
@@ -2144,10 +2260,10 @@ namespace CompanionClaude
             // 8. GUARDRAIL VALIDATION
             Guardrail.Validate(mod, forbiddenCompiperLinks);
 
-            // 8.5 TEST ADVANCER QUEST (Quest 2 â€” development only)
+            // 8.5 TEST ADVANCER QUEST (Quest 2 — development only)
             // Added AFTER guardrail so it doesn't trigger main quest assertions.
             // Enabled by default; pass --disable-test-quest to omit.
-            // Usage: SetStage COMAstra_Test 10 â†’ friendship fires, etc.
+            // Usage: SetStage COMAstra_Test 10 → friendship fires, etc.
             if (!HasArg("--disable-test-quest"))
             {
                 Console.WriteLine("Creating Test Advancer Quest (COMAstra_Test)...");
@@ -2253,10 +2369,13 @@ namespace CompanionClaude
             string srcBase = GetArgValue("--voice-src") ?? System.IO.Path.Combine(repoRoot, "VoiceFiles", "piper_voice", "Sound", "Voice", "Fallout4.esm");
             if (!System.IO.Directory.Exists(srcBase))
             {
-                srcBase = @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm";
+                srcBase = System.IO.Path.Combine(
+                    System.IO.Path.GetTempPath(),
+                    "claude", "piper_voice", "Sound", "Voice", "Fallout4.esm");
             }
+            var fo4Data = DetectFallout4DataPath();
             string dstBase = GetArgValue("--voice-dst")
-                ?? System.IO.Path.Combine(DetectFallout4DataPath() ?? @"E:\SteamLibrary\steamapps\common\Fallout 4\Data", "Sound", "Voice", "CompanionAstra.esp");
+                ?? System.IO.Path.Combine(fo4Data ?? "Data", "Sound", "Voice", "CompanionAstra.esp");
             int copied = 0;
 
             bool TryEnsureDirectory(string path, string label)
@@ -2433,6 +2552,13 @@ namespace CompanionClaude
             bool allowDisdainVoiceOverwrite = HasArg("--allow-disdain-voice-overwrite");
             bool allowHatredVoiceOverwrite = HasArg("--allow-hatred-voice-overwrite");
             var npcVoiceMap = new System.Collections.Generic.List<(uint piperINFO, FormKey ourINFO)>();
+            npcVoiceMap.AddRange(new (uint piperINFO, FormKey ourINFO)[] {
+                // === PICKUP ACTION 1 NPC VOICE (always copy for custom Astra Action1 topics) ===
+                (0x162C6F, astraPickup_NPos.Responses[0].FormKey),
+                (0x162D6A, astraPickup_NNeg.Responses[0].FormKey),
+                (0x162C7D, astraPickup_NNeu.Responses[0].FormKey),
+                (0x1A4EAB, astraPickup_NQue.Responses[0].FormKey),
+            });
             if (allowGreetingVoiceOverwrite)
             {
                 npcVoiceMap.Add((0x162C75, pickupGreeting.FormKey));        // Greeting (only when explicitly allowed)
@@ -2546,6 +2672,8 @@ namespace CompanionClaude
             var playerVoiceMap = new (uint piperINFO, FormKey ourINFO)[] {
                 (0x162C70, astraPickup_PPos.Responses[0].FormKey),  // Pickup Player Positive (placeholder)
                 (0x162DFB, astraPickup_PNeg.Responses[0].FormKey),  // Pickup Player Negative (placeholder)
+                (0x162C82, astraPickup_PNeu.Responses[0].FormKey),  // Pickup Player Neutral (trade)
+                (0x162C74, astraPickup_PQue.Responses[0].FormKey),  // Pickup Player Question
                 // === DISMISS SCENE PLAYER VOICE (added 2026-02-03) ===
                 (0x1658D6, dismiss_PPos.Responses[0].FormKey),  // "For the moment, yeah." (was "Time to go")
                 (0x1659B7, dismiss_PNeg.Responses[0].FormKey),  // "We can stick it out a bit longer." (was "Stay")

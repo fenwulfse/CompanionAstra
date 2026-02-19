@@ -20,7 +20,7 @@ These flags enforce a simple rule: **no greeting changes unless explicitly appro
 
 ## Usage Example
 ```
-dotnet run --project E:\CompanionGeminiFeb26\CompanionAstra_VoiceSwap\CompanionClaude_v13.csproj -- --allow-greeting-text-change --allow-greeting-voice-overwrite --enable-greeting-tts
+dotnet run --project <WORKSPACE_ROOT>\CompanionAstra_VoiceSwap\CompanionClaude_v13.csproj -- --allow-greeting-text-change --allow-greeting-voice-overwrite --enable-greeting-tts
 ```
 
 If you don’t pass the flags, greetings remain untouched.

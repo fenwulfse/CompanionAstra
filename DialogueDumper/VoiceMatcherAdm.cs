@@ -6,11 +6,40 @@ using System.Text.RegularExpressions;
 
 class VoiceMatcherAdm
 {
+    static string ResolveRepoRoot()
+    {
+        string dir = AppContext.BaseDirectory;
+        for (int i = 0; i < 8; i++)
+        {
+            if (Directory.Exists(Path.Combine(dir, "DialogueDumper")))
+            {
+                return dir;
+            }
+
+            var parent = Directory.GetParent(dir);
+            if (parent == null)
+            {
+                break;
+            }
+            dir = parent.FullName;
+        }
+
+        return Directory.GetCurrentDirectory();
+    }
+
     static void Main()
     {
-        string csvPath = @"E:\CompanionClaude_v13_GreetingFix\DialogueDumper\fallout4_all_dialogue.csv";
+        string repoRoot = ResolveRepoRoot();
+        string csvPath = Environment.GetEnvironmentVariable("FALLOUT_DIALOGUE_CSV")
+            ?? Path.Combine(repoRoot, "DialogueDumper", "fallout4_all_dialogue.csv");
 
         Console.WriteLine("=== Voice Matcher for Claude's Affinity Scenes ===\n");
+
+        if (!File.Exists(csvPath))
+        {
+            Console.WriteLine($"Missing CSV: {csvPath}");
+            return;
+        }
 
         // Claude's dialogue organized by scene
         var claudeDialogue = new Dictionary<string, List<string>> {

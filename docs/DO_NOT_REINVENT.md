@@ -7,9 +7,9 @@ This file is a short index of proven wins so we don’t repeat trial‑and‑err
   See `docs/PICKUP_PIPER_EXACT_REPLICA.md`.
 
 ## Working Project Baselines
-- **Current working baseline**: `E:\CompanionGeminiFeb26\CompanionAstra`
-- **Snapshot backup**: `E:\CompanionGeminiFeb26\Backups\2026-02-07_PiperPickupExact`
-- **Voice‑swap workspace**: `E:\CompanionGeminiFeb26\CompanionAstra_VoiceSwap`
+- **Current working baseline**: `<WORKSPACE_ROOT>\CompanionAstra`
+- **Snapshot backup**: `<WORKSPACE_ROOT>\Backups\2026-02-07_PiperPickupExact`
+- **Voice‑swap workspace**: `<WORKSPACE_ROOT>\CompanionAstra_VoiceSwap`
 
 ## Replication Strategy That Works
 - Use **field‑by‑field replica** for scenes (phases, actions, flags, conditions).

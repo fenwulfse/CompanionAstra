@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,12 +6,48 @@ using System.Text.RegularExpressions;
 
 class PiperVoiceMatcher
 {
+    static string ResolveRepoRoot()
+    {
+        string dir = AppContext.BaseDirectory;
+        for (int i = 0; i < 8; i++)
+        {
+            if (Directory.Exists(Path.Combine(dir, "DialogueDumper")))
+            {
+                return dir;
+            }
+
+            var parent = Directory.GetParent(dir);
+            if (parent == null)
+            {
+                break;
+            }
+            dir = parent.FullName;
+        }
+
+        return Directory.GetCurrentDirectory();
+    }
+
     static void Main()
     {
-        string csvPath = @"E:\CompanionClaude_v13_GreetingFix\DialogueDumper\fallout4_all_dialogue.csv";
-        string voiceDir = @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm\NPCFPiper";
+        string repoRoot = ResolveRepoRoot();
+        string csvPath = Environment.GetEnvironmentVariable("FALLOUT_DIALOGUE_CSV")
+            ?? Path.Combine(repoRoot, "DialogueDumper", "fallout4_all_dialogue.csv");
+        string voiceRoot = Environment.GetEnvironmentVariable("PIPER_VOICE_ROOT")
+            ?? Path.Combine(repoRoot, "VoiceFiles", "piper_voice", "Sound", "Voice", "Fallout4.esm");
+        string voiceDir = Path.Combine(voiceRoot, "NPCFPiper");
 
         Console.WriteLine("=== Piper Voice File Matcher ===\n");
+
+        if (!File.Exists(csvPath))
+        {
+            Console.WriteLine($"Missing CSV: {csvPath}");
+            return;
+        }
+        if (!Directory.Exists(voiceDir))
+        {
+            Console.WriteLine($"Missing Piper voice folder: {voiceDir}");
+            return;
+        }
 
         // Get all available Piper voice file IDs
         var availableVoiceFiles = Directory.GetFiles(voiceDir, "*.fuz")
@@ -93,8 +129,8 @@ class PiperVoiceMatcher
         Console.WriteLine("\n=== PLAYER VOICE MATCHES ===\n");
 
         var playerVoiceDirs = new[] {
-            @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm\PlayerVoiceMale01",
-            @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm\PlayerVoiceFemale01"
+            Path.Combine(voiceRoot, "PlayerVoiceMale01"),
+            Path.Combine(voiceRoot, "PlayerVoiceFemale01")
         };
 
         var availablePlayerVoiceFiles = playerVoiceDirs
@@ -160,3 +196,4 @@ class PiperVoiceMatcher
         Console.WriteLine("=== Done ===");
     }
 }
+

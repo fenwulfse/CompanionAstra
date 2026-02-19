@@ -1,9 +1,11 @@
+$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
 Write-Host "Generating CK checklist..."
-python E:\CompanionGeminiFeb26\Tools\generate_ck_checklist.py
+python (Join-Path $toolsDir "generate_ck_checklist.py")
 
 Write-Host "Generating player voice audit..."
-python E:\CompanionGeminiFeb26\Tools\player_voice_audit.py
+python (Join-Path $toolsDir "player_voice_audit.py")
 
 Write-Host "Reports written:"
-Write-Host " - E:\CompanionGeminiFeb26\Tools\CK_Checklist_Astra.txt"
-Write-Host " - E:\CompanionGeminiFeb26\Tools\PlayerVoice_Audit.txt"
+Write-Host " - $(Join-Path $toolsDir 'CK_Checklist_Astra.txt')"
+Write-Host " - $(Join-Path $toolsDir 'PlayerVoice_Audit.txt')"

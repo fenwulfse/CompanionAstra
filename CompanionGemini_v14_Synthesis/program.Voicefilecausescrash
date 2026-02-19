@@ -1408,11 +1408,11 @@ namespace CompanionGemini
             // 10. COPY VOICE FILES (Piper's .fuz files renamed to our FormKeys)
             Console.WriteLine("=== COPYING VOICE FILES ===");
             
-            // Try to find the voice files in the project root if the hardcoded path fails
-            string srcBase = @"C:\Users\fen\AppData\Local\Temp\claude\piper_voice\Sound\Voice\Fallout4.esm";
-            if (!System.IO.Directory.Exists(srcBase))
+            // Resolve source voice root from env or local workspace layout.
+            string srcBase = System.Environment.GetEnvironmentVariable("PIPER_VOICE_ROOT")
+                ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(srcBase) || !System.IO.Directory.Exists(srcBase))
             {
-                // Fallback to local project structure (E:\CompanionGeminiFeb26\VoiceFiles\...)
                 // dotnet run base dir is bin/Debug/net10.0, so up 4 levels to root
                 string rootCandidate = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", ".."));
                 srcBase = System.IO.Path.Combine(rootCandidate, "VoiceFiles", "piper_voice", "Sound", "Voice", "Fallout4.esm");
@@ -1434,7 +1434,14 @@ namespace CompanionGemini
                 return;
             }
 
-            string dstBase = @"D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionGemini.esp";
+            string? fo4Data = System.Environment.GetEnvironmentVariable("FO4_DATA");
+            if (string.IsNullOrWhiteSpace(fo4Data))
+            {
+                fo4Data = System.IO.Path.Combine(
+                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86),
+                    "Steam", "steamapps", "common", "Fallout 4", "Data");
+            }
+            string dstBase = System.IO.Path.Combine(fo4Data, "Sound", "Voice", "CompanionGemini.esp");
             int copied = 0;
 
             // NPC VOICE (Piper/Gemini speaking)

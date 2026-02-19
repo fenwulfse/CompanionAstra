@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Diagnostics;
 
@@ -54,11 +54,11 @@ namespace CompanionClaude
                 bw.Write(lipData);
             }
 
-            Console.WriteLine($"✓ Created .fuz file: {new FileInfo(fuzPath).Length} bytes");
+            Console.WriteLine($"âœ“ Created .fuz file: {new FileInfo(fuzPath).Length} bytes");
         }
 
         /// <summary>
-        /// Complete pipeline: WAV + text → .fuz file
+        /// Complete pipeline: WAV + text â†’ .fuz file
         /// </summary>
         /// <param name="wavPath">Input WAV file</param>
         /// <param name="dialogueText">Spoken dialogue text (for lip-sync generation)</param>
@@ -77,7 +77,7 @@ namespace CompanionClaude
 
             // Set default tool paths
             lipGenPath ??= Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tools", "LipGenerator.exe");
-            xwmEncodePath ??= @"D:\SteamLibrary\steamapps\common\Fallout 4\Tools\Audio\xwmaencode.exe";
+            xwmEncodePath ??= @"<FO4_INSTALL>\Tools\Audio\xwmaencode.exe";
 
             if (!File.Exists(lipGenPath))
                 throw new FileNotFoundException($"LipGenerator not found: {lipGenPath}");
@@ -105,7 +105,7 @@ namespace CompanionClaude
                 if (!File.Exists(lipPath))
                     throw new Exception($"LIP file was not created: {lipPath}");
 
-                Console.WriteLine($"✓ LIP created: {lipPath}");
+                Console.WriteLine($"âœ“ LIP created: {lipPath}");
 
                 // Step 2: Convert WAV to XWM
                 Console.WriteLine("\nStep 2/3: Converting WAV to XWM...");
@@ -114,7 +114,7 @@ namespace CompanionClaude
                 if (!File.Exists(xwmPath))
                     throw new Exception($"XWM file was not created: {xwmPath}");
 
-                Console.WriteLine($"✓ XWM created: {xwmPath}");
+                Console.WriteLine($"âœ“ XWM created: {xwmPath}");
 
                 // Step 3: Pack into .fuz
                 Console.WriteLine("\nStep 3/3: Packing .fuz file...");
@@ -199,14 +199,15 @@ namespace CompanionClaude
                 var audioSize = br.ReadUInt32();
                 var audioData = br.ReadBytes((int)audioSize);
                 File.WriteAllBytes(outputXwmPath, audioData);
-                Console.WriteLine($"✓ Extracted audio: {outputXwmPath} ({audioSize} bytes)");
+                Console.WriteLine($"âœ“ Extracted audio: {outputXwmPath} ({audioSize} bytes)");
 
                 // Read LIP data
                 var lipSize = br.ReadUInt32();
                 var lipData = br.ReadBytes((int)lipSize);
                 File.WriteAllBytes(outputLipPath, lipData);
-                Console.WriteLine($"✓ Extracted LIP: {outputLipPath} ({lipSize} bytes)");
+                Console.WriteLine($"âœ“ Extracted LIP: {outputLipPath} ({lipSize} bytes)");
             }
         }
     }
 }
+

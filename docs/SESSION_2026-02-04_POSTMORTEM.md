@@ -1,4 +1,4 @@
-# Session Post-Mortem: 2026-02-04
+﻿# Session Post-Mortem: 2026-02-04
 
 ## Overview
 
@@ -139,7 +139,8 @@ But even reverting to AlmostBack pattern didn't fix it according to user testing
 
 ## Session End State
 
-- Code pushed to GitHub: https://github.com/fenwulfse/CompanionClaude
+- Code pushed to GitHub: https://github.com/<GITHUB_OWNER>/CompanionClaude
 - User exhausted after hours of testing broken builds
 - No forward progress on voice coverage
 - Project needs external help to move forward
+

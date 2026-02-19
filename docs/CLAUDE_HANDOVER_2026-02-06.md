@@ -46,7 +46,7 @@
 - ✅ WAV → xwmaencode → .xwm (Tool found!)
 - ✅ XWM + LIP → FuzPacker.cs → .fuz (IMPLEMENTED!)
 - 🎉 **COMPLETE PIPELINE READY FOR TESTING!**
-- 📁 Tools ready in: `E:\CompanionClaude_v13_GreetingFix\Tools\`
+- 📁 Tools ready in: `<WORKSPACE_ROOT>\Tools\`
 
 ---
 
@@ -90,8 +90,8 @@
 ## 📂 File Locations:
 
 **Main Project:**
-- `E:\CompanionClaude_v13_GreetingFix\Program.cs` (v20)
-- `E:\CompanionClaude_v13_GreetingFix\Backups\` (all versions)
+- `<WORKSPACE_ROOT>\Program.cs` (v20)
+- `<WORKSPACE_ROOT>\Backups\` (all versions)
 
 **Tools:**
 - `Tools\LipGenerator.exe` - Bethesda's lip-sync tool ✅
@@ -167,9 +167,9 @@
 
 ## ✅ File/Path Changes
 - Voice source now uses **permanent extracted voices**:
-  - `E:\CompanionGeminiFeb26\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm`
+  - `<WORKSPACE_ROOT>\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm`
 - Voice destination (Astra):
-  - `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp\NPCFPiper`
+  - `<FO4_DATA>\Sound\Voice\CompanionAstra.esp\NPCFPiper`
 
 ## ✅ Working Proof
 - CK plays Astra pickup greeting without crashing.
@@ -182,13 +182,13 @@
 
 **Build & Run:**
 ```bash
-cd E:\CompanionClaude_v13_GreetingFix
+cd <WORKSPACE_ROOT>
 dotnet run
 ```
 
 **Test LipGenerator:**
 ```bash
-cd E:\CompanionClaude_v13_GreetingFix\Tools
+cd <WORKSPACE_ROOT>\Tools
 test_lipgen.bat test.wav "Dialogue text here"
 ```
 
@@ -204,7 +204,7 @@ FuzPacker.CreateFuzFromWav(
 ```
 
 **ESP Output:**
-`D:\SteamLibrary\steamapps\common\Fallout 4\Data\CompanionClaude.esp`
+`<FO4_DATA>\CompanionClaude.esp`
 
 ---
 
@@ -270,3 +270,4 @@ The user is right about tokens - we're pushing limits. But the foundation is DON
 *See you on Feb 9+, Claude!*
 *Token limit reached but mission accomplished!*
 *- Claude (2026-02-06 Sessions 5 & 6)*
+

@@ -7,7 +7,7 @@
 
 **Status:** Complete C# implementation ready for testing
 
-**Location:** `E:\CompanionClaude_v13_GreetingFix\FuzPacker.cs`
+**Location:** `<WORKSPACE_ROOT>\FuzPacker.cs`
 
 **Features:**
 - `PackFuzFile(xwm, lip, fuz)` - Pack XWM + LIP → .fuz
@@ -53,18 +53,18 @@ fuzmanager.exe -p "output.fuz" "input.lip" "input.xwm"
 ## 🛠️ Required Tools (All Found!):
 
 ### LipGenerator.exe ✅
-**Location:** `D:\SteamLibrary\steamapps\common\Fallout 4\Tools\LipGen\LipGenerator\`
-**Copied to:** `E:\CompanionClaude_v13_GreetingFix\Tools\`
+**Location:** `<FO4_INSTALL>\Tools\LipGen\LipGenerator\`
+**Copied to:** `<WORKSPACE_ROOT>\Tools\`
 **Purpose:** WAV + text → LIP lip-sync file
 
 ### xwmaencode.exe ✅
-**Location:** `D:\SteamLibrary\steamapps\common\Fallout 4\Tools\Audio\`
-**Copied to:** `E:\CompanionClaude_v13_GreetingFix\Tools\`
+**Location:** `<FO4_INSTALL>\Tools\Audio\`
+**Copied to:** `<WORKSPACE_ROOT>\Tools\`
 **Purpose:** WAV → XWM compressed audio
 
 ### FonixData.cdf ✅
-**Location:** `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\Processing\`
-**Copied to:** `E:\CompanionClaude_v13_GreetingFix\Tools\`
+**Location:** `<FO4_DATA>\Sound\Voice\Processing\`
+**Copied to:** `<WORKSPACE_ROOT>\Tools\`
 **Purpose:** Phoneme database for LipGenerator
 
 ---
@@ -141,3 +141,4 @@ Offset | Size | Content
 
 *Last updated: 2026-02-06 Session 6*
 *Status: Implementation Complete, Testing Pending*
+

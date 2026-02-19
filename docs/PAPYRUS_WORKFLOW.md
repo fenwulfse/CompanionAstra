@@ -1,4 +1,4 @@
-# Papyrus Workflow (Astra)
+﻿# Papyrus Workflow (Astra)
 
 ## Compiler Policy
 - Use Bethesda Papyrus compiler (`PapyrusCompiler.exe`) for final artifact generation.
@@ -19,21 +19,21 @@
 
 ## Required Paths
 - Compiler:
-  - `E:\SteamLibrary\steamapps\common\Fallout 4\Papyrus Compiler\PapyrusCompiler.exe`
+  - `<FO4_INSTALL>\Papyrus Compiler\PapyrusCompiler.exe`
 - Flags:
-  - `E:\SteamLibrary\steamapps\common\Fallout 4\Data\Scripts\Source\Base\Institute_Papyrus_Flags.flg`
+  - `<FO4_DATA>\Scripts\Source\Base\Institute_Papyrus_Flags.flg`
 - Source root:
-  - `E:\FO4Projects\Tools\Papyrus`
+  - `<WORKSPACE_ROOT>\Tools\Papyrus`
 - Output root:
-  - `E:\FO4Projects\Tools\Papyrus\Output`
+  - `<WORKSPACE_ROOT>\Tools\Papyrus\Output`
 
 ## Compile Command
 ```powershell
-& "E:\SteamLibrary\steamapps\common\Fallout 4\Papyrus Compiler\PapyrusCompiler.exe" `
-  "E:\FO4Projects\Tools\Papyrus" `
-  -f="E:\SteamLibrary\steamapps\common\Fallout 4\Data\Scripts\Source\Base\Institute_Papyrus_Flags.flg" `
-  -i="E:\FO4Projects\Tools\Papyrus;E:\SteamLibrary\steamapps\common\Fallout 4\Data\Scripts\Source\Base;E:\SteamLibrary\steamapps\common\Fallout 4\Data\Scripts\Source\User" `
-  -o="E:\FO4Projects\Tools\Papyrus\Output" `
+& "<FO4_INSTALL>\Papyrus Compiler\PapyrusCompiler.exe" `
+  "<WORKSPACE_ROOT>\Tools\Papyrus" `
+  -f="<FO4_DATA>\Scripts\Source\Base\Institute_Papyrus_Flags.flg" `
+  -i="<WORKSPACE_ROOT>\Tools\Papyrus;<FO4_DATA>\Scripts\Source\Base;<FO4_DATA>\Scripts\Source\User" `
+  -o="<WORKSPACE_ROOT>\Tools\Papyrus\Output" `
   -all
 ```
 
@@ -43,7 +43,7 @@
 
 ## Piper Fragment Reference
 - Loose vanilla source script:
-  - `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Scripts\Source\Base\Fragments\Quests\QF_COMPiper_000BBD96.psc`
+  - `<FO4_DATA>\Scripts\Source\Base\Fragments\Quests\QF_COMPiper_000BBD96.psc`
 - This is valid as a template for stage fragment logic, after renaming.
 
 ## Deploy Rule
@@ -61,3 +61,4 @@
   - `Data\Scripts\Source\User\Fragments\Quests\QF_COMAstra_00000805.psc`
 - Do not deploy to nested paths like:
   - `Data\Scripts\Fragments\Quests\Fragments\Quests\...`
+

@@ -11,7 +11,7 @@ Phases, actions, flags, conditions, alias IDs, loop values, and the exact topics
 
 ## Source of Truth
 We used the Gemini inspector to dump Piper's pickup scene from Fallout4.esm:
-`E:\Gemini\Inspectors\InspectPiperPickup\InspectPiperPickup.csproj`
+`<ARCHIVE_ROOT>\Inspectors\InspectPiperPickup\InspectPiperPickup.csproj`
 
 Key outputs from the inspector:
 - 3 actors
@@ -24,7 +24,7 @@ Key outputs from the inspector:
   - HasLoaded3D == 1 (RunOn: QuestAlias 0)
 
 ## Implementation (Astra)
-File: `E:\CompanionGeminiFeb26\CompanionAstra\Program.cs`
+File: `<WORKSPACE_ROOT>\CompanionAstra\Program.cs`
 
 ### 1) Phases and Conditions
 We removed alias-based conditions and replaced with Piper's exact StartConditions:

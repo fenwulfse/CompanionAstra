@@ -5,6 +5,7 @@ This is the working index for the living docs set (wiki/encyclopedia/bible/how-t
 ## Start Here
 - `docs/MULTI_AGENT_GIT_WORKFLOW.md` - git branches, promotion flow, and push policy for ChatGPT/Claude/Gemini.
 - `docs/agents/WORK_SPLIT.md` - ownership split and merge gate for agent lanes.
+- `docs/TEAM_COLLAB_PROTOCOL.md` - strict collaboration rules, deploy ownership, and human tester process.
 - `docs/COMPANION_CREATION_BIBLE.md` - rules, architecture, and parity model.
 - `docs/PAPYRUS_WORKFLOW.md` - compiler workflow and fragment script handling.
 - `docs/BACKUP_WORKFLOW.md` - backup intervals, snapshot command, restore steps.

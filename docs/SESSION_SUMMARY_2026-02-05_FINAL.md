@@ -205,9 +205,9 @@ tradeInfo.Flags = new DialogResponseFlags { Flags = EndSceneFlag };
 ## Research Sources Used
 
 ### Code Archives:
-- E:\Gemini\ULTRAGRAND_ARCHIVE\00_FLATTENED_TIMELINE\2026-01-10_CompanionClaude_v1_2953\Program.cs
-- E:\Gemini\ULTRAGRAND_ARCHIVE\00_FLATTENED_TIMELINE\2026-01-10_CompanionClaude_v2_SceneFixes_9455\Program.cs
-- E:\Gemini\ULTRAGRAND_ARCHIVE\00_FLATTENED_TIMELINE\2026-01-10_CompanionClaude_v3_ButtonFix_4d34\Program.cs
+- <ARCHIVE_ROOT>\ULTRAGRAND_ARCHIVE\00_FLATTENED_TIMELINE\2026-01-10_CompanionClaude_v1_2953\Program.cs
+- <ARCHIVE_ROOT>\ULTRAGRAND_ARCHIVE\00_FLATTENED_TIMELINE\2026-01-10_CompanionClaude_v2_SceneFixes_9455\Program.cs
+- <ARCHIVE_ROOT>\ULTRAGRAND_ARCHIVE\00_FLATTENED_TIMELINE\2026-01-10_CompanionClaude_v3_ButtonFix_4d34\Program.cs
 
 ### Key Findings from Archives:
 - Flag 64 = End Running Scene
@@ -225,7 +225,7 @@ tradeInfo.Flags = new DialogResponseFlags { Flags = EndSceneFlag };
 
 ## Memory File Updated
 
-Location: `C:\Users\fen\.claude\projects\E--CompanionClaude-v13-GreetingFix\memory\MEMORY.md`
+Location: `<USER_HOME>\.claude\projects\E--CompanionClaude-v13-GreetingFix\memory\MEMORY.md`
 
 Key updates:
 - Question response system complete
@@ -238,11 +238,11 @@ Key updates:
 ## Build Commands
 
 ```bash
-cd "E:\CompanionClaude_v13_GreetingFix"
+cd "<WORKSPACE_ROOT>"
 dotnet run
 ```
 
-Output ESP: `D:\SteamLibrary\steamapps\common\Fallout 4\Data\CompanionClaude.esp`
+Output ESP: `<FO4_DATA>\CompanionClaude.esp`
 
 ---
 
@@ -254,3 +254,4 @@ Output ESP: `D:\SteamLibrary\steamapps\common\Fallout 4\Data\CompanionClaude.esp
 4. **Test chain uses trigger stages:** 110, 406, 410, 440, 496 (NOT production stages)
 5. **EndSceneFlag (64):** Available but not yet applied to any responses
 6. **Phase index warnings:** May be auto-resolved by CK, need to test in-game functionality
+

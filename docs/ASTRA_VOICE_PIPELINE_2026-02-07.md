@@ -21,9 +21,9 @@ Automate voice generation for pickup scene using local, free tools and ensure CK
 
 ## Current Output Paths
 - Source vanilla voices:
-  - `E:\CompanionGeminiFeb26\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm`
+  - `<WORKSPACE_ROOT>\VoiceFiles\piper_voice\Sound\Voice\Fallout4.esm`
 - Destination Astra voices:
-  - `D:\SteamLibrary\steamapps\common\Fallout 4\Data\Sound\Voice\CompanionAstra.esp\NPCFPiper`
+  - `<FO4_DATA>\Sound\Voice\CompanionAstra.esp\NPCFPiper`
 
 ## TTS Example (Female)
 ```powershell
@@ -32,7 +32,7 @@ $tts = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $tts.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::Female)
 $tts.Rate = 0
 $tts.Volume = 100
-$tts.SetOutputToWaveFile("E:\CompanionGeminiFeb26\Tools\astra_line.wav")
+$tts.SetOutputToWaveFile("<WORKSPACE_ROOT>\Tools\astra_line.wav")
 $tts.Speak("Hello. I am Astra. Ready to move out?")
 $tts.Dispose()
 ```
@@ -50,4 +50,5 @@ WriteBytes(audioData);
 - CK playback works with FO4 layout.
 - Pickup scene is Astra text + TTS audio.
 - Companion/Dogmeat phase conditions match vanilla behavior.
+
 
