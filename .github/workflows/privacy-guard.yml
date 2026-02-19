@@ -17,7 +17,7 @@ jobs:
         run: |
           set -euo pipefail
           patterns='(E:\\|D:\\|C:\\Users\\)'
-          if git grep -n -I -E "$patterns" -- . ':(exclude).git' ':(exclude)*.png' ':(exclude)*.jpg' ':(exclude)*.jpeg' ':(exclude)*.gif' ':(exclude)*.bmp'; then
+          if git grep -n -I -E "$patterns" -- . ':(exclude).git' ':(exclude).github/workflows/privacy-guard.yml' ':(exclude)*.png' ':(exclude)*.jpg' ':(exclude)*.jpeg' ':(exclude)*.gif' ':(exclude)*.bmp'; then
             echo "Path or identity leak detected. Replace with placeholders before merge."
             exit 1
           fi

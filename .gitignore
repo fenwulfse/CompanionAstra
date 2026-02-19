@@ -18,6 +18,7 @@ FaceFXWrapper-0.41.tar.gz
 !Tools/run_autopilot_cycle.ps1
 !Tools/create_playtest_packet.ps1
 !Tools/VerifyLockedIDConsistency.ps1
+!Tools/bootstrap_external_collab.ps1
 !Tools/FO4Edit/
 !Tools/FO4Edit/Edit Scripts/
 !Tools/FO4Edit/Edit Scripts/DumpDialogueToCSV_Astra.pas
