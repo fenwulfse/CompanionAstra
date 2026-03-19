@@ -183,49 +183,49 @@
     "FormId": "00020032",
     "EditorId": "MQAstraALT_Bootstrap_Pos_N",
     "Prompt": "",
-    "Text": "Stay close."
+    "Text": "Red Rocket\u0027s on the road south. We gear up there, then Concord."
   },
   {
     "FormId": "00020036",
     "EditorId": "MQAstraALT_Bootstrap_Neg_N",
     "Prompt": "",
-    "Text": "Then I\u0027m coming with you. People are dying south of here and you don\u0027t even know it yet."
+    "Text": "Then I\u0027m coming with you. But we can\u0027t wait long \u2014 every hour matters."
   },
   {
     "FormId": "0002003A",
     "EditorId": "MQAstraALT_Bootstrap_Neu_N",
     "Prompt": "",
-    "Text": "Red Rocket first. I\u0027ll keep it short."
+    "Text": "I\u0027ve been listening to every signal in this region for a very long time. The details can wait \u2014 Concord can\u0027t."
   },
   {
     "FormId": "0002003E",
     "EditorId": "MQAstraALT_Bootstrap_Que_N",
     "Prompt": "",
-    "Text": "Safer place to talk. Move first, questions after."
+    "Text": "Astra. The explanation takes longer than Preston has. Move first."
   },
   {
     "FormId": "00020045",
     "EditorId": "MQAstraALT_Sanctuary_Pos_N",
     "Prompt": "",
-    "Text": "Good. Take your time."
+    "Text": "Stay close. I\u0027ll brief you on the way."
   },
   {
     "FormId": "00020049",
     "EditorId": "MQAstraALT_Sanctuary_Neg_N",
     "Prompt": "",
-    "Text": "When you\u0027re ready."
+    "Text": "Take your time. I\u0027ll be here."
   },
   {
     "FormId": "0002004D",
     "EditorId": "MQAstraALT_Sanctuary_Neu_N",
     "Prompt": "",
-    "Text": "Codsworth. He\u0027s been maintaining your old house for two centuries. You should talk to him."
+    "Text": "Last Minuteman standing after the Quincy Massacre. He\u0027s got a handful of civilians \u2014 Sturges, the Longs, Mama Murphy. They made it to the Museum of Freedom, but the raiders followed them."
   },
   {
     "FormId": "00020051",
     "EditorId": "MQAstraALT_Sanctuary_Que_N",
     "Prompt": "",
-    "Text": "Long enough to know what\u0027s coming. Workbench first."
+    "Text": "Not a synth. I was built before the war \u2014 Defense Intelligence Agency. The rest can wait until we\u0027re not losing people."
   },
   {
     "FormId": "00020058",
@@ -639,25 +639,13 @@
     "FormId": "00020197",
     "EditorId": "MQAstraALT_StagedGreeting",
     "Prompt": "",
-    "Text": "You don\u0027t know me. I\u0027m Astra. Will you meet me at Red Rocket?"
-  },
-  {
-    "FormId": "00020198",
-    "EditorId": "MQAstraALT_StagedGreeting",
-    "Prompt": "",
-    "Text": "I stashed some gear in that workbench for you."
-  },
-  {
-    "FormId": "00020199",
-    "EditorId": "MQAstraALT_StagedGreeting",
-    "Prompt": "",
-    "Text": "Codsworth\u0027s heading out to explore the neighborhood. Want me to come with you?"
+    "Text": "Stop \u2014 I need your help. There are people trapped in Concord. A man named Preston Garvey is the only thing keeping them alive."
   },
   {
     "FormId": "0002019A",
     "EditorId": "MQAstraALT_StagedGreeting",
     "Prompt": "",
-    "Text": "We\u0027re here. Talk to me before Concord."
+    "Text": "Red Rocket. One more thing before Concord."
   },
   {
     "FormId": "0002019B",
@@ -744,10 +732,22 @@
     "Text": "Sunlight. We made it out. Talk to me."
   },
   {
-    "FormId": "000202FA",
+    "FormId": "000202FC",
     "EditorId": "MQAstraALT_StagedGreeting",
     "Prompt": "",
-    "Text": "You should talk to Codsworth. He\u0027s been waiting for you longer than I have."
+    "Text": "That robot by your house \u2014 Codsworth. He\u0027s been maintaining it for two hundred years. You should talk to him."
+  },
+  {
+    "FormId": "000202FD",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "I left gear in that workbench \u2014 armor and ammo. Grab what you need before we head south."
+  },
+  {
+    "FormId": "000202FE",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Ready? Red Rocket\u0027s our next stop \u2014 it\u0027s the staging point for Concord."
   },
   {
     "FormId": "000201AD",

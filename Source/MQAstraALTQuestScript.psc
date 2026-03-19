@@ -237,11 +237,11 @@ if AstraActor
   if AstraTravelToRedRocketScene && AstraTravelToRedRocketScene.IsPlaying()
     AstraTravelToRedRocketScene.Stop()
   endif
-  ; Start dialogue scene BEFORE FollowerWait so the scene grabs Astra first
+  ; Start dialogue scene — Astra's alias packages handle AI state
   if RedRocketScene && !RedRocketScene.IsPlaying()
     RedRocketScene.Start()
   endif
-  FollowersScript.GetScript().FollowerWait(AstraActor)
+  ; No FollowerWait — Astra is not in the Followers quest
   AstraActor.EvaluatePackage(abResetAI = true)
 endif
 
@@ -324,9 +324,7 @@ if AstraActor
   if DisallowedCompanionFaction
     AstraActor.RemoveFromFaction(DisallowedCompanionFaction)
   endif
-  ; Resume following (was set to wait at Red Rocket stage 9)
-  FollowersScript.GetScript().FollowerFollow(AstraActor)
-  FollowersScript.GetScript().FollowerSetDistanceMedium(AstraActor)
+  ; Resume following — alias packages handle AI (no FollowerFollow, Astra not in Followers quest)
   AstraActor.EvaluatePackage(abResetAI = true)
   if AstraEscortScene && AstraEscortScene.IsPlaying()
     AstraEscortScene.Stop()
@@ -718,7 +716,7 @@ if AstraActor
   if DogmeatEscortScene && DogmeatEscortScene.IsPlaying()
     DogmeatEscortScene.Stop()
   endif
-  FollowersScript.GetScript().FollowerWait(AstraActor)
+  ; No FollowerWait — Astra is not in the Followers quest
   AstraActor.SetPlayerTeammate(abTeammate = false)
   if DisallowedCompanionFaction
     AstraActor.RemoveFromFaction(DisallowedCompanionFaction)

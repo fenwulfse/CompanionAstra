@@ -38,50 +38,50 @@
   {
     "FormId": "00020030",
     "EditorId": "MQAstraALT_Bootstrap_Pos_P",
-    "Prompt": "Sure. Let\u0027s go.",
-    "Text": "Sure. Let\u0027s go."
+    "Prompt": "Lead the way.",
+    "Text": "Lead the way."
   },
   {
     "FormId": "00020034",
     "EditorId": "MQAstraALT_Bootstrap_Neg_P",
-    "Prompt": "No. I\u0027m going home first.",
-    "Text": "No. I\u0027m going home first."
+    "Prompt": "I need to get home first.",
+    "Text": "I need to get home first."
   },
   {
     "FormId": "00020038",
     "EditorId": "MQAstraALT_Bootstrap_Neu_P",
-    "Prompt": "Brief me on the way.",
-    "Text": "Brief me on the way."
+    "Prompt": "How do you know this?",
+    "Text": "How do you know this?"
   },
   {
     "FormId": "0002003C",
     "EditorId": "MQAstraALT_Bootstrap_Que_P",
-    "Prompt": "Why Red Rocket?",
-    "Text": "Why Red Rocket?"
+    "Prompt": "Who are you?",
+    "Text": "Who are you?"
   },
   {
     "FormId": "00020043",
     "EditorId": "MQAstraALT_Sanctuary_Pos_P",
-    "Prompt": "Thanks. I\u0027ll check it out.",
-    "Text": "Thanks. I\u0027ll check it out."
+    "Prompt": "Let\u0027s move.",
+    "Text": "Let\u0027s move."
   },
   {
     "FormId": "00020047",
     "EditorId": "MQAstraALT_Sanctuary_Neg_P",
-    "Prompt": "Not yet.",
-    "Text": "Not yet."
+    "Prompt": "Give me a minute.",
+    "Text": "Give me a minute."
   },
   {
     "FormId": "0002004B",
     "EditorId": "MQAstraALT_Sanctuary_Neu_P",
-    "Prompt": "What about that robot?",
-    "Text": "What about that robot?"
+    "Prompt": "Tell me about Preston.",
+    "Text": "Tell me about Preston."
   },
   {
     "FormId": "0002004F",
     "EditorId": "MQAstraALT_Sanctuary_Que_P",
-    "Prompt": "How long have you been watching?",
-    "Text": "How long have you been watching?"
+    "Prompt": "You said two hundred years. What are you?",
+    "Text": "You said two hundred years. What are you?"
   },
   {
     "FormId": "00020056",

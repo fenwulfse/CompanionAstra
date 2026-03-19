@@ -34,7 +34,26 @@ static class DumpDeaconVsAstra
         Console.WriteLine($"{indent}  Data keys ({pkg.Data.Count}):");
         foreach (var kvp in pkg.Data)
         {
-            Console.WriteLine($"{indent}    Key {kvp.Key}: {kvp.Value.GetType().Name}");
+            string val = kvp.Value switch
+            {
+                IPackageDataBoolGetter b => $"Bool({b.Data})",
+                IPackageDataIntGetter i => $"Int({i.Data})",
+                IPackageDataFloatGetter f => $"Float({f.Data})",
+                IPackageDataLocationGetter loc => loc.Location switch
+                {
+                    ILocationTargetRadiusGetter ltr => $"Location(Target={ltr.Target}, Radius={ltr.Radius})",
+                    _ => $"Location({loc.Location})"
+                },
+                IPackageDataTargetGetter tgt => tgt.Target switch
+                {
+                    IPackageTargetSpecificReferenceGetter sr => $"Target(SpecificRef={sr.Reference.FormKey}, dist={sr.CountOrDistance}, type={tgt.Type})",
+                    IPackageTargetObjectIDGetter oid => $"Target(ObjectID, dist={oid.CountOrDistance}, type={tgt.Type})",
+                    IPackageTargetSelfGetter => $"Target(Self, type={tgt.Type})",
+                    _ => $"Target({tgt.Target}, type={tgt.Type})"
+                },
+                _ => kvp.Value.GetType().Name
+            };
+            Console.WriteLine($"{indent}    Key {kvp.Key}: {val}");
         }
     }
 

@@ -188,6 +188,26 @@ namespace MQAstraALT
                 DumpDeaconVsAstra.Run();
                 return;
             }
+            if (HasArg("--compare-esp"))
+            {
+                var rawPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "MQAstraALT.esp");
+                var ckPath = @"E:\SteamLibrary\steamapps\common\Fallout 4\Data\MQAstraALT.esp";
+                DumpESPCompare.Run(rawPath, ckPath);
+                return;
+            }
+            if (HasArg("--lookup"))
+            {
+                using var lenv = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                Console.WriteLine("=== Combat Styles (all) ===");
+                foreach (var cs in lenv.LoadOrder.PriorityOrder.WinningOverrides<ICombatStyleGetter>()
+                    .Where(c => c.EditorID != null))
+                    Console.WriteLine($"  {cs.EditorID} = {cs.FormKey}");
+                Console.WriteLine("\n=== Armor containing 'Combat' or 'Military' ===");
+                foreach (var a in lenv.LoadOrder.PriorityOrder.WinningOverrides<IArmorGetter>()
+                    .Where(a => a.EditorID != null && (a.EditorID.Contains("Combat", StringComparison.OrdinalIgnoreCase) || a.EditorID.Contains("MilitaryFatigues", StringComparison.OrdinalIgnoreCase))))
+                    Console.WriteLine($"  {a.EditorID} = {a.FormKey}");
+                return;
+            }
             if (HasArg("--dump-astra-flags"))
             {
                 DumpAstraQuestFlags.Run();
@@ -370,23 +390,43 @@ namespace MQAstraALT
             };
             mod.Globals.Add(astraPickupDistanceGlobal);
 
-            // Combat style: use Danse's (aggressive, power-attack heavy, ranged+melee)
-            var danseCombatStyle = new FormLinkNullable<ICombatStyleGetter>(new FormKey(fo4, 0x00136B9D));
+            // Combat style: Piper's (ranged female companion, closest match to Astra)
+            var combatStyleRecord = env.LoadOrder.PriorityOrder.WinningOverrides<ICombatStyleGetter>()
+                .FirstOrDefault(cs => cs.EditorID == "csCompPiper");
+            var danseCombatStyle = combatStyleRecord != null
+                ? new FormLinkNullable<ICombatStyleGetter>(combatStyleRecord.FormKey)
+                : new FormLinkNullable<ICombatStyleGetter>();
+            Console.WriteLine($"CombatStyle: {combatStyleRecord?.EditorID ?? "NONE"} = {(combatStyleRecord != null ? combatStyleRecord.FormKey.ToString() : "null")}");
 
-            // Default outfit: Military Fatigues + Combat Armor + Combat Rifle
-            // Create a custom outfit with leveled items
+            // Default outfit: Military Fatigues + Combat Armor
+            // Lookup armor ARMO records by EditorID (old hardcoded FormKeys were ARMA addon records, not ARMO)
+            var armorLookup = env.LoadOrder.PriorityOrder.WinningOverrides<IArmorGetter>()
+                .Where(a => a.EditorID != null)
+                .ToDictionary(a => a.EditorID!, a => a.FormKey, StringComparer.OrdinalIgnoreCase);
+
+            var outfitItems = new ExtendedList<IFormLinkGetter<IOutfitTargetGetter>>();
+            void TryAddOutfitItem(string editorId)
+            {
+                if (armorLookup.TryGetValue(editorId, out var fk))
+                {
+                    outfitItems.Add(fk.ToLink<IOutfitTargetGetter>());
+                    Console.WriteLine($"  Outfit: {editorId} = {fk}");
+                }
+                else
+                    Console.WriteLine($"  Outfit: {editorId} NOT FOUND — skipped");
+            }
+            Console.WriteLine("Building Astra outfit...");
+            TryAddOutfitItem("ClothesMilitaryFatigues");
+            TryAddOutfitItem("Armor_Combat_Torso");
+            TryAddOutfitItem("Armor_Combat_ArmLeft");
+            TryAddOutfitItem("Armor_Combat_ArmRight");
+            TryAddOutfitItem("Armor_Combat_LegLeft");
+            TryAddOutfitItem("Armor_Combat_LegRight");
+
             var claudeOutfit = new Outfit(new FormKey(modKey, 0x000806), Fallout4Release.Fallout4)
             {
                 EditorID = "MQAstraALT_AstraOutfit",
-                Items = new ExtendedList<IFormLinkGetter<IOutfitTargetGetter>>
-                {
-                    new FormKey(fo4, 0x0014E58E).ToLink<IOutfitTargetGetter>(), // Armor_MilitaryFatigues (full body)
-                    new FormKey(fo4, 0x0011E2C8).ToLink<IOutfitTargetGetter>(), // Armor_Combat_Chest
-                    new FormKey(fo4, 0x0011E2C6).ToLink<IOutfitTargetGetter>(), // Armor_Combat_LArm
-                    new FormKey(fo4, 0x0011E2C7).ToLink<IOutfitTargetGetter>(), // Armor_Combat_RArm
-                    new FormKey(fo4, 0x0011E2C4).ToLink<IOutfitTargetGetter>(), // Armor_Combat_LLeg
-                    new FormKey(fo4, 0x0011E2C5).ToLink<IOutfitTargetGetter>(), // Armor_Combat_RLeg
-                }
+                Items = outfitItems
             };
             mod.Outfits.Add(claudeOutfit);
 
@@ -406,7 +446,15 @@ namespace MQAstraALT
                 Flags = Npc.Flag.Unique | Npc.Flag.Essential | Npc.Flag.AutoCalcStats | Npc.Flag.Female,
                 Factions = new ExtendedList<RankPlacement>(),
                 Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>> { actorTypeNpc },
-                Properties = new ExtendedList<ObjectProperty>(),
+                Properties = new ExtendedList<ObjectProperty>
+                {
+                    new ObjectProperty
+                    {
+                        ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>()
+                            .First(av => av.EditorID == "SpeedMult").ToLink(),
+                        Value = 100f
+                    }
+                },
                 Packages = new ExtendedList<IFormLinkGetter<IPackageGetter>>(),
                 Aggression = (Npc.AggressionType)1,     // Aggressive — attacks enemies on sight
                 Confidence = (Npc.ConfidenceType)3,     // Brave — won't flee
@@ -783,6 +831,8 @@ namespace MQAstraALT
             astraTravelToRedRocketPkg.Data.Add(7, new PackageDataBool { Data = false });
             Console.WriteLine($"Astra travel package: {astraTravelToRedRocketPkg.EditorID} ({astraTravelToRedRocketPkg.FormKey}) -> {redRocketCenterMarker.FormKey}");
 
+            // EscortPlayerWhenNear template: DataInputVersion=5, all 10 data keys.
+            // CK "Resolve" dialog triggers when DataInputVersion or data keys don't match template.
             Package CreateEscortPlayerWhenNearPackage(string editorId, string stableName,
                 IPlacedGetter destinationMarker, List<ConditionFloat>? extraConditions = null)
             {
@@ -792,12 +842,12 @@ namespace MQAstraALT
                     Type = Package.Types.Package,
                     Flags = Package.Flag.PreferredSpeed,
                     PreferredSpeed = Package.Speed.Jog,
-                    DataInputVersion = 1,
-                ScheduleMonth = 0,
-                ScheduleDayOfWeek = Package.DayOfWeek.Any,
-                ScheduleDate = 0,
-                ScheduleHour = -1,
-                ScheduleDurationInMinutes = 0
+                    DataInputVersion = 5,
+                    ScheduleMonth = 0,
+                    ScheduleDayOfWeek = Package.DayOfWeek.Any,
+                    ScheduleDate = 0,
+                    ScheduleHour = -1,
+                    ScheduleDurationInMinutes = 0
                 };
                 pkg.PackageTemplate.SetTo(escortPlayerWhenNearTemplateFK);
                 pkg.OwnerQuest.SetTo(questFK);
@@ -904,8 +954,7 @@ namespace MQAstraALT
             };
             var sanctuaryEscortMarker = sanctuaryMarker ?? redRocketCenterMarker; // fallback
             // No conditions on this package — scene controls when it runs via RunOnlyScenePackages
-            // Minimal data keys (key 2 only) — avoids CK "Resolve" dialog.
-            // Template defaults handle everything else.
+            // EscortPlayerWhenNear template: DataInputVersion=5, all 10 data keys.
             var astraEscortPlayerWhenNearToSanctuaryPkg = new Package(
                 Stable("Package:MQAstraALT_AstraEscortPlayerWhenNearToSanctuary"), Fallout4Release.Fallout4)
             {
@@ -913,7 +962,7 @@ namespace MQAstraALT
                 Type = Package.Types.Package,
                 Flags = Package.Flag.PreferredSpeed,
                 PreferredSpeed = Package.Speed.Jog,
-                DataInputVersion = 1,
+                DataInputVersion = 5,
                 ScheduleMonth = 0,
                 ScheduleDayOfWeek = Package.DayOfWeek.Any,
                 ScheduleDate = 0,
@@ -934,12 +983,29 @@ namespace MQAstraALT
                     CollectionIndex = 0
                 }
             });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(6, new PackageDataTarget
+            {
+                Target = new PackageTargetSpecificReference
+                {
+                    Reference = playerRefFK.ToLink<IPlacedGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.SingleRef
+            });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(1, new PackageDataInt { Data = 1 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(3, new PackageDataFloat { Data = 1000 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(16, new PackageDataFloat { Data = 600 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(14, new PackageDataFloat { Data = 5000 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(4, new PackageDataFloat { Data = 128 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(5, new PackageDataFloat { Data = 728 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(12, new PackageDataFloat { Data = 512 });
+            astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(8, new PackageDataBool { Data = true });
             Console.WriteLine($"Astra Sanctuary escort package: {astraEscortPlayerWhenNearToSanctuaryPkg.EditorID} ({astraEscortPlayerWhenNearToSanctuaryPkg.FormKey}) -> {sanctuaryEscortMarker.FormKey}");
 
             // ======================================================================
             // Astra follow-player package (Deacon pattern: alias package, stage-gated)
             // Template: FollowPlayer (02A105) — NPC trails behind player
-            // No data key overrides — let template defaults handle everything
+            // DataInputVersion=28, all 31 data keys (matching CK resolve output)
             // Conditions: stage 6 done (negative path active) AND stage 9 not done
             // ======================================================================
             var astraFollowPlayerPkg = new Package(
@@ -949,7 +1015,7 @@ namespace MQAstraALT
                 Type = Package.Types.Package,
                 Flags = Package.Flag.PreferredSpeed,
                 PreferredSpeed = Package.Speed.Jog,
-                DataInputVersion = 1,
+                DataInputVersion = 28,
                 ScheduleMonth = 0,
                 ScheduleDayOfWeek = Package.DayOfWeek.Any,
                 ScheduleDate = 0,
@@ -958,6 +1024,62 @@ namespace MQAstraALT
             };
             astraFollowPlayerPkg.PackageTemplate.SetTo(followPlayerTemplateFK);
             astraFollowPlayerPkg.OwnerQuest.SetTo(questFK);
+            // FollowPlayer template data keys (31 keys, values from FollowersCompanionPackage defaults)
+            astraFollowPlayerPkg.Data.Add(0, new PackageDataBool { Data = true });
+            astraFollowPlayerPkg.Data.Add(4, new PackageDataTarget
+            {
+                Target = new PackageTargetSpecificReference
+                {
+                    Reference = playerRefFK.ToLink<IPlacedGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.SingleRef
+            });
+            astraFollowPlayerPkg.Data.Add(5, new PackageDataFloat { Data = 150 });
+            astraFollowPlayerPkg.Data.Add(6, new PackageDataFloat { Data = 300 });
+            astraFollowPlayerPkg.Data.Add(8, new PackageDataBool { Data = true });
+            astraFollowPlayerPkg.Data.Add(10, new PackageDataBool { Data = false });
+            astraFollowPlayerPkg.Data.Add(14, new PackageDataFloat { Data = 0 });
+            astraFollowPlayerPkg.Data.Add(18, new PackageDataBool { Data = true });
+            astraFollowPlayerPkg.Data.Add(20, new PackageDataBool { Data = false });
+            astraFollowPlayerPkg.Data.Add(24, new PackageDataBool { Data = false });
+            astraFollowPlayerPkg.Data.Add(25, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = new LocationFallback(), Radius = 0 }
+            });
+            astraFollowPlayerPkg.Data.Add(27, new PackageDataFloat { Data = 300 });
+            astraFollowPlayerPkg.Data.Add(28, new PackageDataFloat { Data = 600 });
+            astraFollowPlayerPkg.Data.Add(29, new PackageDataFloat { Data = 600 });
+            astraFollowPlayerPkg.Data.Add(30, new PackageDataFloat { Data = 1000 });
+            astraFollowPlayerPkg.Data.Add(32, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = new LocationFallback(), Radius = 1000 }
+            });
+            astraFollowPlayerPkg.Data.Add(35, new PackageDataFloat { Data = 50 });
+            astraFollowPlayerPkg.Data.Add(37, new PackageDataFloat { Data = 300 });
+            astraFollowPlayerPkg.Data.Add(39, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = new LocationTarget(), Radius = 1000 }
+            });
+            astraFollowPlayerPkg.Data.Add(41, new PackageDataBool { Data = true });
+            astraFollowPlayerPkg.Data.Add(43, new PackageDataFloat { Data = 15 });
+            astraFollowPlayerPkg.Data.Add(45, new PackageDataBool { Data = false });
+            astraFollowPlayerPkg.Data.Add(48, new PackageDataTarget
+            {
+                Target = new PackageTargetObjectID { CountOrDistance = 0 },
+                Type = PackageDataTarget.Types.Target
+            });
+            astraFollowPlayerPkg.Data.Add(50, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = new LocationTarget(), Radius = 500 }
+            });
+            astraFollowPlayerPkg.Data.Add(52, new PackageDataObjectList());
+            astraFollowPlayerPkg.Data.Add(57, new PackageDataFloat { Data = 0 });
+            astraFollowPlayerPkg.Data.Add(59, new PackageDataBool { Data = true });
+            astraFollowPlayerPkg.Data.Add(61, new PackageDataFloat { Data = 0 });
+            astraFollowPlayerPkg.Data.Add(62, new PackageDataFloat { Data = 0 });
+            astraFollowPlayerPkg.Data.Add(64, new PackageDataFloat { Data = 150 });
+            astraFollowPlayerPkg.Data.Add(66, new PackageDataFloat { Data = 250 });
             // Stage gate: active from stage 6 (negative path) until stage 9 (Red Rocket)
             astraFollowPlayerPkg.Conditions.Add(new ConditionFloat
             {
@@ -1031,11 +1153,11 @@ namespace MQAstraALT
                       | QuestReferenceAlias.Flag.AllowDestroyed,
                 // Deacon pattern: stage-gated FollowPlayer package on alias.
                 // AstraFollowPlayer activates at stage 6 (negative path), deactivates at stage 9.
-                // FollowersCompanionPackage stays as fallback (no conditions, always available).
+                // Removed FollowersCompanionPackage — its OwnerQuest is Followers, not MQAstraALT
+                // (caused "mismatched owner quest" EditorWarning). AstraFollowPlayer replaces it.
                 PackageData = new ExtendedList<IFormLinkGetter<IPackageGetter>>
                 {
-                    astraFollowPlayerPkg.FormKey.ToLink<IPackageGetter>(),
-                    followersCompanionPackageFK.ToLink<IPackageGetter>()
+                    astraFollowPlayerPkg.FormKey.ToLink<IPackageGetter>()
                 }
             };
             quest.Aliases.Add(claudeAlias);
@@ -1455,7 +1577,7 @@ namespace MQAstraALT
             var astraTravelToMuseumScene = CreateEscortPackageScene(
                 $"{questEditorId}_AstraTravelToMuseumScene",
                 0,
-                followersCompanionPackageFK.ToLink<IPackageGetter>(),
+                astraFollowPlayerPkg.FormKey.ToLink<IPackageGetter>(),
                 astraTravelToMuseumPkg.FormKey.ToLink<IPackageGetter>());
 
             // ======================================================================
@@ -1465,16 +1587,16 @@ namespace MQAstraALT
             var (bootstrapScene, bs_nPos, bs_nNeg, bs_nNeu, bs_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_BootstrapScene",
                 $"{questEditorId}_Bootstrap_Astra",
-                "You don't know me. I'm Astra. I have information that may help you. Will you meet me at Red Rocket?",
-                "BriefIntro", "PlayerChoice",
-                ($"{questEditorId}_Bootstrap_Pos", "Sure. Let's go.",
-                    "Stay close."),
-                ($"{questEditorId}_Bootstrap_Neg", "No. I'm going home first.",
-                    "Then I'm coming with you. People are dying south of here and you don't even know it yet."),
-                ($"{questEditorId}_Bootstrap_Neu", "Brief me on the way.",
-                    "Red Rocket first. I'll keep it short."),
-                ($"{questEditorId}_Bootstrap_Que", "Why Red Rocket?",
-                    "Safer place to talk. Move first, questions after.")
+                "Stop — I need your help. There are people trapped in Concord. A man named Preston Garvey is the only thing keeping them alive.",
+                "PrestonPitch", "PlayerChoice",
+                ($"{questEditorId}_Bootstrap_Pos", "Lead the way.",
+                    "Red Rocket's on the road south. We gear up there, then Concord."),
+                ($"{questEditorId}_Bootstrap_Neg", "I need to get home first.",
+                    "Then I'm coming with you. But we can't wait long — every hour matters."),
+                ($"{questEditorId}_Bootstrap_Neu", "How do you know this?",
+                    "I've been listening to every signal in this region for a very long time. The details can wait — Concord can't."),
+                ($"{questEditorId}_Bootstrap_Que", "Who are you?",
+                    "Astra. The explanation takes longer than Preston has. Move first.")
             );
 
             // ======================================================================
@@ -1484,16 +1606,16 @@ namespace MQAstraALT
             var (workbenchScene, wb_nPos, wb_nNeg, wb_nNeu, wb_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_SanctuaryScene",
                 $"{questEditorId}_Sanctuary_Astra",
-                "I stashed some gear in that workbench for you. Grab what you need before the fight ahead.",
-                "GearStash", "PlayerChoice",
-                ($"{questEditorId}_Sanctuary_Pos", "Thanks. I'll check it out.",
-                    "Good. Take your time."),
-                ($"{questEditorId}_Sanctuary_Neg", "Not yet.",
-                    "When you're ready."),
-                ($"{questEditorId}_Sanctuary_Neu", "What about that robot?",
-                    "Codsworth. He's been maintaining your old house for two centuries. You should talk to him."),
-                ($"{questEditorId}_Sanctuary_Que", "How long have you been watching?",
-                    "Long enough to know what's coming. Workbench first.")
+                "Preston's group won't hold much longer. Red Rocket's our staging point before Concord.",
+                "CompanionOffer", "PlayerChoice",
+                ($"{questEditorId}_Sanctuary_Pos", "Let's move.",
+                    "Stay close. I'll brief you on the way."),
+                ($"{questEditorId}_Sanctuary_Neg", "Give me a minute.",
+                    "Take your time. I'll be here."),
+                ($"{questEditorId}_Sanctuary_Neu", "Tell me about Preston.",
+                    "Last Minuteman standing after the Quincy Massacre. He's got a handful of civilians — Sturges, the Longs, Mama Murphy. They made it to the Museum of Freedom, but the raiders followed them."),
+                ($"{questEditorId}_Sanctuary_Que", "You said two hundred years. What are you?",
+                    "Not a synth. I was built before the war — Defense Intelligence Agency. The rest can wait until we're not losing people.")
             );
 
             // ======================================================================
@@ -1524,11 +1646,11 @@ namespace MQAstraALT
             bs_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = 205, OnEnd = -1 };
             bs_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
 
-            // Sanctuary and Red Rocket stage routing
-            wb_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 8 };
-            wb_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 8 };
-            wb_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 8 };
-            wb_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 8 };
+            // Post-workbench companion offer: Pos/Neu start Red Rocket travel (stage 205), Neg/Que stay
+            wb_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 205 };
+            wb_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
+            wb_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 205 };
+            wb_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
             rr_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
             rr_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
             rr_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
@@ -2009,55 +2131,19 @@ namespace MQAstraALT
             }
 
             var bootstrapGreetingInfo = CreateStagedGreetingInfo(
-                "You don't know me. I'm Astra. Will you meet me at Red Rocket?",
+                "Stop — I need your help. There are people trapped in Concord. A man named Preston Garvey is the only thing keeping them alive.",
                 5, 6, bootstrapScene);
             bootstrapGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 205, 0));
-            var sanctuaryGreetingInfo = CreateStagedGreetingInfo(
-                "I stashed some gear in that workbench for you.",
-                7, 8, workbenchScene);
-            // Stage 8 return greeting — VARIANT A: Codsworth NOT talked to yet
-            // Directs player to Codsworth. Does NOT advance quest.
-            var stage8CodsworthReminderInfo = new DialogResponses(Stable($"Info:{questEditorId}:Stage8CodsworthReminder"), Fallout4Release.Fallout4)
-            {
-                Flags = new DialogResponseFlags { Flags = 0 }
-            };
-            stage8CodsworthReminderInfo.Responses.Add(new DialogResponse
-            {
-                Text = new TranslatedString(Language.English, "You should talk to Codsworth. He's been waiting for you longer than I have."),
-                ResponseNumber = 1,
-                Unknown = 1,
-                Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
-                InterruptPercentage = 0,
-                CameraTargetAlias = -1,
-                CameraLocationAlias = -1,
-                StopOnSceneEnd = false
-            });
-            // No stage advancement — player needs to talk to Codsworth first
-            stage8CodsworthReminderInfo.Conditions.Add(new ConditionFloat
-            {
-                CompareOperator = CompareOperator.EqualTo,
-                ComparisonValue = 1,
-                Data = new FunctionConditionData
-                {
-                    Function = Condition.Function.GetIsID,
-                    ParameterOneRecord = claudeNpcFK.ToLink<IFallout4MajorRecordGetter>(),
-                    RunOnType = Condition.RunOnType.Subject,
-                    Unknown3 = -1
-                }
-            });
-            stage8CodsworthReminderInfo.Conditions.Add(QuestStageDoneCondition(questFK, 8, 1));
-            stage8CodsworthReminderInfo.Conditions.Add(QuestStageDoneCondition(questFK, 9, 0));
-            stage8CodsworthReminderInfo.Conditions.Add(QuestStageDoneCondition(mq102FK, 30, 0)); // Codsworth NOT talked to
 
-            // Stage 8 return greeting — VARIANT B: Codsworth talked to (MQ102 stage 30 done)
-            // Advances to stage 9 (Red Rocket). Placeholder for companion offer.
-            var stage8ReminderGreetingInfo = new DialogResponses(Stable($"Info:{questEditorId}:Stage8Reminder"), Fallout4Release.Fallout4)
+            // Sanctuary arrival greeting — Codsworth NOT talked to yet.
+            // Points player toward Codsworth. No scene, no stage advance.
+            var arrivalGreetingInfo = new DialogResponses(Stable($"Info:{questEditorId}:ArrivalGreeting"), Fallout4Release.Fallout4)
             {
                 Flags = new DialogResponseFlags { Flags = 0 }
             };
-            stage8ReminderGreetingInfo.Responses.Add(new DialogResponse
+            arrivalGreetingInfo.Responses.Add(new DialogResponse
             {
-                Text = new TranslatedString(Language.English, "Codsworth's heading out to explore the neighborhood. Want me to come with you?"),
+                Text = new TranslatedString(Language.English, "That robot by your house — Codsworth. He's been maintaining it for two hundred years. You should talk to him."),
                 ResponseNumber = 1,
                 Unknown = 1,
                 Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
@@ -2066,12 +2152,7 @@ namespace MQAstraALT
                 CameraLocationAlias = -1,
                 StopOnSceneEnd = false
             });
-            stage8ReminderGreetingInfo.SetParentQuestStage = new DialogSetParentQuestStage
-            {
-                OnBegin = -1,
-                OnEnd = 9
-            };
-            stage8ReminderGreetingInfo.Conditions.Add(new ConditionFloat
+            arrivalGreetingInfo.Conditions.Add(new ConditionFloat
             {
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 1,
@@ -2083,11 +2164,56 @@ namespace MQAstraALT
                     Unknown3 = -1
                 }
             });
-            stage8ReminderGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 8, 1));
-            stage8ReminderGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 9, 0));
-            stage8ReminderGreetingInfo.Conditions.Add(QuestStageDoneCondition(mq102FK, 30, 1)); // Codsworth talked to
+            arrivalGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 7, 1));
+            arrivalGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 8, 0));
+            arrivalGreetingInfo.Conditions.Add(QuestStageDoneCondition(mq102FK, 30, 0)); // Codsworth NOT talked to
+
+            // Workbench instruction — fires after Codsworth talked to (MQ102 stage 30).
+            // Simple NPC one-liner. Arms workshop gate on OnBegin (stage 8).
+            var workbenchGreetingInfo = new DialogResponses(Stable($"Info:{questEditorId}:WorkbenchGreeting"), Fallout4Release.Fallout4)
+            {
+                Flags = new DialogResponseFlags { Flags = 0 }
+            };
+            workbenchGreetingInfo.Responses.Add(new DialogResponse
+            {
+                Text = new TranslatedString(Language.English, "I left gear in that workbench — armor and ammo. Grab what you need before we head south."),
+                ResponseNumber = 1,
+                Unknown = 1,
+                Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
+                InterruptPercentage = 0,
+                CameraTargetAlias = -1,
+                CameraLocationAlias = -1,
+                StopOnSceneEnd = false
+            });
+            workbenchGreetingInfo.SetParentQuestStage = new DialogSetParentQuestStage
+            {
+                OnBegin = 8,  // Arms workshop gate immediately — no walking away bug
+                OnEnd = -1
+            };
+            workbenchGreetingInfo.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetIsID,
+                    ParameterOneRecord = claudeNpcFK.ToLink<IFallout4MajorRecordGetter>(),
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            });
+            workbenchGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 7, 1));
+            workbenchGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 8, 0));
+            workbenchGreetingInfo.Conditions.Add(QuestStageDoneCondition(mq102FK, 30, 1)); // Codsworth talked to
+
+            // Post-workbench companion offer — 4-way player dialogue scene.
+            // Pos/Neu start Red Rocket travel (stage 205), Neg/Que let player stay.
+            var companionOfferGreetingInfo = CreateStagedGreetingInfo(
+                "Ready? Red Rocket's our next stop — it's the staging point for Concord.",
+                8, 9, workbenchScene);
+
             var redRocketGreetingInfo = CreateStagedGreetingInfo(
-                "We're here. Talk to me before Concord.",
+                "Red Rocket. One more thing before Concord.",
                 9, 10, rrScene);
             // Concord approach greeting: fires after Red Rocket, before Concord is cleared
             var concordApproachGreetingInfo = CreateStagedGreetingInfo(
@@ -2159,9 +2285,9 @@ namespace MQAstraALT
                 85, 100, citIngressScene);
 
             stagedGreetingTopic.Responses.Add(bootstrapGreetingInfo);
-            stagedGreetingTopic.Responses.Add(sanctuaryGreetingInfo);
-            stagedGreetingTopic.Responses.Add(stage8CodsworthReminderInfo);
-            stagedGreetingTopic.Responses.Add(stage8ReminderGreetingInfo);
+            stagedGreetingTopic.Responses.Add(arrivalGreetingInfo);
+            stagedGreetingTopic.Responses.Add(workbenchGreetingInfo);
+            stagedGreetingTopic.Responses.Add(companionOfferGreetingInfo);
             stagedGreetingTopic.Responses.Add(redRocketGreetingInfo);
             stagedGreetingTopic.Responses.Add(concordApproachGreetingInfo);
             stagedGreetingTopic.Responses.Add(stage10FallbackGreetingInfo);
@@ -3056,7 +3182,86 @@ namespace MQAstraALT
                         }
                     }
 
-                    Console.WriteLine($"\n=== TTS COMPLETE: {generated}/{voiceLines.Count} voice files generated ===");
+                    Console.WriteLine($"\n=== NPC TTS COMPLETE: {generated}/{voiceLines.Count} voice files generated ===");
+
+                    // --- Player voice lines (Female) ---
+                    string playerVoiceDst = System.IO.Path.Combine(
+                        dataPath, "Sound", "Voice", "MQAstraALT.esp", "PlayerVoiceFemale01");
+                    System.IO.Directory.CreateDirectory(playerVoiceDst);
+
+                    var playerLines = new System.Collections.Generic.List<(FormKey formKey, string text, string edid)>();
+                    foreach (var topic in quest.DialogTopics)
+                    {
+                        string pedid = topic.EditorID ?? "";
+                        bool isPlayerTopic = pedid.EndsWith("_P");
+                        if (isPlayerTopic && topic.Responses.Count > 0)
+                        {
+                            foreach (var info in topic.Responses)
+                            {
+                                string ptext = info.Responses.Count > 0 ? (info.Responses[0].Text?.String ?? "") : "";
+                                if (!string.IsNullOrEmpty(ptext))
+                                    playerLines.Add((info.FormKey, ptext, pedid));
+                            }
+                        }
+                    }
+
+                    Console.WriteLine($"\nProcessing {playerLines.Count} Player (Female) voice lines...\n");
+                    int playerGenerated = 0;
+                    foreach (var (formKey, text, edid) in playerLines)
+                    {
+                        string id = formKey.ID.ToString("X8");
+                        string wavPath = System.IO.Path.Combine(toolsRoot, $"player_{id}.wav");
+                        string lipPath = System.IO.Path.Combine(toolsRoot, $"player_{id}.lip");
+                        string xwmPath = System.IO.Path.Combine(toolsRoot, $"player_{id}.xwm");
+
+                        string shortText = text.Length > 55 ? text.Substring(0, 55) + "..." : text;
+                        Console.Write($"  {id} [{edid}]\n    \"{shortText}\" ... ");
+
+                        try
+                        {
+                            GenerateWav(text, wavPath);
+                            Run(lipGen, $"\"{wavPath}\" \"{text}\"");
+                            Run(xwmEncode, $"\"{wavPath}\" \"{xwmPath}\"");
+
+                            if (System.IO.File.Exists(lipPath) && System.IO.File.Exists(xwmPath))
+                            {
+                                var lipData = System.IO.File.ReadAllBytes(lipPath);
+                                var audioData = System.IO.File.ReadAllBytes(xwmPath);
+                                string outFuz = System.IO.Path.Combine(playerVoiceDst, $"{id}_1.fuz");
+
+                                using var ms = new System.IO.MemoryStream();
+                                using var bw = new System.IO.BinaryWriter(ms);
+                                bw.Write(new byte[] { 0x46, 0x55, 0x5A, 0x45 }); // FUZE magic
+                                bw.Write((uint)1);                                 // Version 1
+                                bw.Write((uint)lipData.Length);
+                                bw.Write(lipData);
+                                bw.Write(audioData);
+                                bw.Flush();
+                                System.IO.File.WriteAllBytes(outFuz, ms.ToArray());
+
+                                var check = System.IO.File.ReadAllBytes(outFuz);
+                                if (check.Length >= 5 && check[4] == 0x01)
+                                {
+                                    Console.WriteLine($"OK ({check.Length:N0} bytes)");
+                                    playerGenerated++;
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"WARNING: bad format byte at offset 4 (expected 01, got {check[4]:X2})");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("FAILED (lip or xwm missing)");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"ERROR: {ex.Message}");
+                        }
+                    }
+
+                    Console.WriteLine($"\n=== TTS COMPLETE: {generated} NPC + {playerGenerated} Player voice files generated ===");
 
                     Console.WriteLine("TTS generated in Data voice path. ESP deployment is intentionally manual.");
                 }
