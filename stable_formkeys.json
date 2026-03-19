@@ -192,6 +192,7 @@
   "Info:MQAstraALT:ArrivalGreeting": "0x0202FC",
   "Info:MQAstraALT:Stage8CodsworthReminder": "0x0202FA",
   "Info:MQAstraALT:Stage8Reminder": "0x020199",
+  "Info:MQAstraALT:TravelGreetingPos": "0x0202FF",
   "Info:MQAstraALT:WorkbenchGreeting": "0x0202FD",
   "Info:MQAstraALT_BoSContactScene:Greeting:50:55": "0x0201A1",
   "Info:MQAstraALT_BoSContact_Astra": "0x0200FF",

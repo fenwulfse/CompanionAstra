@@ -1610,8 +1610,8 @@ namespace MQAstraALT
                 "CompanionOffer", "PlayerChoice",
                 ($"{questEditorId}_Sanctuary_Pos", "Let's move.",
                     "Stay close. I'll brief you on the way."),
-                ($"{questEditorId}_Sanctuary_Neg", "Give me a minute.",
-                    "Take your time. I'll be here."),
+                ($"{questEditorId}_Sanctuary_Neg", "I should help Codsworth first.",
+                    "Go. He's got bloatflies and worse out there. I'll be here when you're done."),
                 ($"{questEditorId}_Sanctuary_Neu", "Tell me about Preston.",
                     "Last Minuteman standing after the Quincy Massacre. He's got a handful of civilians — Sturges, the Longs, Mama Murphy. They made it to the Museum of Freedom, but the raiders followed them."),
                 ($"{questEditorId}_Sanctuary_Que", "You said two hundred years. What are you?",
@@ -1638,19 +1638,27 @@ namespace MQAstraALT
             );
 
             // Bootstrap branch routing:
-            // Positive/Neutral → hidden Red Rocket travel stage → stage 9
-            // Negative → Sanctuary escort stage → stage 7
-            // Question stays in dialogue.
+            // Positive → Red Rocket travel (stage 205)
+            // Negative → Sanctuary escort (stage 6/7)
+            // Neutral/Question → loop back to PlayerChoice (info-gathering, no commit)
             bs_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = 205, OnEnd = -1 };
             bs_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = 6, OnEnd = 7 };
-            bs_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = 205, OnEnd = -1 };
+            bs_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
             bs_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
+            // Loop Neutral/Question back to PlayerChoice — same StartScene/StartScenePhase as greeting
+            bs_nNeu.Responses[0].StartScene.SetTo(bootstrapScene);
+            bs_nNeu.Responses[0].StartScenePhase = "PlayerChoice";
+            bs_nQue.Responses[0].StartScene.SetTo(bootstrapScene);
+            bs_nQue.Responses[0].StartScenePhase = "PlayerChoice";
 
-            // Post-workbench companion offer: Pos/Neu start Red Rocket travel (stage 205), Neg/Que stay
+            // Post-workbench companion offer: Pos/Neu start Red Rocket travel (stage 205), Neg exits, Que loops
             wb_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 205 };
             wb_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
             wb_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 205 };
             wb_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
+            // Loop Question back to PlayerChoice — info-gathering, doesn't commit
+            wb_nQue.Responses[0].StartScene.SetTo(workbenchScene);
+            wb_nQue.Responses[0].StartScenePhase = "PlayerChoice";
             rr_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
             rr_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
             rr_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
@@ -2135,15 +2143,15 @@ namespace MQAstraALT
                 5, 6, bootstrapScene);
             bootstrapGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 205, 0));
 
-            // Sanctuary arrival greeting — Codsworth NOT talked to yet.
-            // Points player toward Codsworth. No scene, no stage advance.
-            var arrivalGreetingInfo = new DialogResponses(Stable($"Info:{questEditorId}:ArrivalGreeting"), Fallout4Release.Fallout4)
+            // Travel interrupt — negative path (Sanctuary escort, before Codsworth).
+            // Simple NPC one-liner. No scene, no stage advance.
+            var travelGreetingNeg = new DialogResponses(Stable($"Info:{questEditorId}:ArrivalGreeting"), Fallout4Release.Fallout4)
             {
                 Flags = new DialogResponseFlags { Flags = 0 }
             };
-            arrivalGreetingInfo.Responses.Add(new DialogResponse
+            travelGreetingNeg.Responses.Add(new DialogResponse
             {
-                Text = new TranslatedString(Language.English, "That robot by your house — Codsworth. He's been maintaining it for two hundred years. You should talk to him."),
+                Text = new TranslatedString(Language.English, "Preston needs our help. Lives are in the balance — we should keep moving."),
                 ResponseNumber = 1,
                 Unknown = 1,
                 Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
@@ -2152,7 +2160,7 @@ namespace MQAstraALT
                 CameraLocationAlias = -1,
                 StopOnSceneEnd = false
             });
-            arrivalGreetingInfo.Conditions.Add(new ConditionFloat
+            travelGreetingNeg.Conditions.Add(new ConditionFloat
             {
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 1,
@@ -2164,9 +2172,41 @@ namespace MQAstraALT
                     Unknown3 = -1
                 }
             });
-            arrivalGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 7, 1));
-            arrivalGreetingInfo.Conditions.Add(QuestStageDoneCondition(questFK, 8, 0));
-            arrivalGreetingInfo.Conditions.Add(QuestStageDoneCondition(mq102FK, 30, 0)); // Codsworth NOT talked to
+            travelGreetingNeg.Conditions.Add(QuestStageDoneCondition(questFK, 7, 1));
+            travelGreetingNeg.Conditions.Add(QuestStageDoneCondition(questFK, 8, 0));
+            travelGreetingNeg.Conditions.Add(QuestStageDoneCondition(mq102FK, 30, 0)); // Codsworth NOT talked to
+
+            // Travel interrupt — positive path (Red Rocket escort, before arrival).
+            // Same "keep moving" line. No scene, no stage advance.
+            var travelGreetingPos = new DialogResponses(Stable($"Info:{questEditorId}:TravelGreetingPos"), Fallout4Release.Fallout4)
+            {
+                Flags = new DialogResponseFlags { Flags = 0 }
+            };
+            travelGreetingPos.Responses.Add(new DialogResponse
+            {
+                Text = new TranslatedString(Language.English, "Preston needs our help. Lives are in the balance — we should keep moving."),
+                ResponseNumber = 1,
+                Unknown = 1,
+                Emotion = neutralEmotion.ToLink<IKeywordGetter>(),
+                InterruptPercentage = 0,
+                CameraTargetAlias = -1,
+                CameraLocationAlias = -1,
+                StopOnSceneEnd = false
+            });
+            travelGreetingPos.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetIsID,
+                    ParameterOneRecord = claudeNpcFK.ToLink<IFallout4MajorRecordGetter>(),
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            });
+            travelGreetingPos.Conditions.Add(QuestStageDoneCondition(questFK, 205, 1)); // Red Rocket travel started
+            travelGreetingPos.Conditions.Add(QuestStageDoneCondition(questFK, 9, 0));   // Not arrived yet
 
             // Workbench instruction — fires after Codsworth talked to (MQ102 stage 30).
             // Simple NPC one-liner. Arms workshop gate on OnBegin (stage 8).
@@ -2285,7 +2325,8 @@ namespace MQAstraALT
                 85, 100, citIngressScene);
 
             stagedGreetingTopic.Responses.Add(bootstrapGreetingInfo);
-            stagedGreetingTopic.Responses.Add(arrivalGreetingInfo);
+            stagedGreetingTopic.Responses.Add(travelGreetingNeg);
+            stagedGreetingTopic.Responses.Add(travelGreetingPos);
             stagedGreetingTopic.Responses.Add(workbenchGreetingInfo);
             stagedGreetingTopic.Responses.Add(companionOfferGreetingInfo);
             stagedGreetingTopic.Responses.Add(redRocketGreetingInfo);

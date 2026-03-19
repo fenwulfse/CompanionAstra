@@ -213,7 +213,7 @@
     "FormId": "00020049",
     "EditorId": "MQAstraALT_Sanctuary_Neg_N",
     "Prompt": "",
-    "Text": "Take your time. I\u0027ll be here."
+    "Text": "Go. He\u0027s got bloatflies and worse out there. I\u0027ll be here when you\u0027re done."
   },
   {
     "FormId": "0002004D",
@@ -735,7 +735,7 @@
     "FormId": "000202FC",
     "EditorId": "MQAstraALT_StagedGreeting",
     "Prompt": "",
-    "Text": "That robot by your house \u2014 Codsworth. He\u0027s been maintaining it for two hundred years. You should talk to him."
+    "Text": "Preston needs our help. Lives are in the balance \u2014 we should keep moving."
   },
   {
     "FormId": "000202FD",
@@ -748,6 +748,12 @@
     "EditorId": "MQAstraALT_StagedGreeting",
     "Prompt": "",
     "Text": "Ready? Red Rocket\u0027s our next stop \u2014 it\u0027s the staging point for Concord."
+  },
+  {
+    "FormId": "000202FF",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Preston needs our help. Lives are in the balance \u2014 we should keep moving."
   },
   {
     "FormId": "000201AD",

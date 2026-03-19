@@ -1,75 +1,73 @@
-## Session: 2026-03-19 ~14:30 — Story Rewrite + Sanctuary Flow Fix
+## Session: 2026-03-19 ~20:00 — Dialogue Loop Polish + Companion Offer Update
 
-### Previous state: MQAstraALT_v30_editorwarnings_fix_2026-03-19_1350
+### Previous state: Z:\Backups\MQAstraALT_v30_story_rewrite_2026-03-19_1445
 
 ### CHANGES (Program.cs only — no Papyrus changes):
 
-1. **Bootstrap dialogue rewritten (Preston hook)**
-   - Old: "You don't know me. I'm Astra. Will you meet me at Red Rocket?"
-   - New: "Stop — I need your help. There are people trapped in Concord. A man named Preston Garvey is the only thing keeping them alive."
-   - Positive: "Lead the way." -> "Red Rocket's on the road south. We gear up there, then Concord."
-   - Negative: "I need to get home first." -> "Then I'm coming with you. But we can't wait long — every hour matters."
-   - Neutral: "How do you know this?" -> "I've been listening to every signal in this region for a very long time..."
-   - Question: "Who are you?" -> "Astra. The explanation takes longer than Preston has. Move first."
-   - Routing unchanged: Pos/Neu -> stage 205 (Red Rocket), Neg -> stage 6/7 (Sanctuary), Que -> stays
+1. **Bootstrap Neutral now loops back (was committing to Red Rocket)**
+   - Old: Neutral ("How do you know this?") had OnBegin=205 — committed player to Red Rocket travel
+   - New: Neutral loops back to PlayerChoice via StartScene/StartScenePhase, same as Question
+   - Both Neutral and Question are info-gathering; neither should commit
 
-2. **Sanctuary workbench scene -> Companion offer scene**
-   - Old: 4-way dialogue about workbench gear ("Thanks. I'll check it out." etc.)
-   - New: 4-way companion offer dialogue after workbench is done
-   - Pos: "Let's move." -> "Stay close. I'll brief you on the way." (OnEnd=205, starts Red Rocket travel)
-   - Neg: "Give me a minute." -> "Take your time. I'll be here." (no advance)
-   - Neu: "Tell me about Preston." -> Full Preston/Minutemen briefing (OnEnd=205)
-   - Que: "You said two hundred years. What are you?" -> "Not a synth. I was built before the war — Defense Intelligence Agency." (no advance)
+2. **Bootstrap Question also loops back**
+   - "Who are you?" → Astra answers → dialogue wheel returns
+   - Uses StartScene/StartScenePhase on the NPC response INFO record
 
-3. **Sanctuary greeting flow completely reworked — fixes 5 bugs**
-   - Old: sanctuaryGreetingInfo (stage 7 done, 8 not done) -> started workbench scene -> OnEnd=8
-   - Old: stage8CodsworthReminderInfo (stage 8 done, MQ102.30 not done)
-   - Old: stage8ReminderGreetingInfo (stage 8 done, MQ102.30 done) -> OnEnd=9
+3. **Travel interrupt greetings added (both paths)**
+   - Negative path: "Preston needs our help. Lives are in the balance — we should keep moving."
+     Conditions: stage 7 done, 8 not done, MQ102.30 not done (before Codsworth)
+   - Positive path: same text
+     Conditions: stage 205 done, 9 not done (traveling to Red Rocket)
+   - Simple NPC one-liners, no scene — player interrupts escort, Astra redirects
 
-   New flow (3 new greetings replace the old 3):
-   a) **arrivalGreetingInfo** — stage 7 done, 8 not done, MQ102.30 NOT done
-      "That robot by your house — Codsworth. He's been maintaining it for two hundred years. You should talk to him."
-      No scene, no stage advance. Points player to Codsworth first.
+4. **Companion offer Neg rewritten for Codsworth context**
+   - Old: "Give me a minute." → "Take your time. I'll be here."
+   - New: "I should help Codsworth first." → "Go. He's got bloatflies and worse out there. I'll be here when you're done."
+   - Exits dialogue (no loop) — player goes to help Codsworth, comes back when ready
 
-   b) **workbenchGreetingInfo** — stage 7 done, 8 not done, MQ102.30 done
-      "I left gear in that workbench — armor and ammo. Grab what you need before we head south."
-      SetParentQuestStage OnBegin=8 (arms workshop gate IMMEDIATELY, not on response end)
-      No scene — simple NPC one-liner. FIXES: walking away no longer skips stage 8.
+5. **Companion offer Que now loops back**
+   - "You said two hundred years. What are you?" → Astra answers → dialogue wheel returns
+   - Same StartScene/StartScenePhase loop pattern as bootstrap
 
-   c) **companionOfferGreetingInfo** — stage 8 done, 9 not done
-      "Ready? Red Rocket's our next stop — it's the staging point for Concord."
-      Starts companion offer scene (the repurposed workbench scene). 4-way player dialogue.
+6. **Arrival greeting renamed to travelGreetingNeg**
+   - Was: "That robot by your house — Codsworth..." (Codsworth pointer)
+   - Now: "Preston needs our help..." (travel interrupt)
+   - Codsworth pointer was removed — MQ102.30 gate on workbenchGreetingInfo handles the flow instead
 
-4. **Red Rocket greeting text updated**
-   - Old: "We're here. Talk to me before Concord."
-   - New: "Red Rocket. One more thing before Concord."
+### GREETING TOPIC ORDER (as of this build):
+1. bootstrapGreetingInfo (stage 5-6, Vault 111 exterior)
+2. travelGreetingNeg (stage 7 done, 8 not done, MQ102.30==0 — Sanctuary escort)
+3. travelGreetingPos (stage 205 done, 9 not done — Red Rocket escort)
+4. workbenchGreetingInfo (stage 7 done, 8 not done, MQ102.30==1 — after Codsworth)
+5. companionOfferGreetingInfo (stage 8 done, 9 not done — after workbench)
+6. redRocketGreetingInfo (stage 9 done, 10 not done)
+7. [remaining stage-driven greetings unchanged]
 
-5. **TTS pipeline: added player voice generation**
-   - Now generates player (female) voice files to PlayerVoiceFemale01/ folder
-   - Uses same Windows TTS pipeline as NPC lines
-   - 76 player lines generated this session
+### LOOP PATTERN SUMMARY:
+Bootstrap scene: Neutral + Question → loop, Positive → Red Rocket, Negative → Sanctuary
+Companion offer: Question → loop, Negative → exit (help Codsworth), Positive/Neutral → Red Rocket
 
-6. **Stale file removed**: QF_MQClaudeALT_0000080A.pex from Data/Scripts/Fragments/Quests/
+### TEST RESULTS (user, 2026-03-19 evening):
+- Bootstrap dialogues: WORKING — all 4 options functional
+- Negative path flow: WORKING — travel interrupt → Codsworth → workbench → companion offer → Red Rocket
+- Codsworth gating (MQ102.30): WORKING — workbench greeting fires after Codsworth food run
+- Clean exit to main menu: YES
+- Save on exit: NOT CONFIRMED — user reports save may not have persisted (needs investigation)
+- CK not tested this session
 
-### BUGS FIXED:
-1. No location gate on sanctuary greeting -> now gates on MQ102 stage 30 (Codsworth talked to = player is at Sanctuary)
-2. Stage 8 only fired on dialogue OnEnd (walking away skipped it) -> now fires on greeting OnBegin
-3. Workbench instruction was a 4-way player dialogue (could walk away without picking) -> now simple NPC one-liner
-4. No Codsworth awareness -> arrivalGreetingInfo points to Codsworth if MQ102.30 not done
-5. No arrival transition -> arrivalGreetingInfo provides it
+### KNOWN ISSUES:
+- **Save persistence**: User reports game may not be saving properly. Could be script error or missing record. Investigate next session.
+- AstraFollowPlayer null reference warnings (5 + "will be disabled") — works at runtime
+- COMAstra phase name/index mismatches (12 warnings) — cosmetic
+- Dogmeat unique actor + mismatched owner quest (3 warnings) — low priority
+- GetDistance phase conditions on escort scenes still pending (task #4)
 
-### NOT CHANGED:
-- Papyrus (.psc / .pex) — no script changes needed
-- Red Rocket scene, Concord approach scene, Coalition pitch scene, all later scenes — unchanged
-- Package data, NPC properties, outfit, combat style — unchanged from editorwarnings_fix
-- Escort scene conditions (task #4 still pending)
-
-### DESIGN NOTES:
-- User gave creative ownership of the story
-- Preston rescue is now the narrative hook (not "meet me at Red Rocket")
-- Sanctuary flow: Codsworth first -> workbench -> companion offer -> Red Rocket travel
-- Astra reveals she's DIA (Defense Intelligence Agency) in the companion offer Question response
-- Post-workbench companion offer fires stage 205 to reuse Red Rocket travel infrastructure
+### STORY NOTES:
+- Astra's race: Human (HumanRace). Pre-war artificial human built by DIA.
+  Not a Gen 3 synth — different technology (synthetic tissue over electronic/mechanical frame).
+  Predates Institute's synth program by 200 years. Payoff comes at Institute reveal.
+- Character gradually reveals: bootstrap (name only) → Sanctuary (DIA mention) → road (details) → Institute (full picture)
+- Female voice (Ava TTS placeholder), female gender, human appearance
 
 ### ROLLBACK:
-Previous backup: Z:\Backups\MQAstraALT_v30_editorwarnings_fix_2026-03-19_1350
+Previous backup: Z:\Backups\MQAstraALT_v30_story_rewrite_2026-03-19_1445
