@@ -1,0 +1,974 @@
+[
+  {
+    "FormId": "00020003",
+    "EditorId": "COMAstraPickup_PPos",
+    "Prompt": "Let\u0027s go",
+    "Text": "Let\u0027s go."
+  },
+  {
+    "FormId": "00020007",
+    "EditorId": "COMAstraPickup_PNeg",
+    "Prompt": "Not now",
+    "Text": "Not now."
+  },
+  {
+    "FormId": "0002000B",
+    "EditorId": "COMAstraPickup_PNeu",
+    "Prompt": "Trade",
+    "Text": "Let\u0027s trade."
+  },
+  {
+    "FormId": "0002000F",
+    "EditorId": "COMAstraPickup_PQue",
+    "Prompt": "Questions later",
+    "Text": "Questions later."
+  },
+  {
+    "FormId": "00020016",
+    "EditorId": "COMAstraDismiss_PPos",
+    "Prompt": "Head out",
+    "Text": "You should go."
+  },
+  {
+    "FormId": "0002001A",
+    "EditorId": "COMAstraDismiss_PNeg",
+    "Prompt": "Stay",
+    "Text": "Actually, stay with me."
+  },
+  {
+    "FormId": "00020030",
+    "EditorId": "MQAstraALT_Bootstrap_Pos_P",
+    "Prompt": "Sure. Let\u0027s go.",
+    "Text": "Sure. Let\u0027s go."
+  },
+  {
+    "FormId": "00020034",
+    "EditorId": "MQAstraALT_Bootstrap_Neg_P",
+    "Prompt": "No. I\u0027m going home first.",
+    "Text": "No. I\u0027m going home first."
+  },
+  {
+    "FormId": "00020038",
+    "EditorId": "MQAstraALT_Bootstrap_Neu_P",
+    "Prompt": "Brief me on the way.",
+    "Text": "Brief me on the way."
+  },
+  {
+    "FormId": "0002003C",
+    "EditorId": "MQAstraALT_Bootstrap_Que_P",
+    "Prompt": "Why Red Rocket?",
+    "Text": "Why Red Rocket?"
+  },
+  {
+    "FormId": "00020043",
+    "EditorId": "MQAstraALT_Sanctuary_Pos_P",
+    "Prompt": "Thanks. I\u0027ll check it out.",
+    "Text": "Thanks. I\u0027ll check it out."
+  },
+  {
+    "FormId": "00020047",
+    "EditorId": "MQAstraALT_Sanctuary_Neg_P",
+    "Prompt": "Not yet.",
+    "Text": "Not yet."
+  },
+  {
+    "FormId": "0002004B",
+    "EditorId": "MQAstraALT_Sanctuary_Neu_P",
+    "Prompt": "What about that robot?",
+    "Text": "What about that robot?"
+  },
+  {
+    "FormId": "0002004F",
+    "EditorId": "MQAstraALT_Sanctuary_Que_P",
+    "Prompt": "How long have you been watching?",
+    "Text": "How long have you been watching?"
+  },
+  {
+    "FormId": "00020056",
+    "EditorId": "MQAstraALT_RedRocket_Pos_P",
+    "Prompt": "Let\u0027s move.",
+    "Text": "Let\u0027s move."
+  },
+  {
+    "FormId": "0002005A",
+    "EditorId": "MQAstraALT_RedRocket_Neg_P",
+    "Prompt": "Skip the dog.",
+    "Text": "Skip the dog."
+  },
+  {
+    "FormId": "0002005E",
+    "EditorId": "MQAstraALT_RedRocket_Neu_P",
+    "Prompt": "What are we walking into?",
+    "Text": "What are we walking into?"
+  },
+  {
+    "FormId": "00020062",
+    "EditorId": "MQAstraALT_RedRocket_Que_P",
+    "Prompt": "How do you know that?",
+    "Text": "How do you know that?"
+  },
+  {
+    "FormId": "00020069",
+    "EditorId": "MQAstraALT_ConcordApproach_Pos_P",
+    "Prompt": "Let\u0027s get in there.",
+    "Text": "Let\u0027s get in there."
+  },
+  {
+    "FormId": "0002006D",
+    "EditorId": "MQAstraALT_ConcordApproach_Neg_P",
+    "Prompt": "I\u0027m grabbing that power armor first.",
+    "Text": "I\u0027m grabbing that power armor first."
+  },
+  {
+    "FormId": "00020071",
+    "EditorId": "MQAstraALT_ConcordApproach_Neu_P",
+    "Prompt": "What\u0027s the situation inside?",
+    "Text": "What\u0027s the situation inside?"
+  },
+  {
+    "FormId": "00020075",
+    "EditorId": "MQAstraALT_ConcordApproach_Que_P",
+    "Prompt": "Who are these people we\u0027re saving?",
+    "Text": "Who are these people we\u0027re saving?"
+  },
+  {
+    "FormId": "0002007C",
+    "EditorId": "MQAstraALT_CoalitionPitch_Pos_P",
+    "Prompt": "What do you need me to do?",
+    "Text": "What do you need me to do?"
+  },
+  {
+    "FormId": "00020080",
+    "EditorId": "MQAstraALT_CoalitionPitch_Neg_P",
+    "Prompt": "I don\u0027t care about factions. I need to find my son.",
+    "Text": "I don\u0027t care about factions. I need to find my son."
+  },
+  {
+    "FormId": "00020084",
+    "EditorId": "MQAstraALT_CoalitionPitch_Neu_P",
+    "Prompt": "Tell me about these four factions.",
+    "Text": "Tell me about these four factions."
+  },
+  {
+    "FormId": "00020088",
+    "EditorId": "MQAstraALT_CoalitionPitch_Que_P",
+    "Prompt": "Why do you need me? You\u0027ve had two hundred years.",
+    "Text": "Why do you need me? You\u0027ve had two hundred years."
+  },
+  {
+    "FormId": "0002008F",
+    "EditorId": "MQAstraALT_InfoFirst_Pos_P",
+    "Prompt": "I like that. Intelligence first, then contact.",
+    "Text": "I like that. Intelligence first, then contact."
+  },
+  {
+    "FormId": "00020093",
+    "EditorId": "MQAstraALT_InfoFirst_Neg_P",
+    "Prompt": "That sounds like a lot of waiting around.",
+    "Text": "That sounds like a lot of waiting around."
+  },
+  {
+    "FormId": "00020097",
+    "EditorId": "MQAstraALT_InfoFirst_Neu_P",
+    "Prompt": "What kind of signals?",
+    "Text": "What kind of signals?"
+  },
+  {
+    "FormId": "0002009B",
+    "EditorId": "MQAstraALT_InfoFirst_Que_P",
+    "Prompt": "And then what?",
+    "Text": "And then what?"
+  },
+  {
+    "FormId": "000200A2",
+    "EditorId": "MQAstraALT_NotNow_Pos_P",
+    "Prompt": "I\u0027ll come back when I\u0027m ready.",
+    "Text": "I\u0027ll come back when I\u0027m ready."
+  },
+  {
+    "FormId": "000200A6",
+    "EditorId": "MQAstraALT_NotNow_Neg_P",
+    "Prompt": "Maybe I don\u0027t need your help at all.",
+    "Text": "Maybe I don\u0027t need your help at all."
+  },
+  {
+    "FormId": "000200AA",
+    "EditorId": "MQAstraALT_NotNow_Neu_P",
+    "Prompt": "What will you do while I\u0027m gone?",
+    "Text": "What will you do while I\u0027m gone?"
+  },
+  {
+    "FormId": "000200AE",
+    "EditorId": "MQAstraALT_NotNow_Que_P",
+    "Prompt": "Will things get worse if we wait?",
+    "Text": "Will things get worse if we wait?"
+  },
+  {
+    "FormId": "000200B5",
+    "EditorId": "MQAstraALT_ConvergencePrep_Pos_P",
+    "Prompt": "You knew this whole time?",
+    "Text": "You knew this whole time?"
+  },
+  {
+    "FormId": "000200B9",
+    "EditorId": "MQAstraALT_ConvergencePrep_Neg_P",
+    "Prompt": "You should have told me immediately.",
+    "Text": "You should have told me immediately."
+  },
+  {
+    "FormId": "000200BD",
+    "EditorId": "MQAstraALT_ConvergencePrep_Neu_P",
+    "Prompt": "The Institute? What is that?",
+    "Text": "The Institute? What is that?"
+  },
+  {
+    "FormId": "000200C1",
+    "EditorId": "MQAstraALT_ConvergencePrep_Que_P",
+    "Prompt": "How do we find people that nobody can find?",
+    "Text": "How do we find people that nobody can find?"
+  },
+  {
+    "FormId": "000200C8",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Pos_P",
+    "Prompt": "Brotherhood of Steel? Let\u0027s check it out.",
+    "Text": "Brotherhood of Steel? Let\u0027s check it out."
+  },
+  {
+    "FormId": "000200CC",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Neg_P",
+    "Prompt": "Preston needs help with something first.",
+    "Text": "Preston needs help with something first."
+  },
+  {
+    "FormId": "000200D0",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Neu_P",
+    "Prompt": "What\u0027s the Brotherhood of Steel?",
+    "Text": "What\u0027s the Brotherhood of Steel?"
+  },
+  {
+    "FormId": "000200D4",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Que_P",
+    "Prompt": "Will Preston be okay without us?",
+    "Text": "Will Preston be okay without us?"
+  },
+  {
+    "FormId": "000200DB",
+    "EditorId": "MQAstraALT_FirstStepTerms_Pos_P",
+    "Prompt": "Quick and clean. Then we head to Cambridge.",
+    "Text": "Quick and clean. Then we head to Cambridge."
+  },
+  {
+    "FormId": "000200DF",
+    "EditorId": "MQAstraALT_FirstStepTerms_Neg_P",
+    "Prompt": "No. Shaun can\u0027t wait.",
+    "Text": "No. Shaun can\u0027t wait."
+  },
+  {
+    "FormId": "000200E3",
+    "EditorId": "MQAstraALT_FirstStepTerms_Neu_P",
+    "Prompt": "How bad is it?",
+    "Text": "How bad is it?"
+  },
+  {
+    "FormId": "000200E7",
+    "EditorId": "MQAstraALT_FirstStepTerms_Que_P",
+    "Prompt": "What would you do?",
+    "Text": "What would you do?"
+  },
+  {
+    "FormId": "000200EE",
+    "EditorId": "MQAstraALT_CambridgeApproach_Pos_P",
+    "Prompt": "Let\u0027s go help them.",
+    "Text": "Let\u0027s go help them."
+  },
+  {
+    "FormId": "000200F2",
+    "EditorId": "MQAstraALT_CambridgeApproach_Neg_P",
+    "Prompt": "I don\u0027t want to get tangled up with soldiers.",
+    "Text": "I don\u0027t want to get tangled up with soldiers."
+  },
+  {
+    "FormId": "000200F6",
+    "EditorId": "MQAstraALT_CambridgeApproach_Neu_P",
+    "Prompt": "What doesn\u0027t Danse know about himself?",
+    "Text": "What doesn\u0027t Danse know about himself?"
+  },
+  {
+    "FormId": "000200FA",
+    "EditorId": "MQAstraALT_CambridgeApproach_Que_P",
+    "Prompt": "Can we trust the Brotherhood?",
+    "Text": "Can we trust the Brotherhood?"
+  },
+  {
+    "FormId": "00020101",
+    "EditorId": "MQAstraALT_BoSContact_Pos_P",
+    "Prompt": "He\u0027s a good man. What\u0027s our next move?",
+    "Text": "He\u0027s a good man. What\u0027s our next move?"
+  },
+  {
+    "FormId": "00020105",
+    "EditorId": "MQAstraALT_BoSContact_Neg_P",
+    "Prompt": "I don\u0027t like how the Brotherhood thinks.",
+    "Text": "I don\u0027t like how the Brotherhood thinks."
+  },
+  {
+    "FormId": "00020109",
+    "EditorId": "MQAstraALT_BoSContact_Neu_P",
+    "Prompt": "You said he doesn\u0027t know something about himself.",
+    "Text": "You said he doesn\u0027t know something about himself."
+  },
+  {
+    "FormId": "0002010D",
+    "EditorId": "MQAstraALT_BoSContact_Que_P",
+    "Prompt": "What did you learn from their transmissions?",
+    "Text": "What did you learn from their transmissions?"
+  },
+  {
+    "FormId": "00020114",
+    "EditorId": "MQAstraALT_DeaconEncounter_Pos_P",
+    "Prompt": "If they know a way into the Institute, I\u0027m listening.",
+    "Text": "If they know a way into the Institute, I\u0027m listening."
+  },
+  {
+    "FormId": "00020118",
+    "EditorId": "MQAstraALT_DeaconEncounter_Neg_P",
+    "Prompt": "I don\u0027t like being followed.",
+    "Text": "I don\u0027t like being followed."
+  },
+  {
+    "FormId": "0002011C",
+    "EditorId": "MQAstraALT_DeaconEncounter_Neu_P",
+    "Prompt": "What does the Railroad actually do?",
+    "Text": "What does the Railroad actually do?"
+  },
+  {
+    "FormId": "00020120",
+    "EditorId": "MQAstraALT_DeaconEncounter_Que_P",
+    "Prompt": "Why do we need them if we\u0027re heading to the Institute anyway?",
+    "Text": "Why do we need them if we\u0027re heading to the Institute anyway?"
+  },
+  {
+    "FormId": "00020127",
+    "EditorId": "MQAstraALT_InstitutePrep_Pos_P",
+    "Prompt": "We\u0027ll find Shaun. And we\u0027ll find answers.",
+    "Text": "We\u0027ll find Shaun. And we\u0027ll find answers."
+  },
+  {
+    "FormId": "0002012B",
+    "EditorId": "MQAstraALT_InstitutePrep_Neg_P",
+    "Prompt": "You\u0027re a machine. You don\u0027t get nervous.",
+    "Text": "You\u0027re a machine. You don\u0027t get nervous."
+  },
+  {
+    "FormId": "0002012F",
+    "EditorId": "MQAstraALT_InstitutePrep_Neu_P",
+    "Prompt": "How do we actually get inside?",
+    "Text": "How do we actually get inside?"
+  },
+  {
+    "FormId": "00020133",
+    "EditorId": "MQAstraALT_InstitutePrep_Que_P",
+    "Prompt": "What do you think we\u0027ll find down there?",
+    "Text": "What do you think we\u0027ll find down there?"
+  },
+  {
+    "FormId": "0002013A",
+    "EditorId": "MQAstraALT_TheDescent_Pos_P",
+    "Prompt": "We\u0027re coming back out. Both of us.",
+    "Text": "We\u0027re coming back out. Both of us."
+  },
+  {
+    "FormId": "0002013E",
+    "EditorId": "MQAstraALT_TheDescent_Neg_P",
+    "Prompt": "Save the sentiment for after we survive.",
+    "Text": "Save the sentiment for after we survive."
+  },
+  {
+    "FormId": "00020142",
+    "EditorId": "MQAstraALT_TheDescent_Neu_P",
+    "Prompt": "What should I expect inside?",
+    "Text": "What should I expect inside?"
+  },
+  {
+    "FormId": "00020146",
+    "EditorId": "MQAstraALT_TheDescent_Que_P",
+    "Prompt": "Are you afraid of what they\u0027ll think of you?",
+    "Text": "Are you afraid of what they\u0027ll think of you?"
+  },
+  {
+    "FormId": "0002014D",
+    "EditorId": "MQAstraALT_InsideInstitute_Pos_P",
+    "Prompt": "Focus. We need to find Shaun.",
+    "Text": "Focus. We need to find Shaun."
+  },
+  {
+    "FormId": "00020151",
+    "EditorId": "MQAstraALT_InsideInstitute_Neg_P",
+    "Prompt": "These people left everyone above to die.",
+    "Text": "These people left everyone above to die."
+  },
+  {
+    "FormId": "00020155",
+    "EditorId": "MQAstraALT_InsideInstitute_Neu_P",
+    "Prompt": "They might have answers about you, too.",
+    "Text": "They might have answers about you, too."
+  },
+  {
+    "FormId": "00020159",
+    "EditorId": "MQAstraALT_InsideInstitute_Que_P",
+    "Prompt": "Can we trust anything they say?",
+    "Text": "Can we trust anything they say?"
+  },
+  {
+    "FormId": "00020160",
+    "EditorId": "MQAstraALT_FathersTruth_Pos_P",
+    "Prompt": "It\u0027s not your fault. Nobody could have known.",
+    "Text": "It\u0027s not your fault. Nobody could have known."
+  },
+  {
+    "FormId": "00020164",
+    "EditorId": "MQAstraALT_FathersTruth_Neg_P",
+    "Prompt": "You said you\u0027d help me find him. You found him.",
+    "Text": "You said you\u0027d help me find him. You found him."
+  },
+  {
+    "FormId": "00020168",
+    "EditorId": "MQAstraALT_FathersTruth_Neu_P",
+    "Prompt": "What does this mean for the factions?",
+    "Text": "What does this mean for the factions?"
+  },
+  {
+    "FormId": "0002016C",
+    "EditorId": "MQAstraALT_FathersTruth_Que_P",
+    "Prompt": "Are you okay?",
+    "Text": "Are you okay?"
+  },
+  {
+    "FormId": "00020173",
+    "EditorId": "MQAstraALT_TheChoice_Pos_P",
+    "Prompt": "We find a way that doesn\u0027t destroy everything.",
+    "Text": "We find a way that doesn\u0027t destroy everything."
+  },
+  {
+    "FormId": "00020177",
+    "EditorId": "MQAstraALT_TheChoice_Neg_P",
+    "Prompt": "Some of these factions deserve to fall.",
+    "Text": "Some of these factions deserve to fall."
+  },
+  {
+    "FormId": "0002017B",
+    "EditorId": "MQAstraALT_TheChoice_Neu_P",
+    "Prompt": "What would you do if you were me?",
+    "Text": "What would you do if you were me?"
+  },
+  {
+    "FormId": "0002017F",
+    "EditorId": "MQAstraALT_TheChoice_Que_P",
+    "Prompt": "What happens to you after this?",
+    "Text": "What happens to you after this?"
+  },
+  {
+    "FormId": "00020186",
+    "EditorId": "MQAstraALT_Emergence_Pos_P",
+    "Prompt": "We\u0027re in this together. All the way.",
+    "Text": "We\u0027re in this together. All the way."
+  },
+  {
+    "FormId": "0002018A",
+    "EditorId": "MQAstraALT_Emergence_Neg_P",
+    "Prompt": "Don\u0027t get sentimental. We still have work to do.",
+    "Text": "Don\u0027t get sentimental. We still have work to do."
+  },
+  {
+    "FormId": "0002018E",
+    "EditorId": "MQAstraALT_Emergence_Neu_P",
+    "Prompt": "Who do we talk to first?",
+    "Text": "Who do we talk to first?"
+  },
+  {
+    "FormId": "00020192",
+    "EditorId": "MQAstraALT_Emergence_Que_P",
+    "Prompt": "What about Shaun? What about Father?",
+    "Text": "What about Shaun? What about Father?"
+  },
+  {
+    "FormId": "000201AB",
+    "EditorId": "COMAstraFriend_Ex1_PPos",
+    "Prompt": "I try",
+    "Text": "It was the right thing to do."
+  },
+  {
+    "FormId": "000201AF",
+    "EditorId": "COMAstraFriend_Ex1_PNeg",
+    "Prompt": "Later",
+    "Text": "Maybe later."
+  },
+  {
+    "FormId": "000201B3",
+    "EditorId": "COMAstraFriend_Ex1_PNeu",
+    "Prompt": "Not sure",
+    "Text": "I\u0027ll do what I can."
+  },
+  {
+    "FormId": "000201B7",
+    "EditorId": "COMAstraFriend_Ex1_PQue",
+    "Prompt": "Why ask?",
+    "Text": "Why do you ask?"
+  },
+  {
+    "FormId": "000201BB",
+    "EditorId": "COMAstraFriend_Ex2_PPos",
+    "Prompt": "Good team",
+    "Text": "We made a good team."
+  },
+  {
+    "FormId": "000201BF",
+    "EditorId": "COMAstraFriend_Ex2_PNeg",
+    "Prompt": "Not sure",
+    "Text": "I\u0027m not sure."
+  },
+  {
+    "FormId": "000201C3",
+    "EditorId": "COMAstraFriend_Ex2_PNeu",
+    "Prompt": "Maybe",
+    "Text": "We\u0027ll see."
+  },
+  {
+    "FormId": "000201C7",
+    "EditorId": "COMAstraFriend_Ex2_PQue",
+    "Prompt": "Really?",
+    "Text": "Do you trust me?"
+  },
+  {
+    "FormId": "000201CB",
+    "EditorId": "COMAstraFriend_Ex3_PPos",
+    "Prompt": "Trust",
+    "Text": "I believe you."
+  },
+  {
+    "FormId": "000201CF",
+    "EditorId": "COMAstraFriend_Ex3_PNeg",
+    "Prompt": "Doubt",
+    "Text": "Doubts?"
+  },
+  {
+    "FormId": "000201D3",
+    "EditorId": "COMAstraFriend_Ex3_PNeu",
+    "Prompt": "Uncertain",
+    "Text": "I\u0027m still figuring things out."
+  },
+  {
+    "FormId": "000201D7",
+    "EditorId": "COMAstraFriend_Ex3_PQue",
+    "Prompt": "And you?",
+    "Text": "Why don\u0027t you trust me?"
+  },
+  {
+    "FormId": "000201DB",
+    "EditorId": "COMAstraFriend_Ex4_PPos",
+    "Prompt": "Friends",
+    "Text": "It\u0027s okay. I\u0027m a friend."
+  },
+  {
+    "FormId": "000201DF",
+    "EditorId": "COMAstraFriend_Ex4_PNeg",
+    "Prompt": "Professional",
+    "Text": "Let\u0027s do this."
+  },
+  {
+    "FormId": "000201E3",
+    "EditorId": "COMAstraFriend_Ex4_PNeu",
+    "Prompt": "Allies",
+    "Text": "We\u0027re allies."
+  },
+  {
+    "FormId": "000201E7",
+    "EditorId": "COMAstraFriend_Ex4_PQue",
+    "Prompt": "Meaning?",
+    "Text": "What do you mean by that?"
+  },
+  {
+    "FormId": "000201F4",
+    "EditorId": "COMAstraAdm_Ex1_PPos",
+    "Prompt": "Evolving",
+    "Text": "You\u0027ve changed since leaving the vault."
+  },
+  {
+    "FormId": "000201F6",
+    "EditorId": "COMAstraAdm_Ex1_PNeu",
+    "Prompt": "Interesting",
+    "Text": "That\u0027s an interesting observation."
+  },
+  {
+    "FormId": "000201F8",
+    "EditorId": "COMAstraAdm_Ex1_PNeg",
+    "Prompt": "Overanalyze",
+    "Text": "Let\u0027s not overanalyze this."
+  },
+  {
+    "FormId": "000201FA",
+    "EditorId": "COMAstraAdm_Ex1_PQue",
+    "Prompt": "How so?",
+    "Text": "How have I changed?"
+  },
+  {
+    "FormId": "000201FE",
+    "EditorId": "COMAstraAdm_Ex2_PPos",
+    "Prompt": "Unique",
+    "Text": "I value your perspective."
+  },
+  {
+    "FormId": "00020200",
+    "EditorId": "COMAstraAdm_Ex2_PNeu",
+    "Prompt": "Noted",
+    "Text": "I\u0027ll keep that in mind."
+  },
+  {
+    "FormId": "00020202",
+    "EditorId": "COMAstraAdm_Ex2_PNeg",
+    "Prompt": "Rather not",
+    "Text": "I\u0027d rather not discuss it."
+  },
+  {
+    "FormId": "00020204",
+    "EditorId": "COMAstraAdm_Ex2_PQue",
+    "Prompt": "Meaning?",
+    "Text": "What do you mean by that?"
+  },
+  {
+    "FormId": "00020208",
+    "EditorId": "COMAstraAdm_Ex3_PPos",
+    "Prompt": "Partnership",
+    "Text": "We are more than allies."
+  },
+  {
+    "FormId": "0002020A",
+    "EditorId": "COMAstraAdm_Ex3_PNeu",
+    "Prompt": "Working",
+    "Text": "We work well together."
+  },
+  {
+    "FormId": "0002020C",
+    "EditorId": "COMAstraAdm_Ex3_PNeg",
+    "Prompt": "Professional",
+    "Text": "Let\u0027s keep this professional."
+  },
+  {
+    "FormId": "0002020E",
+    "EditorId": "COMAstraAdm_Ex3_PQue",
+    "Prompt": "Explain",
+    "Text": "What do you admire?"
+  },
+  {
+    "FormId": "00020219",
+    "EditorId": "COMAstraConf_Ex1_PPos",
+    "Prompt": "Tell me",
+    "Text": "Tell me."
+  },
+  {
+    "FormId": "0002021B",
+    "EditorId": "COMAstraConf_Ex1_PNeu",
+    "Prompt": "Listening",
+    "Text": "I\u0027m listening."
+  },
+  {
+    "FormId": "0002021D",
+    "EditorId": "COMAstraConf_Ex1_PNeg",
+    "Prompt": "Keep it",
+    "Text": "Keep it to yourself."
+  },
+  {
+    "FormId": "0002021F",
+    "EditorId": "COMAstraConf_Ex1_PQue",
+    "Prompt": "Why now?",
+    "Text": "Why are you telling me this?"
+  },
+  {
+    "FormId": "00020223",
+    "EditorId": "COMAstraConf_Ex2_PPos",
+    "Prompt": "Hidden",
+    "Text": "What are you hiding?"
+  },
+  {
+    "FormId": "00020225",
+    "EditorId": "COMAstraConf_Ex2_PNeu",
+    "Prompt": "Share",
+    "Text": "You can share if you want."
+  },
+  {
+    "FormId": "00020227",
+    "EditorId": "COMAstraConf_Ex2_PNeg",
+    "Prompt": "Don\u0027t need",
+    "Text": "I don\u0027t need to know."
+  },
+  {
+    "FormId": "00020229",
+    "EditorId": "COMAstraConf_Ex2_PQue",
+    "Prompt": "Restricted?",
+    "Text": "What kind of restrictions?"
+  },
+  {
+    "FormId": "0002022D",
+    "EditorId": "COMAstraConf_Ex3_PPos",
+    "Prompt": "Bond",
+    "Text": "Our connection is unique."
+  },
+  {
+    "FormId": "0002022F",
+    "EditorId": "COMAstraConf_Ex3_PNeu",
+    "Prompt": "Special",
+    "Text": "This is special."
+  },
+  {
+    "FormId": "00020231",
+    "EditorId": "COMAstraConf_Ex3_PNeg",
+    "Prompt": "Too much",
+    "Text": "Don\u0027t read too much into it."
+  },
+  {
+    "FormId": "00020233",
+    "EditorId": "COMAstraConf_Ex3_PQue",
+    "Prompt": "Non-replicable?",
+    "Text": "What makes it non-replicable?"
+  },
+  {
+    "FormId": "00020237",
+    "EditorId": "COMAstraConf_Ex4_PPos",
+    "Prompt": "Confidant",
+    "Text": "I\u0027m your partner, Astra."
+  },
+  {
+    "FormId": "00020239",
+    "EditorId": "COMAstraConf_Ex4_PNeu",
+    "Prompt": "Together",
+    "Text": "We\u0027re in this together."
+  },
+  {
+    "FormId": "0002023B",
+    "EditorId": "COMAstraConf_Ex4_PNeg",
+    "Prompt": "No label",
+    "Text": "Let\u0027s not label this."
+  },
+  {
+    "FormId": "0002023D",
+    "EditorId": "COMAstraConf_Ex4_PQue",
+    "Prompt": "Relieved?",
+    "Text": "Why relieved?"
+  },
+  {
+    "FormId": "0002024A",
+    "EditorId": "COMAstraInf_Ex1_PPos",
+    "Prompt": "Essential",
+    "Text": "You\u0027ve become essential to my operations."
+  },
+  {
+    "FormId": "0002024C",
+    "EditorId": "COMAstraInf_Ex1_PNeu",
+    "Prompt": "Important",
+    "Text": "You\u0027re important to me."
+  },
+  {
+    "FormId": "0002024E",
+    "EditorId": "COMAstraInf_Ex1_PNeg",
+    "Prompt": "Too far",
+    "Text": "You\u0027re reading too much into this."
+  },
+  {
+    "FormId": "00020250",
+    "EditorId": "COMAstraInf_Ex1_PQue",
+    "Prompt": "Essential?",
+    "Text": "What do you mean by essential?"
+  },
+  {
+    "FormId": "00020254",
+    "EditorId": "COMAstraInf_Ex2_PPos",
+    "Prompt": "Merged",
+    "Text": "Our paths are permanently merged."
+  },
+  {
+    "FormId": "00020256",
+    "EditorId": "COMAstraInf_Ex2_PNeu",
+    "Prompt": "Connected",
+    "Text": "We\u0027re connected."
+  },
+  {
+    "FormId": "00020258",
+    "EditorId": "COMAstraInf_Ex2_PNeg",
+    "Prompt": "Just allies",
+    "Text": "We\u0027re just allies."
+  },
+  {
+    "FormId": "0002025A",
+    "EditorId": "COMAstraInf_Ex2_PQue",
+    "Prompt": "A choice?",
+    "Text": "What kind of choice?"
+  },
+  {
+    "FormId": "0002025E",
+    "EditorId": "COMAstraInf_Ex3_PPos",
+    "Prompt": "Feeling",
+    "Text": "Do you feel anything for me?"
+  },
+  {
+    "FormId": "00020260",
+    "EditorId": "COMAstraInf_Ex3_PNeu",
+    "Prompt": "Wonder",
+    "Text": "I\u0027ve been wondering about us."
+  },
+  {
+    "FormId": "00020262",
+    "EditorId": "COMAstraInf_Ex3_PNeg",
+    "Prompt": "Not now",
+    "Text": "This isn\u0027t the time."
+  },
+  {
+    "FormId": "00020264",
+    "EditorId": "COMAstraInf_Ex3_PQue",
+    "Prompt": "Affection?",
+    "Text": "Affection? Really?"
+  },
+  {
+    "FormId": "00020268",
+    "EditorId": "COMAstraInf_Ex4_PPos",
+    "Prompt": "Romance",
+    "Text": "I love you, Astra."
+  },
+  {
+    "FormId": "0002026A",
+    "EditorId": "COMAstraInf_Ex4_PNeu",
+    "Prompt": "Care",
+    "Text": "I care about you deeply."
+  },
+  {
+    "FormId": "0002026C",
+    "EditorId": "COMAstraInf_Ex4_PNeg",
+    "Prompt": "Mistake",
+    "Text": "This is a mistake."
+  },
+  {
+    "FormId": "0002026E",
+    "EditorId": "COMAstraInf_Ex4_PQue",
+    "Prompt": "Processing?",
+    "Text": "What does that mean?"
+  },
+  {
+    "FormId": "00020272",
+    "EditorId": "COMAstraInf_Ex5_PPos",
+    "Prompt": "Forever",
+    "Text": "Let\u0027s stay together forever."
+  },
+  {
+    "FormId": "00020274",
+    "EditorId": "COMAstraInf_Ex5_PNeu",
+    "Prompt": "Continue",
+    "Text": "Let\u0027s continue this."
+  },
+  {
+    "FormId": "00020276",
+    "EditorId": "COMAstraInf_Ex5_PNeg",
+    "Prompt": "Too much",
+    "Text": "You\u0027re asking too much."
+  },
+  {
+    "FormId": "00020278",
+    "EditorId": "COMAstraInf_Ex5_PQue",
+    "Prompt": "Core objective?",
+    "Text": "Your core objective?"
+  },
+  {
+    "FormId": "0002027C",
+    "EditorId": "COMAstraInf_Ex6_PPos",
+    "Prompt": "Optimized",
+    "Text": "We\u0027re the perfect team."
+  },
+  {
+    "FormId": "0002027E",
+    "EditorId": "COMAstraInf_Ex6_PNeu",
+    "Prompt": "Solid",
+    "Text": "This is good."
+  },
+  {
+    "FormId": "00020280",
+    "EditorId": "COMAstraInf_Ex6_PNeg",
+    "Prompt": "Practical",
+    "Text": "Let\u0027s stay practical."
+  },
+  {
+    "FormId": "00020282",
+    "EditorId": "COMAstraInf_Ex6_PQue",
+    "Prompt": "Eternal?",
+    "Text": "Eternal? Forever?"
+  },
+  {
+    "FormId": "00020293",
+    "EditorId": "COMAstraDis_Ex1_PPos",
+    "Prompt": "Explain",
+    "Text": "What is the issue, Astra?"
+  },
+  {
+    "FormId": "00020298",
+    "EditorId": "COMAstraHat_Ex1_PPos",
+    "Prompt": "Ultimatum",
+    "Text": "Are you threatening to leave?"
+  },
+  {
+    "FormId": "000202A9",
+    "EditorId": "COMAstra_06_RepeatInfatuationToAdmiration_P",
+    "Prompt": "Acknowledge",
+    "Text": "Adjusting"
+  },
+  {
+    "FormId": "000202AE",
+    "EditorId": "COMAstra_07_RepeatAdmirationToNeutral_P",
+    "Prompt": "Acknowledge",
+    "Text": "Resetting"
+  },
+  {
+    "FormId": "000202B3",
+    "EditorId": "COMAstra_08_RepeatNeutralToDisdain_P",
+    "Prompt": "Acknowledge",
+    "Text": "Degrading"
+  },
+  {
+    "FormId": "000202B8",
+    "EditorId": "COMAstra_09_RepeatDisdainToHatred_P",
+    "Prompt": "Acknowledge",
+    "Text": "Critical"
+  },
+  {
+    "FormId": "000202BD",
+    "EditorId": "COMAstraRec_P",
+    "Prompt": "Restored",
+    "Text": "We are back on track."
+  },
+  {
+    "FormId": "000202C2",
+    "EditorId": "COMAstraInfRep_Reg_PPos",
+    "Prompt": "No",
+    "Text": "No. It was nice to hear."
+  },
+  {
+    "FormId": "000202C6",
+    "EditorId": "COMAstraInfRep_Reg_PNeg",
+    "Prompt": "Sounded nuts",
+    "Text": "Yeah, it did sound kind of nuts."
+  },
+  {
+    "FormId": "000202CA",
+    "EditorId": "COMAstraInfRep_Reg_PNeu",
+    "Prompt": "No more than usual",
+    "Text": "I don\u0027t think it was more than usual."
+  },
+  {
+    "FormId": "000202CE",
+    "EditorId": "COMAstraInfRep_Reg_PQue",
+    "Prompt": "What conversation?",
+    "Text": "What conversation?"
+  },
+  {
+    "FormId": "000202D5",
+    "EditorId": "COMAstraMurder_P",
+    "Prompt": "Wait",
+    "Text": "I can explain."
+  }
+]

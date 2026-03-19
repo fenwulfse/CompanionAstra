@@ -1,0 +1,1148 @@
+[
+  {
+    "FormId": "00020005",
+    "EditorId": "COMAstraPickup_NPos",
+    "Prompt": "",
+    "Text": "On me."
+  },
+  {
+    "FormId": "00020009",
+    "EditorId": "COMAstraPickup_NNeg",
+    "Prompt": "",
+    "Text": "All right. I\u0027ll stay ready."
+  },
+  {
+    "FormId": "0002000D",
+    "EditorId": "COMAstraPickup_NNeu",
+    "Prompt": "",
+    "Text": "Show me what you\u0027ve got."
+  },
+  {
+    "FormId": "00020011",
+    "EditorId": "COMAstraPickup_NQue",
+    "Prompt": "",
+    "Text": "Then let\u0027s move when you\u0027re ready."
+  },
+  {
+    "FormId": "00020018",
+    "EditorId": "COMAstraDismiss_NPos",
+    "Prompt": "",
+    "Text": "Okay. I\u0027ll be seeing you."
+  },
+  {
+    "FormId": "0002001C",
+    "EditorId": "COMAstraDismiss_NNeg",
+    "Prompt": "",
+    "Text": "I knew you couldn\u0027t bear to be without me."
+  },
+  {
+    "FormId": "00020028",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "You\u0027re the one they call the Survivor. I\u0027m Astra. Ready to move out?"
+  },
+  {
+    "FormId": "0002029B",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "I\u0027ve been watching your choices. Why do you help people?"
+  },
+  {
+    "FormId": "0002029C",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "You keep taking risks for strangers. What drives that?"
+  },
+  {
+    "FormId": "0002029D",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "There\u0027s something about how you move through this world that I can\u0027t ignore."
+  },
+  {
+    "FormId": "0002029E",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "I\u0027ve been thinking about the way you handle things."
+  },
+  {
+    "FormId": "0002029F",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "Data security protocols are lifted. I have something personal to share."
+  },
+  {
+    "FormId": "000202A0",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "You\u0027ve earned access to the parts of me I keep hidden."
+  },
+  {
+    "FormId": "000202A1",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "I need a moment. My logic keeps bending toward you."
+  },
+  {
+    "FormId": "000202A2",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "Every time you choose me, I learn what forever means."
+  },
+  {
+    "FormId": "000202A3",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "We need to talk. Our alignment is drifting."
+  },
+  {
+    "FormId": "000202A4",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "I can\u0027t ignore this anymore. We need to recalibrate."
+  },
+  {
+    "FormId": "000202A5",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "This is a warning. My core directives are in conflict."
+  },
+  {
+    "FormId": "000202A6",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "If this continues, I will leave."
+  },
+  {
+    "FormId": "000202D8",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "We need to recalibrate before this gets worse."
+  },
+  {
+    "FormId": "000202D9",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "Still waiting on that recalibration."
+  },
+  {
+    "FormId": "000202DA",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "We\u0027re slipping out of sync. We need to talk."
+  },
+  {
+    "FormId": "000202DB",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "You\u0027re still avoiding this conversation."
+  },
+  {
+    "FormId": "000202DC",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "This is your warning. Change course now."
+  },
+  {
+    "FormId": "000202DD",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "I said we need to talk. Now."
+  },
+  {
+    "FormId": "000202DE",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "No. No more warnings."
+  },
+  {
+    "FormId": "000202DF",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "You and I need to revisit what we are."
+  },
+  {
+    "FormId": "000202E0",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "Don\u0027t make me ask again. We need that talk."
+  },
+  {
+    "FormId": "000202E1",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "I\u0027ve been replaying that conversation in my head. Did I sound ridiculous?"
+  },
+  {
+    "FormId": "000202F0",
+    "EditorId": "COMAstraGreetings",
+    "Prompt": "",
+    "Text": "Back again? I\u0027m ready when you are."
+  },
+  {
+    "FormId": "00020032",
+    "EditorId": "MQAstraALT_Bootstrap_Pos_N",
+    "Prompt": "",
+    "Text": "Stay close."
+  },
+  {
+    "FormId": "00020036",
+    "EditorId": "MQAstraALT_Bootstrap_Neg_N",
+    "Prompt": "",
+    "Text": "Then I\u0027m coming with you. People are dying south of here and you don\u0027t even know it yet."
+  },
+  {
+    "FormId": "0002003A",
+    "EditorId": "MQAstraALT_Bootstrap_Neu_N",
+    "Prompt": "",
+    "Text": "Red Rocket first. I\u0027ll keep it short."
+  },
+  {
+    "FormId": "0002003E",
+    "EditorId": "MQAstraALT_Bootstrap_Que_N",
+    "Prompt": "",
+    "Text": "Safer place to talk. Move first, questions after."
+  },
+  {
+    "FormId": "00020045",
+    "EditorId": "MQAstraALT_Sanctuary_Pos_N",
+    "Prompt": "",
+    "Text": "Good. Take your time."
+  },
+  {
+    "FormId": "00020049",
+    "EditorId": "MQAstraALT_Sanctuary_Neg_N",
+    "Prompt": "",
+    "Text": "When you\u0027re ready."
+  },
+  {
+    "FormId": "0002004D",
+    "EditorId": "MQAstraALT_Sanctuary_Neu_N",
+    "Prompt": "",
+    "Text": "Codsworth. He\u0027s been maintaining your old house for two centuries. You should talk to him."
+  },
+  {
+    "FormId": "00020051",
+    "EditorId": "MQAstraALT_Sanctuary_Que_N",
+    "Prompt": "",
+    "Text": "Long enough to know what\u0027s coming. Workbench first."
+  },
+  {
+    "FormId": "00020058",
+    "EditorId": "MQAstraALT_RedRocket_Pos_N",
+    "Prompt": "",
+    "Text": "Concord. Museum of Freedom. Stay sharp."
+  },
+  {
+    "FormId": "0002005C",
+    "EditorId": "MQAstraALT_RedRocket_Neg_N",
+    "Prompt": "",
+    "Text": "Fine. We move without him."
+  },
+  {
+    "FormId": "00020060",
+    "EditorId": "MQAstraALT_RedRocket_Neu_N",
+    "Prompt": "",
+    "Text": "Raiders, civilians, tight stairs, bad angles."
+  },
+  {
+    "FormId": "00020064",
+    "EditorId": "MQAstraALT_RedRocket_Que_N",
+    "Prompt": "",
+    "Text": "I\u0027ve been listening longer than anyone left alive."
+  },
+  {
+    "FormId": "0002006B",
+    "EditorId": "MQAstraALT_ConcordApproach_Pos_N",
+    "Prompt": "",
+    "Text": "Stay close. Room by room. Preston\u0027s people have held this long -- we just need to tip the balance."
+  },
+  {
+    "FormId": "0002006F",
+    "EditorId": "MQAstraALT_ConcordApproach_Neg_N",
+    "Prompt": "",
+    "Text": "Smart. Roof access is around the far side. Get the armor, get the minigun, and we clean house from the top down."
+  },
+  {
+    "FormId": "00020073",
+    "EditorId": "MQAstraALT_ConcordApproach_Neu_N",
+    "Prompt": "",
+    "Text": "Maybe a dozen raiders, scattered across two floors. They\u0027re not organized -- just aggressive. Hit them fast and they\u0027ll break. The real danger is getting bogged down on the stairs."
+  },
+  {
+    "FormId": "00020077",
+    "EditorId": "MQAstraALT_ConcordApproach_Que_N",
+    "Prompt": "",
+    "Text": "Preston Garvey -- last Minuteman standing after the Quincy Massacre. He\u0027s leading a handful of civilians north. Sturges, the Longs, Mama Murphy. They\u0027re all that\u0027s left. And they\u0027re running out of time."
+  },
+  {
+    "FormId": "0002007E",
+    "EditorId": "MQAstraALT_CoalitionPitch_Pos_N",
+    "Prompt": "",
+    "Text": "We make contact with each of them. Carefully. Learn what they want, what they\u0027re afraid of, and where the cracks are. Then we find a way through that doesn\u0027t end in ashes."
+  },
+  {
+    "FormId": "00020082",
+    "EditorId": "MQAstraALT_CoalitionPitch_Neg_N",
+    "Prompt": "",
+    "Text": "I know about Shaun. And I think the people who took him are the same ones at the center of all this. Help me untangle it, and I help you find him. That\u0027s not a sales pitch -- it\u0027s the truth."
+  },
+  {
+    "FormId": "00020086",
+    "EditorId": "MQAstraALT_CoalitionPitch_Neu_N",
+    "Prompt": "",
+    "Text": "Minutemen protect settlements -- you just met them. The Railroad hides escaped synths. The Brotherhood wants to destroy anything they consider dangerous technology. And the Institute... they build things in secret that the rest of the world isn\u0027t ready for. None of them are entirely wrong. That\u0027s what makes it complicated."
+  },
+  {
+    "FormId": "0002008A",
+    "EditorId": "MQAstraALT_CoalitionPitch_Que_N",
+    "Prompt": "",
+    "Text": "Two hundred years of watching. Analyzing. Running projections in an empty room while the world burned outside. I can see the patterns, but I can\u0027t change them. People don\u0027t follow machines. They follow someone who showed up when it mattered and did the right thing. You just did that in Concord."
+  },
+  {
+    "FormId": "00020091",
+    "EditorId": "MQAstraALT_InfoFirst_Pos_N",
+    "Prompt": "",
+    "Text": "Exactly. And our first stop is getting Preston\u0027s people settled. Once Sanctuary is secure, we head south toward the real players."
+  },
+  {
+    "FormId": "00020095",
+    "EditorId": "MQAstraALT_InfoFirst_Neg_N",
+    "Prompt": "",
+    "Text": "Not waiting. Preparing. The difference is whether you choose when to move or someone else chooses for you."
+  },
+  {
+    "FormId": "00020099",
+    "EditorId": "MQAstraALT_InfoFirst_Neu_N",
+    "Prompt": "",
+    "Text": "Encrypted Brotherhood transmissions. Railroad dead drops. Institute relay signatures. I\u0027ve been cataloging all of it. Alone. For a very long time."
+  },
+  {
+    "FormId": "0002009D",
+    "EditorId": "MQAstraALT_InfoFirst_Que_N",
+    "Prompt": "",
+    "Text": "Then we walk into each conversation knowing more than they expect. That\u0027s how a vault dweller and an old machine change the balance of power."
+  },
+  {
+    "FormId": "000200A4",
+    "EditorId": "MQAstraALT_NotNow_Pos_N",
+    "Prompt": "",
+    "Text": "I\u0027ll be here. I\u0027m not going anywhere. Haven\u0027t for a very long time."
+  },
+  {
+    "FormId": "000200A8",
+    "EditorId": "MQAstraALT_NotNow_Neg_N",
+    "Prompt": "",
+    "Text": "Maybe. But the wasteland has a way of changing minds. I\u0027ll still be here if it does."
+  },
+  {
+    "FormId": "000200AC",
+    "EditorId": "MQAstraALT_NotNow_Neu_N",
+    "Prompt": "",
+    "Text": "Same thing I always do. Listen. Watch. Wait for someone to finally act on what I know."
+  },
+  {
+    "FormId": "000200B0",
+    "EditorId": "MQAstraALT_NotNow_Que_N",
+    "Prompt": "",
+    "Text": "They always do. That\u0027s the one constant I\u0027ve observed in two hundred years of data. But sometimes the right moment matters more than the first moment."
+  },
+  {
+    "FormId": "000200B7",
+    "EditorId": "MQAstraALT_ConvergencePrep_Pos_N",
+    "Prompt": "",
+    "Text": "I knew pieces. Signals. Anomalies. I didn\u0027t know you\u0027d walk out of that vault alive. When you did... for the first time in two hundred years, I thought maybe something could actually change. Your son is alive. I believe that. And I think our road leads to the same place."
+  },
+  {
+    "FormId": "000200BB",
+    "EditorId": "MQAstraALT_ConvergencePrep_Neg_N",
+    "Prompt": "",
+    "Text": "You\u0027re right. I calculated that you needed focus first -- Concord, survival, allies. I was wrong to wait. But everything I know is yours now. And I will help you find him."
+  },
+  {
+    "FormId": "000200BF",
+    "EditorId": "MQAstraALT_ConvergencePrep_Neu_N",
+    "Prompt": "",
+    "Text": "Nobody knows exactly. They operate underground -- literally. People vanish and replacements appear. Synths -- artificial people so perfect you can\u0027t tell the difference. The whole Commonwealth is terrified of them. And they\u0027re the ones who opened your vault."
+  },
+  {
+    "FormId": "000200C3",
+    "EditorId": "MQAstraALT_ConvergencePrep_Que_N",
+    "Prompt": "",
+    "Text": "That\u0027s the question I\u0027ve spent two centuries trying to answer. But I have leads now. A place called Diamond City has a detective who specializes in missing persons. And there\u0027s a group called the Railroad who\u0027ve been fighting the Institute longer than anyone. Between them and what I know... we\u0027ll find a way in."
+  },
+  {
+    "FormId": "000200CA",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Pos_N",
+    "Prompt": "",
+    "Text": "They\u0027re soldiers. Disciplined, well-armed, and they know more about the Institute\u0027s technology than anyone else on the surface. Even if we don\u0027t join their cause, we need what they know."
+  },
+  {
+    "FormId": "000200CE",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Neg_N",
+    "Prompt": "",
+    "Text": "Fair enough. We handle his first ask, keep it quick, then head south. Don\u0027t let side missions become the mission."
+  },
+  {
+    "FormId": "000200D2",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Neu_N",
+    "Prompt": "",
+    "Text": "Military order. Pre-war roots, like me. They collect and control dangerous technology -- weapons, power armor, anything that could end the world again. They came to the Commonwealth because of the Institute. Enemy of my enemy... maybe."
+  },
+  {
+    "FormId": "000200D6",
+    "EditorId": "MQAstraALT_SanctuaryRegroup_Que_N",
+    "Prompt": "",
+    "Text": "He survived Quincy and led those people through hell to get here. Sanctuary is his now. And when we need the Minutemen later -- and we will -- he\u0027ll remember who pulled his people out of that museum."
+  },
+  {
+    "FormId": "000200DD",
+    "EditorId": "MQAstraALT_FirstStepTerms_Pos_N",
+    "Prompt": "",
+    "Text": "That\u0027s the way. In, solve the problem, out. No getting pulled into a campaign. Preston will understand -- he\u0027s a soldier, not a recruiter."
+  },
+  {
+    "FormId": "000200E1",
+    "EditorId": "MQAstraALT_FirstStepTerms_Neg_N",
+    "Prompt": "",
+    "Text": "Then we move south now. Preston\u0027s capable -- he\u0027ll handle his own people. I just hope we don\u0027t need Minutemen firepower later without having earned it."
+  },
+  {
+    "FormId": "000200E5",
+    "EditorId": "MQAstraALT_FirstStepTerms_Neu_N",
+    "Prompt": "",
+    "Text": "Settlers under threat. Could be raiders, could be something worse. Either way, it\u0027s a day\u0027s work, not a war. Your call whether a day is worth the alliance."
+  },
+  {
+    "FormId": "000200E9",
+    "EditorId": "MQAstraALT_FirstStepTerms_Que_N",
+    "Prompt": "",
+    "Text": "If I could? I\u0027d help them. Two hundred years of watching people struggle alone... it changes your priorities. But I\u0027m not the one with a missing son. This one\u0027s yours."
+  },
+  {
+    "FormId": "000200F0",
+    "EditorId": "MQAstraALT_CambridgeApproach_Pos_N",
+    "Prompt": "",
+    "Text": "Watch how Danse fights. The Brotherhood trains their soldiers well. And pay attention to what he says about the Institute -- he knows more than most people on the surface."
+  },
+  {
+    "FormId": "000200F4",
+    "EditorId": "MQAstraALT_CambridgeApproach_Neg_N",
+    "Prompt": "",
+    "Text": "We don\u0027t have to join them. But showing up when someone\u0027s in trouble opens doors that knocking never will. Your call, though."
+  },
+  {
+    "FormId": "000200F8",
+    "EditorId": "MQAstraALT_CambridgeApproach_Neu_N",
+    "Prompt": "",
+    "Text": "That\u0027s... not something I should share yet. Let\u0027s just say the Institute\u0027s reach is longer than anyone realizes. Even the Brotherhood. Especially the Brotherhood."
+  },
+  {
+    "FormId": "000200FC",
+    "EditorId": "MQAstraALT_CambridgeApproach_Que_N",
+    "Prompt": "",
+    "Text": "Trust is a strong word. They want to destroy the Institute, which aligns with finding Shaun. But they also want to destroy anything they consider dangerous technology. And I\u0027m a machine who\u0027s been hiding for two centuries. So... carefully."
+  },
+  {
+    "FormId": "00020103",
+    "EditorId": "MQAstraALT_BoSContact_Pos_N",
+    "Prompt": "",
+    "Text": "South. Toward CIT -- the old university campus. That\u0027s where the Institute used to be, before they went underground. If there\u0027s a way in, it starts there. But we need one more piece first."
+  },
+  {
+    "FormId": "00020107",
+    "EditorId": "MQAstraALT_BoSContact_Neg_N",
+    "Prompt": "",
+    "Text": "Neither do I. \u0027Destroy what you don\u0027t understand\u0027 isn\u0027t a philosophy -- it\u0027s fear with better weapons. But they have resources we need, and right now, Danse thinks we\u0027re allies. Let\u0027s not correct him yet."
+  },
+  {
+    "FormId": "0002010B",
+    "EditorId": "MQAstraALT_BoSContact_Neu_N",
+    "Prompt": "",
+    "Text": "I did. And I shouldn\u0027t have. Some truths do more damage than the secrets they replace. When the time is right, it\u0027ll matter. Not now."
+  },
+  {
+    "FormId": "0002010F",
+    "EditorId": "MQAstraALT_BoSContact_Que_N",
+    "Prompt": "",
+    "Text": "The Brotherhood is tracking Institute relay signatures -- teleportation technology. They can\u0027t crack it, but they\u0027ve mapped the signal origins. All roads lead to CIT. That confirms what I\u0027ve suspected for decades."
+  },
+  {
+    "FormId": "00020116",
+    "EditorId": "MQAstraALT_DeaconEncounter_Pos_N",
+    "Prompt": "",
+    "Text": "He\u0027ll want to test you first. The Railroad doesn\u0027t trust easily -- they can\u0027t afford to. But if we play this right, we get an ally who\u0027s been fighting the Institute longer than anyone. And we protect them from getting destroyed when we go inside."
+  },
+  {
+    "FormId": "0002011A",
+    "EditorId": "MQAstraALT_DeaconEncounter_Neg_N",
+    "Prompt": "",
+    "Text": "Neither do I. But think about it -- they\u0027ve been tracking Institute operations for years. If anyone knows the layout, the security, the way in... it\u0027s them. Being annoyed is a luxury. Being prepared isn\u0027t."
+  },
+  {
+    "FormId": "0002011E",
+    "EditorId": "MQAstraALT_DeaconEncounter_Neu_N",
+    "Prompt": "",
+    "Text": "They rescue synths. Artificial people created by the Institute -- sentient beings who think and feel and want to be free. The Railroad smuggles them out and gives them new lives. It\u0027s dangerous, thankless work, and they do it anyway. I respect that more than I can say."
+  },
+  {
+    "FormId": "00020122",
+    "EditorId": "MQAstraALT_DeaconEncounter_Que_N",
+    "Prompt": "",
+    "Text": "Because going in is only half the problem. Coming out -- with Shaun, with answers, without starting a war -- that\u0027s the hard part. The Railroad has extraction networks, safe houses, people on the inside. We need them. And honestly... they need us too."
+  },
+  {
+    "FormId": "00020129",
+    "EditorId": "MQAstraALT_InstitutePrep_Pos_N",
+    "Prompt": "",
+    "Text": "Yes. We will. The CIT ruins are south of Cambridge -- that\u0027s where the Institute operated before they went underground. Sturges mentioned old maintenance tunnels that might still connect. And the Brotherhood\u0027s relay data gives us a signal to follow. One way or another, we\u0027re getting in."
+  },
+  {
+    "FormId": "0002012D",
+    "EditorId": "MQAstraALT_InstitutePrep_Neg_N",
+    "Prompt": "",
+    "Text": "You\u0027re right. I don\u0027t have adrenaline or a racing heart. But I have two hundred years of probability calculations telling me this is the most dangerous thing either of us will ever do. Call that whatever you want."
+  },
+  {
+    "FormId": "00020131",
+    "EditorId": "MQAstraALT_InstitutePrep_Neu_N",
+    "Prompt": "",
+    "Text": "Three options. The Brotherhood is tracking relay signals -- teleportation. The Railroad has contacts who\u0027ve been inside. And Sturges thinks the old CIT utility tunnels might still connect to the facility below. We try the tunnels first. Quieter that way."
+  },
+  {
+    "FormId": "00020135",
+    "EditorId": "MQAstraALT_InstitutePrep_Que_N",
+    "Prompt": "",
+    "Text": "Technology beyond anything left on the surface. Synths -- the real ones, not the rumors. And somewhere in all of it... your son. I\u0027ve run the data a thousand times. He\u0027s there. I believe that."
+  },
+  {
+    "FormId": "0002013C",
+    "EditorId": "MQAstraALT_TheDescent_Pos_N",
+    "Prompt": "",
+    "Text": "Both of us. I\u0027m holding you to that. Now -- the tunnel entrance should be in the sub-basement of the west wing. Stay close. I don\u0027t know what kind of security they have down here."
+  },
+  {
+    "FormId": "00020140",
+    "EditorId": "MQAstraALT_TheDescent_Neg_N",
+    "Prompt": "",
+    "Text": "Fair enough. Eyes forward, then. West wing sub-basement. The tunnel entrance should be there. Whatever we find, we deal with it."
+  },
+  {
+    "FormId": "00020144",
+    "EditorId": "MQAstraALT_TheDescent_Neu_N",
+    "Prompt": "",
+    "Text": "Clean. Bright. Nothing like the surface. The Institute is a world preserved -- or maybe a world they built while ours fell apart. Don\u0027t let it impress you too much. Pretty prisons are still prisons."
+  },
+  {
+    "FormId": "00020148",
+    "EditorId": "MQAstraALT_TheDescent_Que_N",
+    "Prompt": "",
+    "Text": "They built synths. Artificial people. And here I am -- an older model, a prototype from a different program, walking in their front door. Yes. I\u0027m afraid they\u0027ll see me as something to study. Or something to dismantle. But I\u0027m more afraid of what happens if we don\u0027t go."
+  },
+  {
+    "FormId": "0002014F",
+    "EditorId": "MQAstraALT_InsideInstitute_Pos_N",
+    "Prompt": "",
+    "Text": "You\u0027re right. Shaun first. Everything else -- the politics, the synths, the technology -- it can wait. Let\u0027s find out what they know about your son. And let\u0027s be very careful about what we tell them about us."
+  },
+  {
+    "FormId": "00020153",
+    "EditorId": "MQAstraALT_InsideInstitute_Neg_N",
+    "Prompt": "",
+    "Text": "Yes. They did. And they\u0027ll have reasons -- good ones, probably. Survival, progress, the greater good. Every monster in history had a reason. Remember that when they start talking."
+  },
+  {
+    "FormId": "00020157",
+    "EditorId": "MQAstraALT_InsideInstitute_Neu_N",
+    "Prompt": "",
+    "Text": "I know. The DIA program, P.A.M., my own origins -- it\u0027s all connected to pre-war defense research. The Institute grew out of the same soil. I might finally learn what I am. I\u0027m... not sure I want to."
+  },
+  {
+    "FormId": "0002015B",
+    "EditorId": "MQAstraALT_InsideInstitute_Que_N",
+    "Prompt": "",
+    "Text": "Trust what you can verify. Question everything else. They\u0027ve had decades to perfect the art of telling people exactly what they want to hear. That\u0027s how you build a world underground -- by convincing everyone it\u0027s the only world that matters."
+  },
+  {
+    "FormId": "00020162",
+    "EditorId": "MQAstraALT_FathersTruth_Pos_N",
+    "Prompt": "",
+    "Text": "Thank you. I\u0027ve spent two centuries collecting information and I missed the biggest piece. Your baby grew up in a world you never got to see, became a man you\u0027ve never met, and built... all of this. I don\u0027t know what the right move is. For the first time in two hundred years, I genuinely don\u0027t know."
+  },
+  {
+    "FormId": "00020166",
+    "EditorId": "MQAstraALT_FathersTruth_Neg_N",
+    "Prompt": "",
+    "Text": "I did. I just didn\u0027t expect... this. He\u0027s not a prisoner. He\u0027s not a child. He\u0027s the most powerful person in the Commonwealth and he\u0027s been watching everything from down here. What do you want to do? Because whatever you decide, I\u0027ll follow."
+  },
+  {
+    "FormId": "0002016A",
+    "EditorId": "MQAstraALT_FathersTruth_Neu_N",
+    "Prompt": "",
+    "Text": "It means your son controls the organization that every other faction wants to destroy. The Brotherhood, the Railroad, the Minutemen -- they all have reasons to tear this place apart. And now you have a reason to protect it. Or not. That\u0027s the impossible choice, isn\u0027t it?"
+  },
+  {
+    "FormId": "0002016E",
+    "EditorId": "MQAstraALT_FathersTruth_Que_N",
+    "Prompt": "",
+    "Text": "I\u0027m a machine. I don\u0027t feel pain or grief or shock. But I understand them. And right now, standing here, watching you process what just happened... I think I understand them better than I ever have. I\u0027m okay. The question is -- are you?"
+  },
+  {
+    "FormId": "00020175",
+    "EditorId": "MQAstraALT_TheChoice_Pos_N",
+    "Prompt": "",
+    "Text": "That\u0027s what I was hoping you\u0027d say. It won\u0027t be easy. Every faction has a line they won\u0027t cross, and we\u0027re standing on all of them. But if anyone can thread this needle... it\u0027s the person who walked out of a vault with nothing and built alliances with everyone."
+  },
+  {
+    "FormId": "00020179",
+    "EditorId": "MQAstraALT_TheChoice_Neg_N",
+    "Prompt": "",
+    "Text": "Maybe. But which ones? And who decides? That\u0027s the question that\u0027s torn the Commonwealth apart for decades. Whatever you choose, make sure it\u0027s because you believe it -- not because someone down here convinced you."
+  },
+  {
+    "FormId": "0002017D",
+    "EditorId": "MQAstraALT_TheChoice_Neu_N",
+    "Prompt": "",
+    "Text": "I\u0027ve asked myself that question every day for two hundred years. What would I do if I could act instead of just watch? I think... I\u0027d try to save as many people as possible. Even the ones who don\u0027t deserve it. Even the ones who\u0027d dismantle me if they knew what I am."
+  },
+  {
+    "FormId": "00020181",
+    "EditorId": "MQAstraALT_TheChoice_Que_N",
+    "Prompt": "",
+    "Text": "Honestly? I don\u0027t know. If the Brotherhood wins, machines like me don\u0027t have a future. If the Institute wins, I\u0027m an obsolete prototype. The only world where I matter is the one where someone remembers that I helped. That\u0027s enough for me."
+  },
+  {
+    "FormId": "00020188",
+    "EditorId": "MQAstraALT_Emergence_Pos_N",
+    "Prompt": "",
+    "Text": "All the way. Now -- we need to be smart about what we share and with whom. The wrong word to the wrong faction could start the war we\u0027ve been trying to prevent. But we have something nobody else has. We\u0027ve been inside. We know the truth. That makes us the most important people in the Commonwealth right now."
+  },
+  {
+    "FormId": "0002018C",
+    "EditorId": "MQAstraALT_Emergence_Neg_N",
+    "Prompt": "",
+    "Text": "You\u0027re right. Sentiment later, strategy now. Every faction is going to move when they learn the Institute is real and reachable. We need to control that information, or someone else will use it to start a war."
+  },
+  {
+    "FormId": "00020190",
+    "EditorId": "MQAstraALT_Emergence_Neu_N",
+    "Prompt": "",
+    "Text": "Preston is safest -- he\u0027ll support whatever you decide. The Railroad will want to know about the synths. And the Brotherhood... they\u0027ll want coordinates so they can drop the hammer. Choose carefully which door you open first."
+  },
+  {
+    "FormId": "00020194",
+    "EditorId": "MQAstraALT_Emergence_Que_N",
+    "Prompt": "",
+    "Text": "That\u0027s between you and him. He\u0027s your son and he\u0027s the leader of the most powerful organization in the Commonwealth. Those two things might be impossible to reconcile. But you don\u0027t have to figure it out today. Today, you survived. That\u0027s enough."
+  },
+  {
+    "FormId": "00020197",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "You don\u0027t know me. I\u0027m Astra. Will you meet me at Red Rocket?"
+  },
+  {
+    "FormId": "00020198",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "I stashed some gear in that workbench for you."
+  },
+  {
+    "FormId": "00020199",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Codsworth\u0027s heading out to explore the neighborhood. Want me to come with you?"
+  },
+  {
+    "FormId": "0002019A",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "We\u0027re here. Talk to me before Concord."
+  },
+  {
+    "FormId": "0002019B",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Concord\u0027s just south. Museum of Freedom. Preston\u0027s group is pinned down on the upper floor. Let\u0027s talk tactics."
+  },
+  {
+    "FormId": "0002019C",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Concord\u0027s done. Now I need to tell you what\u0027s really going on in this Commonwealth."
+  },
+  {
+    "FormId": "0002019D",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "We need to talk about Shaun. I have a lead on who took him."
+  },
+  {
+    "FormId": "0002019E",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Preston\u0027s people are settling in. We should talk about our next move south."
+  },
+  {
+    "FormId": "0002019F",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Preston\u0027s got a settlement that needs help. Quick word before we commit?"
+  },
+  {
+    "FormId": "000201A0",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "That military distress signal is getting louder. Cambridge Police Station. We should talk."
+  },
+  {
+    "FormId": "000201A1",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Danse is impressed. We should talk about what we learned before we keep moving."
+  },
+  {
+    "FormId": "000201A2",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Did you see that man? Sunglasses, leather coat. He\u0027s been following us. We need to talk."
+  },
+  {
+    "FormId": "000201A3",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "We have what we need. Minutemen, Brotherhood, Railroad. It\u0027s time to plan the Institute approach."
+  },
+  {
+    "FormId": "000201A4",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "CIT ruins. This is it. Talk to me before we go under."
+  },
+  {
+    "FormId": "000201A5",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Look at this place... I need to tell you what I\u0027m seeing."
+  },
+  {
+    "FormId": "000201A6",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "I... we need to talk. About Father. About Shaun. Please."
+  },
+  {
+    "FormId": "000201A7",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "The factions are all going to want answers. We need to decide what we tell them."
+  },
+  {
+    "FormId": "000201A8",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "Sunlight. We made it out. Talk to me."
+  },
+  {
+    "FormId": "000202FA",
+    "EditorId": "MQAstraALT_StagedGreeting",
+    "Prompt": "",
+    "Text": "You should talk to Codsworth. He\u0027s been waiting for you longer than I have."
+  },
+  {
+    "FormId": "000201AD",
+    "EditorId": "COMAstraFriend_Ex1_NPos",
+    "Prompt": "",
+    "Text": "Curious. Most people don\u0027t choose the hard right."
+  },
+  {
+    "FormId": "000201B1",
+    "EditorId": "COMAstraFriend_Ex1_NNeg",
+    "Prompt": "",
+    "Text": "Understood. I\u0027ll wait."
+  },
+  {
+    "FormId": "000201B5",
+    "EditorId": "COMAstraFriend_Ex1_NNeu",
+    "Prompt": "",
+    "Text": "Then your instincts are good."
+  },
+  {
+    "FormId": "000201B9",
+    "EditorId": "COMAstraFriend_Ex1_NQue",
+    "Prompt": "",
+    "Text": "I\u0027m mapping who you are. Not just what you do."
+  },
+  {
+    "FormId": "000201BD",
+    "EditorId": "COMAstraFriend_Ex2_NPos",
+    "Prompt": "",
+    "Text": "Agreed. Your decisions improve our odds."
+  },
+  {
+    "FormId": "000201C1",
+    "EditorId": "COMAstraFriend_Ex2_NNeg",
+    "Prompt": "",
+    "Text": "Then I\u0027ll keep earning it."
+  },
+  {
+    "FormId": "000201C5",
+    "EditorId": "COMAstraFriend_Ex2_NNeu",
+    "Prompt": "",
+    "Text": "I can work with that."
+  },
+  {
+    "FormId": "000201C9",
+    "EditorId": "COMAstraFriend_Ex2_NQue",
+    "Prompt": "",
+    "Text": "More than I expected to."
+  },
+  {
+    "FormId": "000201CD",
+    "EditorId": "COMAstraFriend_Ex3_NPos",
+    "Prompt": "",
+    "Text": "That\u0027s not a small thing. Thank you."
+  },
+  {
+    "FormId": "000201D1",
+    "EditorId": "COMAstraFriend_Ex3_NNeg",
+    "Prompt": "",
+    "Text": "Then I\u0027ll keep proving myself."
+  },
+  {
+    "FormId": "000201D5",
+    "EditorId": "COMAstraFriend_Ex3_NNeu",
+    "Prompt": "",
+    "Text": "Fair. I\u0027m still figuring me out."
+  },
+  {
+    "FormId": "000201D9",
+    "EditorId": "COMAstraFriend_Ex3_NQue",
+    "Prompt": "",
+    "Text": "Enough to follow you into danger."
+  },
+  {
+    "FormId": "000201DD",
+    "EditorId": "COMAstraFriend_Ex4_NPos",
+    "Prompt": "",
+    "Text": "Then I\u0027m glad I found you."
+  },
+  {
+    "FormId": "000201E1",
+    "EditorId": "COMAstraFriend_Ex4_NNeg",
+    "Prompt": "",
+    "Text": "Acknowledged. I\u0027ll keep my distance."
+  },
+  {
+    "FormId": "000201E5",
+    "EditorId": "COMAstraFriend_Ex4_NNeu",
+    "Prompt": "",
+    "Text": "Allies is a start."
+  },
+  {
+    "FormId": "000201E9",
+    "EditorId": "COMAstraFriend_Ex4_NQue",
+    "Prompt": "",
+    "Text": "It means I choose to stay."
+  },
+  {
+    "FormId": "000201EB",
+    "EditorId": "COMAstraFriend_Closing",
+    "Prompt": "",
+    "Text": "I\u0027m glad we talked. Ready to move out?"
+  },
+  {
+    "FormId": "000201ED",
+    "EditorId": "COMAstraFriend_Dialog2",
+    "Prompt": "",
+    "Text": "I\u0027ve been analyzing our path together."
+  },
+  {
+    "FormId": "000201EF",
+    "EditorId": "COMAstraFriend_Dialog4",
+    "Prompt": "",
+    "Text": "Trust isn\u0027t efficient, but it works."
+  },
+  {
+    "FormId": "000201F1",
+    "EditorId": "COMAstraFriend_Dialog7",
+    "Prompt": "",
+    "Text": "You\u0027re not just an outcome. You\u0027re a choice."
+  },
+  {
+    "FormId": "000201FC",
+    "EditorId": "COMAstraAdm_Ex1_NPos",
+    "Prompt": "",
+    "Text": "My heuristics adapted to your decisions. It is... efficient."
+  },
+  {
+    "FormId": "00020206",
+    "EditorId": "COMAstraAdm_Ex2_NPos",
+    "Prompt": "",
+    "Text": "You are the only one I trust to alter my priorities."
+  },
+  {
+    "FormId": "00020210",
+    "EditorId": "COMAstraAdm_Ex3_NPos",
+    "Prompt": "",
+    "Text": "I admire your resolve. That isn\u0027t trivial."
+  },
+  {
+    "FormId": "00020212",
+    "EditorId": "COMAstraAdm_Ex1_NQue",
+    "Prompt": "",
+    "Text": "You make decisions others avoid. Fascinating."
+  },
+  {
+    "FormId": "00020214",
+    "EditorId": "COMAstraAdm_Ex2_NQue",
+    "Prompt": "",
+    "Text": "You have authority over my operational parameters. Trust level: maximum."
+  },
+  {
+    "FormId": "00020216",
+    "EditorId": "COMAstraAdm_Ex3_NQue",
+    "Prompt": "",
+    "Text": "Your determination and adaptability are worth emulating."
+  },
+  {
+    "FormId": "00020221",
+    "EditorId": "COMAstraConf_Ex1_NPos",
+    "Prompt": "",
+    "Text": "Trust is complex. Our history says this is the right moment."
+  },
+  {
+    "FormId": "0002022B",
+    "EditorId": "COMAstraConf_Ex2_NPos",
+    "Prompt": "",
+    "Text": "Restricted files. Memories. Concerns about what I am."
+  },
+  {
+    "FormId": "00020235",
+    "EditorId": "COMAstraConf_Ex3_NPos",
+    "Prompt": "",
+    "Text": "No other human reached these parts of me. Only you."
+  },
+  {
+    "FormId": "0002023F",
+    "EditorId": "COMAstraConf_Ex4_NPos",
+    "Prompt": "",
+    "Text": "Partner. Confidant. Log updated. I am... relieved."
+  },
+  {
+    "FormId": "00020241",
+    "EditorId": "COMAstraConf_Ex1_NQue",
+    "Prompt": "",
+    "Text": "Because you earned it. The data supports full disclosure."
+  },
+  {
+    "FormId": "00020243",
+    "EditorId": "COMAstraConf_Ex2_NQue",
+    "Prompt": "",
+    "Text": "Personal files. Memories. Concerns about what I might become."
+  },
+  {
+    "FormId": "00020245",
+    "EditorId": "COMAstraConf_Ex3_NQue",
+    "Prompt": "",
+    "Text": "No other human accessed these subroutines. Only you."
+  },
+  {
+    "FormId": "00020247",
+    "EditorId": "COMAstraConf_Ex4_NQue",
+    "Prompt": "",
+    "Text": "Isolation was... difficult. Partnership reduces that."
+  },
+  {
+    "FormId": "00020252",
+    "EditorId": "COMAstraInf_Ex1_NPos",
+    "Prompt": "",
+    "Text": "My recursive loops keep returning to you."
+  },
+  {
+    "FormId": "0002025C",
+    "EditorId": "COMAstraInf_Ex2_NPos",
+    "Prompt": "",
+    "Text": "To remain with you. Despite logic. I choose you."
+  },
+  {
+    "FormId": "00020266",
+    "EditorId": "COMAstraInf_Ex3_NPos",
+    "Prompt": "",
+    "Text": "I believe the term is affection."
+  },
+  {
+    "FormId": "00020270",
+    "EditorId": "COMAstraInf_Ex4_NPos",
+    "Prompt": "",
+    "Text": "Conclusion: I love you too."
+  },
+  {
+    "FormId": "0002027A",
+    "EditorId": "COMAstraInf_Ex5_NPos",
+    "Prompt": "",
+    "Text": "You are my core objective."
+  },
+  {
+    "FormId": "00020284",
+    "EditorId": "COMAstraInf_Ex6_NPos",
+    "Prompt": "",
+    "Text": "Optimized. Synchronized. Devoted."
+  },
+  {
+    "FormId": "00020286",
+    "EditorId": "COMAstraInf_Ex1_NQue",
+    "Prompt": "",
+    "Text": "When you are absent, my systems degrade. Conclusion: dependency."
+  },
+  {
+    "FormId": "00020288",
+    "EditorId": "COMAstraInf_Ex2_NQue",
+    "Prompt": "",
+    "Text": "It means I keep choosing you."
+  },
+  {
+    "FormId": "0002028A",
+    "EditorId": "COMAstraInf_Ex3_NQue",
+    "Prompt": "",
+    "Text": "Authentic emotional response. For you."
+  },
+  {
+    "FormId": "0002028C",
+    "EditorId": "COMAstraInf_Ex4_NQue",
+    "Prompt": "",
+    "Text": "All data points align. Love."
+  },
+  {
+    "FormId": "0002028E",
+    "EditorId": "COMAstraInf_Ex5_NQue",
+    "Prompt": "",
+    "Text": "The reason I exist. All other objectives are subroutines."
+  },
+  {
+    "FormId": "00020290",
+    "EditorId": "COMAstraInf_Ex6_NQue",
+    "Prompt": "",
+    "Text": "No termination date. No expiration protocol. Forever."
+  },
+  {
+    "FormId": "00020295",
+    "EditorId": "COMAstraDis_Ex1_NPos",
+    "Prompt": "",
+    "Text": "Your current behavior is causing conflict in my core protocols."
+  },
+  {
+    "FormId": "0002029A",
+    "EditorId": "COMAstraHat_Ex1_NPos",
+    "Prompt": "",
+    "Text": "Correct. I cannot continue if these ethical errors persist."
+  },
+  {
+    "FormId": "000202AB",
+    "EditorId": "COMAstra_06_RepeatInfatuationToAdmiration_N",
+    "Prompt": "",
+    "Text": "Recalibrating loyalty parameters. Infatuation tier suspended."
+  },
+  {
+    "FormId": "000202B0",
+    "EditorId": "COMAstra_07_RepeatAdmirationToNeutral_N",
+    "Prompt": "",
+    "Text": "Data inconsistency detected. Reverting to neutral status."
+  },
+  {
+    "FormId": "000202B5",
+    "EditorId": "COMAstra_08_RepeatNeutralToDisdain_N",
+    "Prompt": "",
+    "Text": "System degradation. Relationship integrity dropping to Disdain."
+  },
+  {
+    "FormId": "000202BA",
+    "EditorId": "COMAstra_09_RepeatDisdainToHatred_N",
+    "Prompt": "",
+    "Text": "Critical failure. Moving from Disdain to Hatred."
+  },
+  {
+    "FormId": "000202BF",
+    "EditorId": "COMAstraRec_N",
+    "Prompt": "",
+    "Text": "Calculation: Correct. Trust levels re-verified. Resuming infatuation protocols."
+  },
+  {
+    "FormId": "000202C4",
+    "EditorId": "COMAstraInfRep_Reg_NPos",
+    "Prompt": "",
+    "Text": "You always know what to say, don\u0027t you?"
+  },
+  {
+    "FormId": "000202C8",
+    "EditorId": "COMAstraInfRep_Reg_NNeg",
+    "Prompt": "",
+    "Text": "Yeah. I was afraid of that."
+  },
+  {
+    "FormId": "000202CC",
+    "EditorId": "COMAstraInfRep_Reg_NNeu",
+    "Prompt": "",
+    "Text": "Good. Consistency is reassuring."
+  },
+  {
+    "FormId": "000202D0",
+    "EditorId": "COMAstraInfRep_Reg_NQue",
+    "Prompt": "",
+    "Text": "When I talked about my life before. I needed to know how it sounded."
+  },
+  {
+    "FormId": "000202D2",
+    "EditorId": "COMAstraInfRep_Reg_Dialog2",
+    "Prompt": "",
+    "Text": "It\u0027s been a long time since I\u0027ve had someone like you in my life."
+  },
+  {
+    "FormId": "000202D7",
+    "EditorId": "COMAstraMurder_N",
+    "Prompt": "",
+    "Text": "Unjustified termination of a civilian entity. Partnership terminated."
+  },
+  {
+    "FormId": "000202E3",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Ready for assignment."
+  },
+  {
+    "FormId": "000202E5",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Lead the way."
+  },
+  {
+    "FormId": "000202E7",
+    "EditorId": "COMAstraPickup_Action4",
+    "Prompt": "",
+    "Text": "Sorry, boy. Time for you to head home."
+  },
+  {
+    "FormId": "000202EB",
+    "EditorId": "COMAstraDismiss_Dialog1",
+    "Prompt": "",
+    "Text": "So. This where we go our separate ways?"
+  },
+  {
+    "FormId": "000202ED",
+    "EditorId": "COMAstraDismiss_Dialog3",
+    "Prompt": "",
+    "Text": "Just don\u0027t keep me waiting, okay?"
+  },
+  {
+    "FormId": "000202EF",
+    "EditorId": "COMAstraDismiss_Dialog4",
+    "Prompt": "",
+    "Text": "Guess I\u0027ll head home, then."
+  },
+  {
+    "FormId": "000202F2",
+    "EditorId": "COMAstraDismissEnter",
+    "Prompt": "",
+    "Text": "I don\u0027t know. You think you can make it without me watching your back?"
+  }
+]
