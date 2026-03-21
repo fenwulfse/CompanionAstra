@@ -19,13 +19,13 @@ Astra integrates with vanilla quests (MQ102 Out of Time, MQ105 When Freedom Call
 
 ## What Makes This Different
 
-Most Fallout 4 mods are built in the Creation Kit GUI. This one is **generated from ~3,200 lines of C#**:
+Most Fallout 4 mods are built in the Creation Kit GUI. This one is **generated from ~3,500 lines of C#**:
 
 - **Quest stages, objectives, and log entries** — all programmatic
 - **Branching dialogue scenes** with 4-way player choice (Positive/Negative/Neutral/Question)
 - **NPC escort and travel packages** using vanilla templates (EscortPlayerWhenNear, FollowPlayer, Travel)
 - **Papyrus script fragments** with full VMAD wiring for CK visibility
-- **TTS voice generation** — placeholder voice files so NPCs actually speak (Windows TTS → LIP → XWM → FUZ pipeline)
+- **TTS voice generation** via edge-tts (Microsoft Edge neural voices) — Astra speaks with `en-US-AvaNeural`
 - **Stable FormKey allocation** — deterministic IDs that survive rebuilds
 
 The entire mod can be rebuilt from source in seconds with `dotnet run`.
@@ -44,18 +44,23 @@ What works:
 - Full story arc through Institute reveal (dialogue written, routing in progress)
 
 Known issues:
-- Save persistence needs investigation
-- Some CK editor warnings (cosmetic, don't affect gameplay)
+- Exit save on quit-to-menu needs investigation
 - Later quest stages (Coalition pitch, faction encounters) are dialogue-only — routing not fully wired
-- Voice files are TTS placeholders
+- Voice files are neural TTS placeholders (production would use voice actors)
+
+Verified:
+- Quit-to-desktop crash fixed (companionactorscript bindings corrected)
+- CK EditorWarnings clean — zero package warnings
+- Full Piper-equivalent NPC scripts (companionactorscript, workshopnpcscript, teleportactorscript)
+- Default sandbox AI package (companion idles naturally when not quest-driven)
 
 ## Tech Stack
 
 - **C# / .NET 10.0** — source language
 - **Mutagen v0.52.0** (`Mutagen.Bethesda.Fallout4`) — Bethesda plugin generation
 - **Papyrus** — in-game scripting (compiled separately)
-- **Windows System.Speech** — TTS voice generation
-- **LipGenerator / xwmaencode** — voice file processing pipeline
+- **edge-tts** — Microsoft Edge neural voice synthesis (en-US-AvaNeural)
+- **miniaudio / LipGenerator / xwmaencode** — voice file processing (MP3 → WAV → LIP → XWM → FUZ)
 
 ## Building from Source
 
@@ -101,15 +106,18 @@ Open an issue, submit a PR, or reach out. The codebase is a single `Program.cs` 
 ## Project Structure
 
 ```
-Program.cs              — Main ESP generator (all records)
-MQAstraALT.csproj       — .NET project file
-Source/                  — Papyrus scripts (.psc)
-  MQAstraALTQuestScript.psc  — Quest script (stages, events)
-  Fragments/Quests/     — CK-compatible fragment scripts
-CHANGELOG.txt           — Session-by-session development log
-stable_formkeys.json    — Deterministic FormKey allocation
-npc_voice_lines.json    — NPC dialogue text for TTS
-player_voice_lines.json — Player dialogue text for TTS
+Program.cs                — Main ESP generator (~3,500 lines, all records)
+COMAstraSourceBuilder.cs  — Companion management quest builder
+DumpCompanionScript.cs    — Utility: inspect any NPC's VMAD script properties
+MQAstraALT.csproj         — .NET project file
+stable_formkeys.json      — Deterministic FormKey allocation
+Source/                    — Papyrus scripts (.psc)
+  MQAstraALTQuestScript.psc    — Quest script (stages, events)
+  Fragments/Quests/            — CK-compatible fragment scripts
+generate_voices.py         — NPC voice generation (edge-tts pipeline)
+generate_player_voices.py  — Player voice generation
+npc_voice_lines.json       — NPC dialogue text for TTS
+player_voice_lines.json    — Player dialogue text for TTS
 ```
 
 ## License
