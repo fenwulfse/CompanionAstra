@@ -221,6 +221,83 @@ namespace MQAstraALT
                 DumpAstraQuestFlags.Run();
                 return;
             }
+            if (HasArg("--find-script"))
+            {
+                string scriptName = cmdArgs.FirstOrDefault(a => a.StartsWith("--script="))?.Split('=')[1] ?? "CompanionPowerArmorKeywordScript";
+                using var senv = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                Console.WriteLine($"Searching for script: {scriptName}");
+                // Check NPC records
+                int found = 0;
+                foreach (var npc in senv.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
+                {
+                    if (npc.VirtualMachineAdapter == null) continue;
+                    foreach (var s in npc.VirtualMachineAdapter.Scripts)
+                    {
+                        if (s.Name.Contains(scriptName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            Console.WriteLine($"\n  NPC: {npc.EditorID} ({npc.FormKey})");
+                            Console.WriteLine($"    Script: {s.Name} ({s.Properties.Count} props)");
+                            foreach (var prop in s.Properties)
+                            {
+                                if (prop is IScriptObjectPropertyGetter obj)
+                                    Console.WriteLine($"      OBJ {prop.Name} = {obj.Object.FormKey} alias={obj.Alias}");
+                                else if (prop is IScriptBoolPropertyGetter b)
+                                    Console.WriteLine($"      BOOL {prop.Name} = {b.Data}");
+                                else if (prop is IScriptObjectListPropertyGetter ol)
+                                {
+                                    Console.WriteLine($"      OBJL {prop.Name} ({ol.Objects.Count} items):");
+                                    foreach (var o in ol.Objects)
+                                        Console.WriteLine($"        {o.Object.FormKey}");
+                                }
+                                else
+                                    Console.WriteLine($"      {prop.GetType().Name} {prop.Name}");
+                            }
+                            found++;
+                        }
+                    }
+                }
+                // Also check quest alias scripts via reflection
+                foreach (var q in senv.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>())
+                {
+                    foreach (var alias in q.Aliases)
+                    {
+                        // Try to get scripts from alias via reflection
+                        var vmadProp2 = alias.GetType().GetProperty("VirtualMachineAdapter");
+                        if (vmadProp2 == null) continue;
+                        var vmad2 = vmadProp2.GetValue(alias);
+                        if (vmad2 == null) continue;
+                        var scriptsProp2 = vmad2.GetType().GetProperty("Scripts");
+                        if (scriptsProp2 == null) continue;
+                        var scripts = scriptsProp2.GetValue(vmad2) as System.Collections.IEnumerable;
+                        if (scripts == null) continue;
+                        foreach (var sObj in scripts)
+                        {
+                            var nameProp = sObj.GetType().GetProperty("Name");
+                            if (nameProp == null) continue;
+                            var sName = nameProp.GetValue(sObj)?.ToString() ?? "";
+                            if (!sName.Contains(scriptName, StringComparison.OrdinalIgnoreCase)) continue;
+                            var ra = alias as IQuestReferenceAliasGetter;
+                            Console.WriteLine($"\n  Quest: {q.EditorID} ({q.FormKey}) Alias: {ra?.Name ?? "?"} (ID={ra?.ID ?? 0})");
+                            Console.WriteLine($"    Script: {sName}");
+                            var propsProp = sObj.GetType().GetProperty("Properties");
+                            if (propsProp?.GetValue(sObj) is System.Collections.IEnumerable props)
+                            {
+                                foreach (var prop in props)
+                                {
+                                    if (prop is IScriptObjectPropertyGetter obj)
+                                        Console.WriteLine($"      OBJ {prop} = {obj.Object.FormKey}");
+                                    else
+                                        Console.WriteLine($"      {prop}");
+                                }
+                            }
+                            found++;
+                        }
+                    }
+                }
+                // (old quest alias code replaced above)
+                Console.WriteLine($"\nFound {found} instances.");
+                return;
+            }
             if (HasArg("--dump-pkg"))
             {
                 uint pkgId = 0x0975DC; // PiperDefaultSandboxContinueIfNearPkg
@@ -256,6 +333,38 @@ namespace MQAstraALT
             if (HasArg("--type-probe"))
             {
                 TypeProbe.Run();
+                return;
+            }
+            if (HasArg("--find-quest"))
+            {
+                string qName = cmdArgs.FirstOrDefault(a => a.StartsWith("--quest="))?.Split('=')[1] ?? "COMPiper";
+                using var qenv = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                foreach (var q in qenv.LoadOrder.PriorityOrder.WinningOverrides<IQuestGetter>())
+                {
+                    if (q.EditorID != null && q.EditorID.Contains(qName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine($"\nQuest: {q.EditorID} ({q.FormKey})");
+                        Console.WriteLine($"  Stages: {q.Stages.Count}, Aliases: {q.Aliases.Count}");
+                        Console.WriteLine($"  Flags: {q.Data?.Flags}");
+                        // Show dialogue topics
+                        int topicCount = 0;
+                        foreach (var dt in qenv.LoadOrder.PriorityOrder.WinningOverrides<IDialogTopicGetter>())
+                        {
+                            if (dt.Quest.FormKey == q.FormKey)
+                            {
+                                var responses = dt.Responses.Count;
+                                Console.WriteLine($"  Topic: {dt.EditorID} ({dt.FormKey}) type={dt.SubtypeName} responses={responses}");
+                                foreach (var info in dt.Responses)
+                                {
+                                    if (info.Responses.Count > 0)
+                                        Console.WriteLine($"    [{info.FormKey}] \"{info.Responses[0].Text}\"");
+                                }
+                                topicCount++;
+                                if (topicCount > 30) { Console.WriteLine("  ... (truncated)"); break; }
+                            }
+                        }
+                    }
+                }
                 return;
             }
 
@@ -626,6 +735,34 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "TeleportOutSpell", Object = new FormKey(fo4, 0x062BDB).ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptObjectProperty { Name = "TeleportInSpell", Object = new FormKey(fo4, 0x062BDC).ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "teleportInOnLoad", Data = false }
+                        }
+                    },
+                    // CompanionPowerArmorKeywordScript — identical on ALL vanilla companions
+                    new ScriptEntry
+                    {
+                        Name = "CompanionPowerArmorKeywordScript",
+                        Properties = new ExtendedList<ScriptProperty>
+                        {
+                            new ScriptObjectProperty { Name = "pAttachSlot2", Object = new FormKey(fo4, 0x0FF18C).ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "isPowerArmorFrame", Object = new FormKey(fo4, 0x15503F).ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "pAttachPassenger", Object = new FormKey(fo4, 0x1F9859).ToLink<IFallout4MajorRecordGetter>() }
+                        }
+                    },
+                    // CompanionCrimeFactionHostilityScript — crime faction handling
+                    new ScriptEntry
+                    {
+                        Name = "CompanionCrimeFactionHostilityScript",
+                        Properties = new ExtendedList<ScriptProperty>
+                        {
+                            new ScriptObjectListProperty
+                            {
+                                Name = "IgnoreSharedCrimeForAnyoneInTheseFactions",
+                                Objects = new ExtendedList<ScriptObjectProperty>
+                                {
+                                    new ScriptObjectProperty { Object = new FormKey(fo4, 0x2495D0).ToLink<IFallout4MajorRecordGetter>() },
+                                    new ScriptObjectProperty { Object = new FormKey(fo4, 0x2495CB).ToLink<IFallout4MajorRecordGetter>() }
+                                }
+                            }
                         }
                     }
                 }

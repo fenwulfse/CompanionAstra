@@ -1,0 +1,103 @@
+
+Quest: COMPiperTalk (1A6207:Fallout4.esm)
+  Stages: 1, Aliases: 1
+  Flags: StartGameEnabled, AllowRepeatedStages, StartsEnabled, RunOnce
+  Topic:  (1A640A:Fallout4.esm) type=SCEN responses=6
+    [1A6472:Fallout4.esm] "What? I haven't made it readily apparent? You're making us look like monsters out here. How you think I feel about that?"
+    [1A6475:Fallout4.esm] "You know for a long time I thought Mayor McDonough was the only one who could make my blood boil."
+    [1A6476:Fallout4.esm] "You're something else, you know that? What you've done... I don't know if there's enough good will in the world to put things right again."
+    [1A6477:Fallout4.esm] "Are you serious? The things you've done? You ought to be ashamed. I know I am."
+    [1A6478:Fallout4.esm] "Where do I begin? Blue, I'm starting to wish I'd never met you. Clear enough for you?"
+  Topic:  (1A6412:Fallout4.esm) type=SCEN responses=6
+    [1A6656:Fallout4.esm] "You know, I'm getting real sick of how you've been acting lately. Unless things start turning around, I can't promise how much longer I'll be around."
+    [1A6657:Fallout4.esm] "You want my opinion? I think you're making a real mess of things out here. God. Can't you just try doing the right thing for a change?"
+    [1A6659:Fallout4.esm] "Look, I came out here with you to help the folks of the Commonwealth, not walk all over them. What do you say we give that a try?"
+    [1A665A:Fallout4.esm] "Me? I'm getting awfully tired of how you're handling yourself out here."
+    [1A6660:Fallout4.esm] "Why? Are you thinking of actually listening for a change? Because I'd love a reason to not just head back home."
+  Topic:  (1A6418:Fallout4.esm) type=SCEN responses=6
+    [1A65D5:Fallout4.esm] "Look, you don't need to worry. We're... fine, I guess. I just, I want to do right by folks out here. I guess I need to know you do too."
+    [1A65D6:Fallout4.esm] "I suppose things are alright. Just feels like we could be doing more for folks out here, you know?"
+    [1A65D7:Fallout4.esm] "I guess I'm still on the fence. Show me you want to make lives better out here. Then we'll talk."
+    [1A65D8:Fallout4.esm] "Well, things aren't bad. Because believe me, you'd know if they were. But I suppose we could be doing better."
+    [1A65DE:Fallout4.esm] "It's hard to say at the moment. I think I need you to show me you're not just out here for yourself."
+  Topic:  (1A641E:Fallout4.esm) type=SCEN responses=6
+    [1A64EC:Fallout4.esm] "You got nothing to worry about. We're good, Blue. Now what do you say we get back to makin' trouble?"
+    [1A64ED:Fallout4.esm] "Well, I gotta say I like the way you've been handling yourself out here. Commonwealth's not an easy place to do the right thing."
+    [1A64EE:Fallout4.esm] "Well, it's awful nice to be traveling with someone who's got their head on straight. So I'd say I'm good."
+    [1A64EF:Fallout4.esm] "Things are pretty good from where I'm standing. So long as we're helping people out here, I'm all in."
+    [1A64F0:Fallout4.esm] "Not a lot of complaints at the moment. And you can ask around, that is a rare occurrence."
+  Topic:  (1A641F:Fallout4.esm) type=SCEN responses=6
+    [1A64CB:Fallout4.esm] "You and me? Heh. I never suspected two people could do this much good for the Commonwealth."
+    [1A64D0:Fallout4.esm] "I doubt I've ever been this good, Blue. You and I are making a real difference. That's pretty much all I've ever wanted."
+    [1A64D1:Fallout4.esm] "Frankly, I'm great. I mean, I got you watching my back, don't I?"
+    [1A64D2:Fallout4.esm] "Heh. The smartest thing I've done in life is heading out with you. So I'd say I'm pretty damn good."
+    [1A64D3:Fallout4.esm] "Well, unless you've got some objections you're not raising, I'd say we're about as good as good can be."
+  Topic:  (1A6420:Fallout4.esm) type=SCEN responses=6
+    [1A664E:Fallout4.esm] "Blue, I'm on cloud nine. Things couldn't be better. And that's all thanks to you."
+    [1A6650:Fallout4.esm] "Honestly, there's no place I'd rather be right now than by your side."
+    [1A6652:Fallout4.esm] "I'm with the person I love, helping those in need. I couldn't imagine a better life."
+    [1A6653:Fallout4.esm] "Honestly, I feel a bit guilty. Why should I get so lucky when so many folks have it so hard? But other than that, I'm great."
+    [1A6654:Fallout4.esm] "Someone sounds a little nervous. Well you've got nothing to worry about. This is the happiest I've been in a long time. I'm out here with you."
+  Topic:  (1A6421:Fallout4.esm) type=SCEN responses=0
+  Topic:  (1A6422:Fallout4.esm) type=SCEN responses=6
+    [1A65BC:Fallout4.esm] "If you're sure. I guess I'll head home. Just... don't keep me waiting."
+    [1A65CD:Fallout4.esm] "If that's what you want. I'll just head on home. Gonna be dull without ya."
+    [1A65CE:Fallout4.esm] "Suppose I'll head home, then. But if you decide you want to get in some more trouble, you know where to find me."
+    [1A65D2:Fallout4.esm] "Sure thing. I'll head for home."
+    [1A65D3:Fallout4.esm] "Fine by me. Feel free to take your time. Get whatever you need to out of your system."
+    [1AB286:Fallout4.esm] "First good idea you've had in a while. I'm heading home."
+  Topic:  (1A6425:Fallout4.esm) type=SCEN responses=3
+    [1AC43B:Fallout4.esm] "Alright."
+    [1AC43C:Fallout4.esm] "Sure."
+    [1AC43D:Fallout4.esm] "Okay."
+  Topic:  (1A6426:Fallout4.esm) type=SCEN responses=1
+  Topic:  (1A6437:Fallout4.esm) type=SCEN responses=2
+  Topic:  (1A6438:Fallout4.esm) type=SCEN responses=5
+    [1A64A8:Fallout4.esm] "It's time we called it quits."
+    [1A64A9:Fallout4.esm] "I think we ought to go our separate ways."
+    [1A64AA:Fallout4.esm] "It's time we each went our own way."
+    [1A64AB:Fallout4.esm] "It's time we part ways."
+    [1A64AC:Fallout4.esm] "I think we're done for now."
+  Topic:  (1A6454:Fallout4.esm) type=SCEN responses=5
+  Topic:  (1A6462:Fallout4.esm) type=SCEN responses=6
+    [1A64D5:Fallout4.esm] "I was just wondering where you and I stand."
+    [1A64D7:Fallout4.esm] "Is everything okay between us?"
+    [1A64D8:Fallout4.esm] "I just wanted to check-in, make sure things were alright between us."
+    [1A64E6:Fallout4.esm] "Are things alright between us?"
+    [1A64EA:Fallout4.esm] "Is everything alright between us, Piper?"
+  Topic:  (1A6463:Fallout4.esm) type=GREE responses=41
+    [093B23:Fallout4.esm] "You know, you look like you could really use this. These things have literally saved my life."
+    [093B24:Fallout4.esm] "You hungry? These always keep me going."
+    [093B25:Fallout4.esm] "You look like you could use a pick-me-up."
+    [093B26:Fallout4.esm] "Hey. Here. Something to keep you sharp. Always worked for me."
+    [093B27:Fallout4.esm] "Time for some travel fuel. Want one?"
+    [16CB54:Fallout4.esm] "Not sure I want to hear what you have to say."
+    [16CB57:Fallout4.esm] "What?"
+    [16CB58:Fallout4.esm] "Yeah?"
+    [16CB59:Fallout4.esm] "Fine, talk."
+    [16CB5A:Fallout4.esm] "Well? You gonna say something?"
+    [16CB5B:Fallout4.esm] "Ugh, what?"
+    [16CB5C:Fallout4.esm] "What now?"
+    [16CB5D:Fallout4.esm] "Make it quick."
+    [16CB5E:Fallout4.esm] "What do you want?"
+    [16CB5F:Fallout4.esm] "Oh, is this an apology?"
+    [16CB60:Fallout4.esm] "What going on?"
+    [16CB61:Fallout4.esm] "Something you need?"
+    [16CB62:Fallout4.esm] "Cap for your thoughts?"
+    [16CB63:Fallout4.esm] "Talk to me."
+    [16CB64:Fallout4.esm] "Something to say?"
+    [16CB65:Fallout4.esm] "All right. Out with it."
+    [16CB66:Fallout4.esm] "Got something for me?"
+    [16CB67:Fallout4.esm] "What's going on?"
+    [16CB68:Fallout4.esm] "What do ya need?"
+    [16CB69:Fallout4.esm] "Shoot."
+    [16CB6A:Fallout4.esm] "What can I do?"
+    [16CB6B:Fallout4.esm] "Need something? All you gotta do is ask."
+    [16CB6C:Fallout4.esm] "You've got my undivided attention."
+    [16CB6D:Fallout4.esm] "Ask away."
+    [16CB6E:Fallout4.esm] "Something up?"
+    [16CB6F:Fallout4.esm] "Hey doll."
+    [16CB70:Fallout4.esm] "Hey handsome."
+    [16CB71:Fallout4.esm] "Something I can do?"
+    [16CB72:Fallout4.esm] "You need something, you let me know."
+    [16CB73:Fallout4.esm] "Anything you need?"
