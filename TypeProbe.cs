@@ -14,8 +14,10 @@ static class TypeProbe
         Dump(typeof(PackageDataLocation));
         Dump(typeof(LocationTargetRadius));
         Dump(typeof(LocationTarget));
+        Dump(typeof(LocationFallback));
         Dump(typeof(PackageDataTarget));
         Dump(typeof(PackageTargetSpecificReference));
+        Dump(typeof(PackageTargetObjectID));
         Dump(typeof(PackageTargetAlias));
         Dump(typeof(SceneAction));
         Dump(typeof(SceneActionTypicalType));

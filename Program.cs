@@ -188,6 +188,14 @@ namespace MQAstraALT
                 DumpDeaconVsAstra.Run();
                 return;
             }
+            if (HasArg("--dump-companion-script"))
+            {
+                uint csId = 0x00002F25; // default: Piper
+                var csArg = Array.FindIndex(cmdArgs, a => a.StartsWith("--npc-id="));
+                if (csArg >= 0) csId = Convert.ToUInt32(cmdArgs[csArg].Split('=')[1], 16);
+                DumpCompanionScript.Run(csId);
+                return;
+            }
             if (HasArg("--compare-esp"))
             {
                 var rawPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "MQAstraALT.esp");
@@ -211,6 +219,38 @@ namespace MQAstraALT
             if (HasArg("--dump-astra-flags"))
             {
                 DumpAstraQuestFlags.Run();
+                return;
+            }
+            if (HasArg("--dump-pkg"))
+            {
+                uint pkgId = 0x0975DC; // PiperDefaultSandboxContinueIfNearPkg
+                var pkgArg = Array.FindIndex(cmdArgs, a => a.StartsWith("--pkg-id="));
+                if (pkgArg >= 0) pkgId = Convert.ToUInt32(cmdArgs[pkgArg].Split('=')[1], 16);
+                using var penv = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                var pkg = penv.LoadOrder.PriorityOrder.WinningOverrides<IPackageGetter>()
+                    .First(p => p.FormKey.ID == pkgId);
+                Console.WriteLine($"Package: {pkg.EditorID} ({pkg.FormKey})");
+                Console.WriteLine($"Template: {(pkg.PackageTemplate.IsNull ? "NONE" : pkg.PackageTemplate.FormKey.ToString())}");
+                Console.WriteLine($"DataInputVersion: {pkg.DataInputVersion}");
+                Console.WriteLine($"Speed: {pkg.PreferredSpeed}");
+                Console.WriteLine($"Data keys ({pkg.Data.Count}):");
+                foreach (var kvp in pkg.Data)
+                {
+                    var val = kvp.Value;
+                    string desc = val switch {
+                        IPackageDataBoolGetter b => $"Bool={b.Data}",
+                        IPackageDataIntGetter i => $"Int={i.Data}",
+                        IPackageDataFloatGetter f => $"Float={f.Data}",
+                        IPackageDataLocationGetter loc => $"Location(radius={loc.Location?.Radius}, target={loc.Location?.Target?.GetType().Name}" +
+                            (loc.Location?.Target is ILocationFallbackGetter lfb ? $", fallbackType={lfb.GetType().GetProperty("Type")?.GetValue(lfb)} (int={(int)Convert.ChangeType(lfb.GetType().GetProperty("Type")!.GetValue(lfb)!, typeof(int))})" : "") +
+                            (loc.Location?.Target is ILocationTargetGetter lt ? $", link={lt.Link}" : "") + ")",
+                        IPackageDataTargetGetter tgt => $"Target(type={tgt.Type}, target={tgt.Target?.GetType().Name}" +
+                            (tgt.Target is IPackageTargetSpecificReferenceGetter sr ? $", ref={sr.Reference}" : "") +
+                            (tgt.Target is IPackageTargetObjectTypeGetter ot ? $", objType={ot.Type}" : "") + ")",
+                        _ => val.GetType().Name
+                    };
+                    Console.WriteLine($"  [{kvp.Key}] {desc}");
+                }
                 return;
             }
             if (HasArg("--type-probe"))
@@ -355,11 +395,52 @@ namespace MQAstraALT
                 .First(a => a.EditorID == "CA_WantsToTalkMurder");
             var ca_Event_Murder = env.LoadOrder.PriorityOrder.WinningOverrides<IKeywordGetter>()
                 .First(k => k.EditorID == "CA_Event_Murder");
-            var ca_LovesEvent = new FormKey(fo4, 0x0FA879);
-            var ca_LikesEvent = new FormKey(fo4, 0x0FA878);
-            var ca_DislikesEvent = new FormKey(fo4, 0x0FA877);
-            var ca_HatesEvent = new FormKey(fo4, 0x0FA876);
-            var ca_ConsideredMurderFactionList = new FormKey(fo4, 0x0FA87A);
+            // Astra-specific custom event keywords (vanilla companions each have their own set)
+            var ca_AstraLovesKW = new Mutagen.Bethesda.Fallout4.Keyword(Stable("Keyword:CA_CustomEvent_AstraLoves"), Fallout4Release.Fallout4)
+                { EditorID = "CA_CustomEvent_AstraLoves" };
+            var ca_AstraLikesKW = new Mutagen.Bethesda.Fallout4.Keyword(Stable("Keyword:CA_CustomEvent_AstraLikes"), Fallout4Release.Fallout4)
+                { EditorID = "CA_CustomEvent_AstraLikes" };
+            var ca_AstraDislikesKW = new Mutagen.Bethesda.Fallout4.Keyword(Stable("Keyword:CA_CustomEvent_AstraDislikes"), Fallout4Release.Fallout4)
+                { EditorID = "CA_CustomEvent_AstraDislikes" };
+            var ca_AstraHatesKW = new Mutagen.Bethesda.Fallout4.Keyword(Stable("Keyword:CA_CustomEvent_AstraHates"), Fallout4Release.Fallout4)
+                { EditorID = "CA_CustomEvent_AstraHates" };
+            mod.Keywords.Add(ca_AstraLovesKW);
+            mod.Keywords.Add(ca_AstraLikesKW);
+            mod.Keywords.Add(ca_AstraDislikesKW);
+            mod.Keywords.Add(ca_AstraHatesKW);
+
+            // Astra-specific murder faction list (vanilla: CompanionMurder_Valentine etc.)
+            var ca_AstraMurderFactionList = new FormList(Stable("FormList:CompanionMurder_Astra"), Fallout4Release.Fallout4)
+                { EditorID = "CompanionMurder_Astra" };
+            mod.FormLists.Add(ca_AstraMurderFactionList);
+
+            // Astra-specific perk and messages (vanilla: CompNickPerk, CompanionInfatuationPerkMessage_Valentine etc.)
+            var ca_AstraPerk = new Perk(Stable("Perk:CompAstraPerk"), Fallout4Release.Fallout4)
+            {
+                EditorID = "CompAstraPerk",
+                Name = "Astra's Insight",
+                Description = "Astra's analytical nature grants improved terminal hacking.",
+                Playable = false
+            };
+            mod.Perks.Add(ca_AstraPerk);
+
+            var ca_AstraPerkMessage = new Message(Stable("Message:CompanionInfatuationPerkMessage_Astra"), Fallout4Release.Fallout4)
+            {
+                EditorID = "CompanionInfatuationPerkMessage_Astra",
+                Name = "Astra admires you.",
+                Description = "You have gained Astra's Insight.",
+                Flags = Message.Flag.MessageBox
+            };
+            mod.Messages.Add(ca_AstraPerkMessage);
+
+            var ca_AstraRomanticMessage = new Message(Stable("Message:CompanionInfatuationRomanticMessage_Astra"), Fallout4Release.Fallout4)
+            {
+                EditorID = "CompanionInfatuationRomanticMessage_Astra",
+                Name = "Astra idolizes you.",
+                Description = "Your bond with Astra has deepened.",
+                Flags = Message.Flag.MessageBox
+            };
+            mod.Messages.Add(ca_AstraRomanticMessage);
             var experienceAV = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>()
                 .First(a => a.EditorID == "Experience");
             var hasItemForPlayerAV = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>()
@@ -535,24 +616,171 @@ namespace MQAstraALT
                             new ScriptBoolProperty { Name = "bApplyWorkshopOwnerFaction", Data = false },
                             new ScriptBoolProperty { Name = "bCommandable", Data = true }
                         }
+                    },
+                    // teleportactorscript — matches Piper exactly (enables fast travel teleport FX)
+                    new ScriptEntry
+                    {
+                        Name = "teleportactorscript",
+                        Properties = new ExtendedList<ScriptProperty>
+                        {
+                            new ScriptObjectProperty { Name = "TeleportOutSpell", Object = new FormKey(fo4, 0x062BDB).ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "TeleportInSpell", Object = new FormKey(fo4, 0x062BDC).ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptBoolProperty { Name = "teleportInOnLoad", Data = false }
+                        }
                     }
                 }
             };
 
-            UpsertStructListProperty(companionActorScript, "TraitPreference_Array");
-            UpsertStructListProperty(companionActorScript, "EventData_Array");
-            UpsertObjectListProperty(companionActorScript, "NotConsideredMurder_Array");
-            UpsertStructListProperty(companionActorScript, "MurderThreshold_Array");
-            UpsertObjectListProperty(companionActorScript, "KeywordsToAddWhileCurrentCompanion");
+            // TraitPreference_Array — Astra personality (matches Piper: Generous=likes, Selfish=dislikes, Peaceful=likes, Violent=dislikes)
+            var traitGenerous = new FormKey(fo4, 0x0A1B1C);  // CA_Trait_Generous
+            var traitSelfish = new FormKey(fo4, 0x0A1B1D);   // CA_Trait_Selfish
+            var traitPeaceful = new FormKey(fo4, 0x0A1B20);  // CA_Trait_Peaceful
+            var traitViolent = new FormKey(fo4, 0x0A1B21);   // CA_Trait_Violent
+            var traitPrefArray = UpsertStructListProperty(companionActorScript, "TraitPreference_Array");
+            traitPrefArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Trait", Object = traitGenerous.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptBoolProperty { Name = "Likes", Data = true }
+            }});
+            traitPrefArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Trait", Object = traitSelfish.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptBoolProperty { Name = "Likes", Data = false }
+            }});
+            traitPrefArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Trait", Object = traitPeaceful.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptBoolProperty { Name = "Likes", Data = true }
+            }});
+            traitPrefArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Trait", Object = traitViolent.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptBoolProperty { Name = "Likes", Data = false }
+            }});
 
-            UpsertObjectProperty(companionActorScript, "LovesEvent").Object = ca_LovesEvent.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "InfatuationPerk").Object = new FormKey(fo4, 0x1CC8AC).ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "ConsideredMurderFactionList").Object = ca_ConsideredMurderFactionList.ToLink<IFallout4MajorRecordGetter>();
+            // EventData_Array — shared events all companions react to (modeled from Piper dump)
+            var caEventLikesGlobal = new FormKey(fo4, 0x05611C);    // CA_Event_Likes
+            var caEventDislikesGlobal = new FormKey(fo4, 0x05611E);  // CA_Event_Dislikes
+            var caEventHatesGlobal = new FormKey(fo4, 0x05611F);     // CA_Event_Hates
+            var caEventLovesGlobal = new FormKey(fo4, 0x05611D);     // CA_Event_Loves
+            var caEventSteal = new FormKey(fo4, 0x04D8AA);           // CA_Event_Steal
+            var caEventDonateItem = new FormKey(fo4, 0x0792C7);      // CA_Event_DonateItem
+            var caEventHack = new FormKey(fo4, 0x0A1B2F);            // CA_Event_HackComputer
+            var caEventHealDog = new FormKey(fo4, 0x0A1B2D);         // CA_Event_HealDogmeant
+            var caEventPickLock = new FormKey(fo4, 0x0A1B30);          // CA_Event_PickLock (regular)
+            var caEventPickLockOwned = new FormKey(fo4, 0x0A1B31);   // CA_Event_PickLockOwnedDoor
+            var caEventPickpocket = new FormKey(fo4, 0x0A1B29);      // CA_Event_StealPickpocket
+            var caEventEatCorpse = new FormKey(fo4, 0x1D2877);       // CA_Event_EatCorpse
+            var minSettlementHelp = new FormKey(fo4, 0x144356);      // MinSettlementHelp
+            var minSettlementRefuseHelp = new FormKey(fo4, 0x144357); // MinSettlementRefuseHelp
+            var mq302Evacuate = new FormKey(fo4, 0x19B647);          // MQ302EvacuateInstitute
+            var synthSuspectKillFalse = new FormKey(fo4, 0x14435A);  // SynthSuspectKillFalse
+            var synthSuspectKillTrue = new FormKey(fo4, 0x144359);   // SynthSuspectKillTrue
+            var eventDataArray = UpsertStructListProperty(companionActorScript, "EventData_Array");
+            // Companion-specific keyword events (indices 0-3, matching Piper pattern)
+            // These map the Astra-specific keywords to disposition changes — essential for affinity system
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = ca_AstraDislikesKW.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventHatesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = ca_AstraHatesKW.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = ca_AstraLikesKW.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLovesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = ca_AstraLovesKW.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            // Astra likes: hacking, helping, donating
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventHack.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventDonateItem.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventHealDog.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            // Astra likes: picking locks (Piper pattern)
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventPickLock.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            // Astra dislikes: stealing, pickpocketing, eating corpses, picking owned locks
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventSteal.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventPickpocket.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventPickLockOwned.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventEatCorpse.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            // Astra hates: murder
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventHatesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            // Settlement and quest events (matching Piper)
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = minSettlementHelp.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = minSettlementRefuseHelp.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = mq302Evacuate.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventDislikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = synthSuspectKillFalse.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = synthSuspectKillTrue.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+
+            // NotConsideredMurder_Array — shared faction (all vanilla companions have this)
+            var notMurderArray = UpsertObjectListProperty(companionActorScript, "NotConsideredMurder_Array");
+            notMurderArray.Objects.Add(new ScriptObjectProperty { Name = "Item", Object = new FormKey(fo4, 0x22118A).ToLink<IFallout4MajorRecordGetter>() }); // CompanionsNeverConsiderMurderFaction
+
+            // MurderThreshold_Array — COMAstra quest stages for murder reactions
+            var murderArray = UpsertStructListProperty(companionActorScript, "MurderThreshold_Array");
+            murderArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "QuestToSet", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptIntProperty { Name = "StageToSet", Data = 600 }
+            }});
+            murderArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "QuestToSet", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptIntProperty { Name = "StageToSet", Data = 630 },
+                new ScriptFloatProperty { Name = "AffinityPenalty", Data = -5000f }
+            }});
+
+            // KeywordsToAddWhileCurrentCompanion — playerCanStimpak (all vanilla companions have this)
+            var kwArray = UpsertObjectListProperty(companionActorScript, "KeywordsToAddWhileCurrentCompanion");
+            kwArray.Objects.Add(new ScriptObjectProperty { Name = "Item", Object = new FormKey(fo4, 0x0AD52A).ToLink<IFallout4MajorRecordGetter>() }); // playerCanStimpak
+
+            UpsertObjectProperty(companionActorScript, "LovesEvent").Object = ca_AstraLovesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "InfatuationPerk").Object = ca_AstraPerk.FormKey.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "ConsideredMurderFactionList").Object = ca_AstraMurderFactionList.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "IdleTopic");
             UpsertObjectProperty(companionActorScript, "DismissScene").Object = Stable("Scene:COMAstraDismissScene").ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "DislikesEvent").Object = ca_DislikesEvent.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "DislikesEvent").Object = ca_AstraDislikesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "InfatuationThreshold").Object = caT1Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "HomeLocation");
+            UpsertObjectProperty(companionActorScript, "HomeLocation"); // Set after redRocketTruckStopLocation is resolved
             UpsertObjectProperty(companionActorScript, "CA_Event_Murder").Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertBoolProperty(companionActorScript, "ShouldGivePlayerItems").Data = true;
             companionActorScript.Properties.Add(new ScriptStructListProperty
@@ -633,16 +861,16 @@ namespace MQAstraALT
                     }
                 }
             });
-            UpsertObjectProperty(companionActorScript, "InfatuationRomanticMessage").Object = new FormKey(fo4, 0x1CC8AE).ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "InfatuationRomanticMessage").Object = ca_AstraRomanticMessage.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "MurderToggle").Object = commonMurderToggleAlwaysOff.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "MQComplete").Object = mqComplete.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "ItemToGive");
             UpsertObjectProperty(companionActorScript, "Tutorial").Object = tutorialQuest.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "LikesEvent").Object = ca_LikesEvent.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "LikesEvent").Object = ca_AstraLikesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "HasItemForPlayer").Object = hasItemForPlayerAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "InfatuationPerkMessage").Object = new FormKey(fo4, 0x1CC8AD).ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "InfatuationPerkMessage").Object = ca_AstraPerkMessage.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "StartingThreshold").Object = caT3Neutral.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "HatesEvent").Object = ca_HatesEvent.ToLink<IFallout4MajorRecordGetter>();
+            UpsertObjectProperty(companionActorScript, "HatesEvent").Object = ca_AstraHatesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "TemporaryAngerLevel").Object = temporaryAngerLevelAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "Experience").Object = experienceAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
 
@@ -682,14 +910,10 @@ namespace MQAstraALT
             // stable_formkeys.json owns the generated MQAstraALT-side IDs from 0x020000 upward.
 
             // VANILLA FOLLOW PACKAGES ONLY.
-            // Do not fabricate a custom follow package here. Use Bethesda's package
-            // records directly so the scene package action is populated the same way.
+            // Vanilla follow packages (for reference; Dogmeat now uses MQAstraALT_DogmeatFollowPlayer)
             var followersCompanionPackageFK = env.LoadOrder.PriorityOrder.WinningOverrides<IPackageGetter>()
                 .First(p => p.EditorID == "FollowersCompanionPackage").FormKey;
-            var dogmeatIntroFollowPackageFK = env.LoadOrder.PriorityOrder.WinningOverrides<IPackageGetter>()
-                .First(p => p.EditorID == "DogmeatIntroSceneFollowPlayerPackage").FormKey;
-            Console.WriteLine($"Vanilla Astra MQ follow package: {followersCompanionPackageFK}");
-            Console.WriteLine($"Vanilla Dogmeat MQ follow package: {dogmeatIntroFollowPackageFK}");
+            Console.WriteLine($"Vanilla FollowersCompanionPackage: {followersCompanionPackageFK}");
 
             // Use the workbench as the travel destination — puts Astra right at the
             // Red Rocket workbench so the player naturally tags it on arrival.
@@ -709,6 +933,9 @@ namespace MQAstraALT
                 Environment.Exit(1);
             }
             Console.WriteLine($"Red Rocket travel location: {redRocketTruckStopLocation.FormKey} ({redRocketTruckStopLocation.EditorID})");
+
+            // Set HomeLocation now that redRocketTruckStopLocation is resolved (fixes myLocation() errors in COMAstra 80/90)
+            UpsertObjectProperty(companionActorScript, "HomeLocation").Object = redRocketTruckStopLocation.FormKey.ToLink<IFallout4MajorRecordGetter>();
 
             // Sanctuary marker for negative-path escort
             Console.WriteLine("Searching for Sanctuary markers...");
@@ -1043,35 +1270,47 @@ namespace MQAstraALT
             astraFollowPlayerPkg.Data.Add(18, new PackageDataBool { Data = true });
             astraFollowPlayerPkg.Data.Add(20, new PackageDataBool { Data = false });
             astraFollowPlayerPkg.Data.Add(24, new PackageDataBool { Data = false });
+            var nearSelfFallback = new LocationFallback();
+            // Set Type to NearSelf (12) via reflection — LocationType enum not directly accessible
+            nearSelfFallback.GetType().GetProperty("Type")!.SetValue(nearSelfFallback,
+                Enum.ToObject(nearSelfFallback.GetType().GetProperty("Type")!.PropertyType, 12));
             astraFollowPlayerPkg.Data.Add(25, new PackageDataLocation
             {
-                Location = new LocationTargetRadius { Target = new LocationFallback(), Radius = 0 }
+                Location = new LocationTargetRadius { Target = nearSelfFallback, Radius = 0 }
             });
             astraFollowPlayerPkg.Data.Add(27, new PackageDataFloat { Data = 300 });
             astraFollowPlayerPkg.Data.Add(28, new PackageDataFloat { Data = 600 });
             astraFollowPlayerPkg.Data.Add(29, new PackageDataFloat { Data = 600 });
             astraFollowPlayerPkg.Data.Add(30, new PackageDataFloat { Data = 1000 });
+            var nearEditorFallback = new LocationFallback();
+            // Set Type to NearEditorLocation (3) via reflection
+            nearEditorFallback.GetType().GetProperty("Type")!.SetValue(nearEditorFallback,
+                Enum.ToObject(nearEditorFallback.GetType().GetProperty("Type")!.PropertyType, 3));
             astraFollowPlayerPkg.Data.Add(32, new PackageDataLocation
             {
-                Location = new LocationTargetRadius { Target = new LocationFallback(), Radius = 1000 }
+                Location = new LocationTargetRadius { Target = nearEditorFallback, Radius = 1000 }
             });
             astraFollowPlayerPkg.Data.Add(35, new PackageDataFloat { Data = 50 });
             astraFollowPlayerPkg.Data.Add(37, new PackageDataFloat { Data = 300 });
             astraFollowPlayerPkg.Data.Add(39, new PackageDataLocation
             {
-                Location = new LocationTargetRadius { Target = new LocationTarget(), Radius = 1000 }
+                Location = new LocationTargetRadius { Target = new LocationTarget { Link = playerRefFK.ToLink<IPlacedGetter>() }, Radius = 1000 }
             });
             astraFollowPlayerPkg.Data.Add(41, new PackageDataBool { Data = true });
             astraFollowPlayerPkg.Data.Add(43, new PackageDataFloat { Data = 15 });
             astraFollowPlayerPkg.Data.Add(45, new PackageDataBool { Data = false });
             astraFollowPlayerPkg.Data.Add(48, new PackageDataTarget
             {
-                Target = new PackageTargetObjectID { CountOrDistance = 0 },
+                Target = new PackageTargetObjectID
+                {
+                    Reference = new FormKey(fo4, 0x08BE67).ToLink<IObjectIdGetter>(), // Followers_Scene_StandHere
+                    CountOrDistance = 0
+                },
                 Type = PackageDataTarget.Types.Target
             });
             astraFollowPlayerPkg.Data.Add(50, new PackageDataLocation
             {
-                Location = new LocationTargetRadius { Target = new LocationTarget(), Radius = 500 }
+                Location = new LocationTargetRadius { Target = new LocationTarget { Link = playerRefFK.ToLink<IPlacedGetter>() }, Radius = 500 }
             });
             astraFollowPlayerPkg.Data.Add(52, new PackageDataObjectList());
             astraFollowPlayerPkg.Data.Add(57, new PackageDataFloat { Data = 0 });
@@ -1104,6 +1343,177 @@ namespace MQAstraALT
                 }
             });
             Console.WriteLine($"Astra follow-player package: {astraFollowPlayerPkg.EditorID} ({astraFollowPlayerPkg.FormKey})");
+
+            // ======================================================================
+            // Dogmeat follow package — FollowPlayer template, owned by MQAstraALT
+            // (fixes "mismatched owner quest" from vanilla DogmeatIntroSceneFollowPlayerPackage)
+            // Uses same template + data keys as AstraFollowPlayer for consistency.
+            // ======================================================================
+            var dogmeatFollowPkg = new Package(
+                Stable("Package:MQAstraALT_DogmeatFollowPlayer"), Fallout4Release.Fallout4)
+            {
+                EditorID = "MQAstraALT_DogmeatFollowPlayer",
+                Type = Package.Types.Package,
+                Flags = Package.Flag.PreferredSpeed,
+                PreferredSpeed = Package.Speed.Walk,
+                DataInputVersion = 28,
+                ScheduleMonth = 0,
+                ScheduleDayOfWeek = Package.DayOfWeek.Any,
+                ScheduleHour = -1,
+                ScheduleMinute = 0,
+                ScheduleDurationInMinutes = 0
+            };
+            dogmeatFollowPkg.PackageTemplate.SetTo(followPlayerTemplateFK);
+            dogmeatFollowPkg.OwnerQuest.SetTo(questFK);
+            // FollowPlayer template data keys (same structure as AstraFollowPlayer)
+            dogmeatFollowPkg.Data.Add(0, new PackageDataBool { Data = true });
+            dogmeatFollowPkg.Data.Add(4, new PackageDataTarget
+            {
+                Target = new PackageTargetSpecificReference
+                {
+                    Reference = playerRefFK.ToLink<IPlacedGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.SingleRef
+            });
+            dogmeatFollowPkg.Data.Add(5, new PackageDataFloat { Data = 150 });
+            dogmeatFollowPkg.Data.Add(6, new PackageDataFloat { Data = 300 });
+            dogmeatFollowPkg.Data.Add(8, new PackageDataBool { Data = true });
+            dogmeatFollowPkg.Data.Add(10, new PackageDataBool { Data = false });
+            dogmeatFollowPkg.Data.Add(14, new PackageDataFloat { Data = 0 });
+            dogmeatFollowPkg.Data.Add(18, new PackageDataBool { Data = true });
+            dogmeatFollowPkg.Data.Add(20, new PackageDataBool { Data = false });
+            dogmeatFollowPkg.Data.Add(24, new PackageDataBool { Data = false });
+            var dogNearSelf = new LocationFallback();
+            dogNearSelf.GetType().GetProperty("Type")!.SetValue(dogNearSelf,
+                Enum.ToObject(dogNearSelf.GetType().GetProperty("Type")!.PropertyType, 12));
+            dogmeatFollowPkg.Data.Add(25, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = dogNearSelf, Radius = 0 }
+            });
+            dogmeatFollowPkg.Data.Add(27, new PackageDataFloat { Data = 300 });
+            dogmeatFollowPkg.Data.Add(28, new PackageDataFloat { Data = 600 });
+            dogmeatFollowPkg.Data.Add(29, new PackageDataFloat { Data = 600 });
+            dogmeatFollowPkg.Data.Add(30, new PackageDataFloat { Data = 1000 });
+            var dogNearEditor = new LocationFallback();
+            dogNearEditor.GetType().GetProperty("Type")!.SetValue(dogNearEditor,
+                Enum.ToObject(dogNearEditor.GetType().GetProperty("Type")!.PropertyType, 3));
+            dogmeatFollowPkg.Data.Add(32, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = dogNearEditor, Radius = 1000 }
+            });
+            dogmeatFollowPkg.Data.Add(35, new PackageDataFloat { Data = 50 });
+            dogmeatFollowPkg.Data.Add(37, new PackageDataFloat { Data = 300 });
+            dogmeatFollowPkg.Data.Add(39, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = new LocationTarget { Link = playerRefFK.ToLink<IPlacedGetter>() }, Radius = 1000 }
+            });
+            dogmeatFollowPkg.Data.Add(41, new PackageDataBool { Data = true });
+            dogmeatFollowPkg.Data.Add(43, new PackageDataFloat { Data = 15 });
+            dogmeatFollowPkg.Data.Add(45, new PackageDataBool { Data = false });
+            dogmeatFollowPkg.Data.Add(48, new PackageDataTarget
+            {
+                Target = new PackageTargetObjectID
+                {
+                    Reference = new FormKey(fo4, 0x08BE67).ToLink<IObjectIdGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.Target
+            });
+            dogmeatFollowPkg.Data.Add(50, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = new LocationTarget { Link = playerRefFK.ToLink<IPlacedGetter>() }, Radius = 500 }
+            });
+            dogmeatFollowPkg.Data.Add(52, new PackageDataObjectList());
+            dogmeatFollowPkg.Data.Add(57, new PackageDataFloat { Data = 0 });
+            dogmeatFollowPkg.Data.Add(59, new PackageDataBool { Data = true });
+            dogmeatFollowPkg.Data.Add(61, new PackageDataFloat { Data = 0 });
+            dogmeatFollowPkg.Data.Add(62, new PackageDataFloat { Data = 0 });
+            dogmeatFollowPkg.Data.Add(64, new PackageDataFloat { Data = 150 });
+            dogmeatFollowPkg.Data.Add(66, new PackageDataFloat { Data = 250 });
+            Console.WriteLine($"Dogmeat follow package: {dogmeatFollowPkg.EditorID} ({dogmeatFollowPkg.FormKey})");
+
+            // ======================================================================
+            // Astra default sandbox — SandboxAndKeepEyeOnContinueIfNear template
+            // Matches PiperDefaultSandboxContinueIfNearPkg (0975DC) exactly.
+            // This is Astra's fallback AI: wander, sit, lean, idle when no quest package overrides.
+            // ======================================================================
+            var sandboxTemplateFK = new FormKey(fo4, 0x136326); // SandboxAndKeepEyeOnContinueIfNear
+            var astraSandboxPkg = new Package(
+                Stable("Package:AstraDefaultSandboxPkg"), Fallout4Release.Fallout4)
+            {
+                EditorID = "AstraDefaultSandboxPkg",
+                Type = Package.Types.Package,
+                Flags = Package.Flag.PreferredSpeed,
+                PreferredSpeed = Package.Speed.Run,
+                DataInputVersion = 10,
+                ScheduleMonth = 0,
+                ScheduleDayOfWeek = Package.DayOfWeek.Any,
+                ScheduleHour = -1,
+                ScheduleMinute = 0,
+                ScheduleDurationInMinutes = 0
+            };
+            astraSandboxPkg.PackageTemplate.SetTo(sandboxTemplateFK);
+            // Key 2 — sandbox location: NearEditorLocationCell (13), radius=0
+            var sandboxLoc = new LocationFallback();
+            sandboxLoc.GetType().GetProperty("Type")!.SetValue(sandboxLoc,
+                Enum.ToObject(sandboxLoc.GetType().GetProperty("Type")!.PropertyType, 13)); // NearEditorLocationCell
+            astraSandboxPkg.Data.Add(2, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = sandboxLoc, Radius = 0 }
+            });
+            // Key 21 — alternate location: NearEditorLocationCell (13), radius=0
+            var sandboxAltLoc = new LocationFallback();
+            sandboxAltLoc.GetType().GetProperty("Type")!.SetValue(sandboxAltLoc,
+                Enum.ToObject(sandboxAltLoc.GetType().GetProperty("Type")!.PropertyType, 13));
+            astraSandboxPkg.Data.Add(21, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = sandboxAltLoc, Radius = 0 }
+            });
+            // Key 26 — fallback: NearSelf (12), radius=64
+            var sandboxNearSelf = new LocationFallback();
+            sandboxNearSelf.GetType().GetProperty("Type")!.SetValue(sandboxNearSelf,
+                Enum.ToObject(sandboxNearSelf.GetType().GetProperty("Type")!.PropertyType, 12)); // NearSelf
+            astraSandboxPkg.Data.Add(26, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius { Target = sandboxNearSelf, Radius = 64 }
+            });
+            // Key 22 — keep eye on: PlayerRef
+            astraSandboxPkg.Data.Add(22, new PackageDataTarget
+            {
+                Target = new PackageTargetSpecificReference
+                {
+                    Reference = playerRefFK.ToLink<IPlacedGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.SingleRef
+            });
+            // Key 30 — target object type: None (default)
+            astraSandboxPkg.Data.Add(30, new PackageDataTarget
+            {
+                Target = new PackageTargetObjectType
+                {
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.Target
+            });
+            // Boolean/float keys matching Piper
+            astraSandboxPkg.Data.Add(12, new PackageDataBool { Data = true });
+            astraSandboxPkg.Data.Add(5, new PackageDataBool { Data = false });
+            astraSandboxPkg.Data.Add(6, new PackageDataBool { Data = false });
+            astraSandboxPkg.Data.Add(7, new PackageDataBool { Data = true });
+            astraSandboxPkg.Data.Add(8, new PackageDataBool { Data = true });
+            astraSandboxPkg.Data.Add(9, new PackageDataBool { Data = true });
+            astraSandboxPkg.Data.Add(14, new PackageDataBool { Data = true });
+            astraSandboxPkg.Data.Add(10, new PackageDataBool { Data = false });
+            astraSandboxPkg.Data.Add(16, new PackageDataBool { Data = false });
+            astraSandboxPkg.Data.Add(18, new PackageDataFloat { Data = 50 });
+            astraSandboxPkg.Data.Add(20, new PackageDataBool { Data = false });
+            astraSandboxPkg.Data.Add(28, new PackageDataBool { Data = false });
+            // No conditions — always available as fallback (same as Piper's: 0 conditions)
+            Console.WriteLine($"Astra sandbox package: {astraSandboxPkg.EditorID} ({astraSandboxPkg.FormKey})");
+            // Add to NPC-level package list (like Piper's NPC has PiperDefaultSandboxContinueIfNearPkg)
+            claudeNpc.Packages.Add(astraSandboxPkg.FormKey.ToLink<IPackageGetter>());
 
             // Scene flag combo: ShowAllText + PlayerDialogueScene (numeric 36)
             var playerDialogueSceneFlags = (Scene.Flag)36;
@@ -1173,7 +1583,7 @@ namespace MQAstraALT
                       | QuestReferenceAlias.Flag.Optional,
                 PackageData = new ExtendedList<IFormLinkGetter<IPackageGetter>>
                 {
-                    dogmeatIntroFollowPackageFK.ToLink<IPackageGetter>()
+                    dogmeatFollowPkg.FormKey.ToLink<IPackageGetter>()
                 }
             };
             quest.Aliases.Add(dogmeatAlias);
@@ -1523,7 +1933,7 @@ namespace MQAstraALT
             var dogmeatEscortScene = CreateEscortPackageScene(
                 $"{questEditorId}_DogmeatEscortScene",
                 1,
-                dogmeatIntroFollowPackageFK.ToLink<IPackageGetter>());
+                dogmeatFollowPkg.FormKey.ToLink<IPackageGetter>());
 
             Console.WriteLine("Creating Astra Red Rocket travel package scene...");
             var astraTravelToRedRocketScene = CreateEscortPackageScene(
@@ -2852,6 +3262,8 @@ namespace MQAstraALT
             mod.Packages.Add(astraEscortPlayerWhenNearToRedRocketAlwaysPkg);
             mod.Packages.Add(astraEscortPlayerWhenNearToSanctuaryPkg);
             mod.Packages.Add(astraFollowPlayerPkg);
+            mod.Packages.Add(dogmeatFollowPkg);
+            mod.Packages.Add(astraSandboxPkg);
             mod.Quests.Add(companionQuest);
             mod.Quests.Add(quest);
 
@@ -3132,17 +3544,23 @@ namespace MQAstraALT
                         p.WaitForExit();
                     }
 
-                    string PsEscape(string s) => s.Replace("'", "''").Replace("\"", "\\\"");
+                    // Edge TTS voice map (Microsoft neural voices via edge-tts)
+                    const string VOICE_ASTRA = "en-US-AvaNeural";       // composed, analytical — Astra's character
+                    const string VOICE_PLAYER_F = "en-US-JennyNeural";  // distinct from Astra
+                    const string VOICE_PLAYER_M = "en-US-AndrewNeural"; // earnest, straightforward
 
-                    void GenerateWav(string text, string wavPath)
+                    string PyEscape(string s) => s.Replace("\\", "\\\\").Replace("'", "\\'");
+
+                    void GenerateWav(string text, string wavPath, string voice = VOICE_ASTRA)
                     {
-                        string ps = "Add-Type -AssemblyName System.Speech; " +
-                                    "$tts = New-Object System.Speech.Synthesis.SpeechSynthesizer; " +
-                                    "$tts.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::Female); " +
-                                    "$tts.Rate = 0; $tts.Volume = 100; " +
-                                    $"$tts.SetOutputToWaveFile('{PsEscape(wavPath)}'); " +
-                                    $"$tts.Speak('{PsEscape(text)}'); $tts.Dispose();";
-                        Run("powershell", $"-Command \"{ps}\"");
+                        string mp3Path = wavPath.Replace(".wav", ".mp3");
+                        // edge-tts: generate MP3 with neural voice
+                        Run("python", $"-m edge_tts --voice {voice} --text \"{text.Replace("\"", "\\\"")}\" --write-media \"{mp3Path}\"");
+                        // miniaudio: convert MP3 to WAV (16-bit PCM, required by LipGenerator)
+                        string pyConvert = $"import miniaudio; " +
+                            $"audio = miniaudio.decode_file('{PyEscape(mp3Path)}', output_format=miniaudio.SampleFormat.SIGNED16, nchannels=1, sample_rate=44100); " +
+                            $"miniaudio.wav_write_file('{PyEscape(wavPath)}', audio)";
+                        Run("python", $"-c \"{pyConvert}\"");
                     }
 
                     // Collect all NPC dialogue lines from quest topics
@@ -3260,7 +3678,7 @@ namespace MQAstraALT
 
                         try
                         {
-                            GenerateWav(text, wavPath);
+                            GenerateWav(text, wavPath, VOICE_PLAYER_F);
                             Run(lipGen, $"\"{wavPath}\" \"{text}\"");
                             Run(xwmEncode, $"\"{wavPath}\" \"{xwmPath}\"");
 
@@ -3302,7 +3720,68 @@ namespace MQAstraALT
                         }
                     }
 
-                    Console.WriteLine($"\n=== TTS COMPLETE: {generated} NPC + {playerGenerated} Player voice files generated ===");
+                    // --- Player voice lines (Male) ---
+                    string playerVoiceMaleDst = System.IO.Path.Combine(
+                        dataPath, "Sound", "Voice", "MQAstraALT.esp", "PlayerVoiceMale01");
+                    System.IO.Directory.CreateDirectory(playerVoiceMaleDst);
+
+                    Console.WriteLine($"\nProcessing {playerLines.Count} Player (Male) voice lines...\n");
+                    int playerMaleGenerated = 0;
+                    foreach (var (formKey, text, edid) in playerLines)
+                    {
+                        string id = formKey.ID.ToString("X8");
+                        string wavPath = System.IO.Path.Combine(toolsRoot, $"playerm_{id}.wav");
+                        string lipPath = System.IO.Path.Combine(toolsRoot, $"playerm_{id}.lip");
+                        string xwmPath = System.IO.Path.Combine(toolsRoot, $"playerm_{id}.xwm");
+
+                        string shortText = text.Length > 55 ? text.Substring(0, 55) + "..." : text;
+                        Console.Write($"  {id} [{edid}]\n    \"{shortText}\" ... ");
+
+                        try
+                        {
+                            GenerateWav(text, wavPath, VOICE_PLAYER_M);
+                            Run(lipGen, $"\"{wavPath}\" \"{text}\"");
+                            Run(xwmEncode, $"\"{wavPath}\" \"{xwmPath}\"");
+
+                            if (System.IO.File.Exists(lipPath) && System.IO.File.Exists(xwmPath))
+                            {
+                                var lipData = System.IO.File.ReadAllBytes(lipPath);
+                                var audioData = System.IO.File.ReadAllBytes(xwmPath);
+                                string outFuz = System.IO.Path.Combine(playerVoiceMaleDst, $"{id}_1.fuz");
+
+                                using var ms = new System.IO.MemoryStream();
+                                using var bw = new System.IO.BinaryWriter(ms);
+                                bw.Write(new byte[] { 0x46, 0x55, 0x5A, 0x45 }); // FUZE magic
+                                bw.Write((uint)1);                                 // Version 1
+                                bw.Write((uint)lipData.Length);
+                                bw.Write(lipData);
+                                bw.Write(audioData);
+                                bw.Flush();
+                                System.IO.File.WriteAllBytes(outFuz, ms.ToArray());
+
+                                var check = System.IO.File.ReadAllBytes(outFuz);
+                                if (check.Length >= 5 && check[4] == 0x01)
+                                {
+                                    Console.WriteLine($"OK ({check.Length:N0} bytes)");
+                                    playerMaleGenerated++;
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"WARNING: bad format byte at offset 4 (expected 01, got {check[4]:X2})");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("FAILED (lip or xwm missing)");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"ERROR: {ex.Message}");
+                        }
+                    }
+
+                    Console.WriteLine($"\n=== TTS COMPLETE: {generated} NPC + {playerGenerated} Player(F) + {playerMaleGenerated} Player(M) voice files generated ===");
 
                     Console.WriteLine("TTS generated in Data voice path. ESP deployment is intentionally manual.");
                 }

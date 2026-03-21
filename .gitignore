@@ -4,3 +4,26 @@ out/
 *.user
 *.suo
 .vs/
+
+# Session handover/release notes (historical, not source)
+HANDOFF_*.md
+HANDOVER_*.md
+RELEASE_NOTE_*.md
+RECOVERY_LOG_*.md
+WORKSPACE_NOTE_*.md
+HOTFIX_NOTE_*.md
+OVERNIGHT_RECOVERY_NOTE_*.md
+SOURCE_RESET_NOTE_*.md
+DISMISS_VM_AD_HOTFIX_NOTE_*.md
+GREETING_VOICE_NOTE.md
+ASTRA_CONVERSION_NOTE_*.md
+CHANGELOG_CLAUDE_*.md
+USER_FEEDBACK_NOTE_*.md
+VOICE_AND_FORMID_STABILITY_*.md
+PACKAGE_ACTION_FINDINGS_*.md
+PACKAGE_PROBE_NOTE_*.md
+REDROCKET_*.md
+
+# Old project file
+MQClaudeALT.csproj
+QF_MQClaudeALT_*.psc

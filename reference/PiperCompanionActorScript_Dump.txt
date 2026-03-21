@@ -1,0 +1,77 @@
+CompanionPiper (002F1E:Fallout4.esm) — companionactorscript dump 2026-03-20
+=============================================================================
+
+TraitPreference_Array (4 structs):
+  [0] CA_Trait_Generous (0A1B1C) Likes=True
+  [1] CA_Trait_Selfish  (0A1B1D) Likes=False
+  [2] CA_Trait_Peaceful (0A1B20) Likes=True
+  [3] CA_Trait_Violent   (0A1B21) Likes=False
+
+LovesEvent     = CA_CustomEvent_PiperLoves    (1716BE)
+LikesEvent     = CA_CustomEvent_PiperLikes    (1716BD)
+DislikesEvent  = CA_CustomEvent_PiperDislikes (1716BB)
+HatesEvent     = CA_CustomEvent_PiperHates    (1716BC)
+
+InfatuationPerk           = CompPiperPerk (178D54)
+InfatuationPerkMessage    = CompanionInfatuationPerkMessage_Piper (1D1210)
+InfatuationRomanticMessage = CA_Piper_Threshold_Romance (1E774B)
+ConsideredMurderFactionList = CompanionMurder_Piper (249509)
+
+IdleTopic    = COMPiperIdles (162C55)
+DismissScene = COMPiperDismissScene (162EFB)
+HomeLocation = DiamondCityPublickOccurrencesLocation (003962)
+ItemToGive   = CompanionGivePlayerItem_Piper (093B2C)
+
+NotConsideredMurder_Array: CompanionsNeverConsiderMurderFaction (22118A)
+KeywordsToAddWhileCurrentCompanion: playerCanStimpak (0AD52A)
+
+MurderThreshold_Array:
+  [0] QuestToSet=COMPiper (0BBD96), StageToSet=600
+  [1] QuestToSet=COMPiper (0BBD96), StageToSet=630, AffinityPenalty=-5000
+
+EventData_Array (17 structs):
+  [0]  Dislikes CA_CustomEvent_PiperDislikes (1716BB) msg=CA_Piper_Dislikes (02B737)
+  [1]  Hates    CA_CustomEvent_PiperHates    (1716BC) msg=CA_Piper_Hates (02B738)
+  [2]  Likes    CA_CustomEvent_PiperLikes    (1716BD) msg=CA_Piper_Likes (02B739)
+  [3]  Loves    CA_CustomEvent_PiperLoves    (1716BE) msg=CA_Piper_Loves (02B73A)
+  [4]  Likes    CA_Event_DonateItem          (0792C7) msg=CA_Piper_Likes
+  [5]  Dislikes CA_Event_EatCorpse           (1D2877) msg=CA_Piper_Dislikes
+  [6]  Likes    CA_Event_HealDogmeant        (0A1B2D) msg=CA_Piper_Likes
+  [7]  Hates    CA_Event_Murder              (04D8AB) msg=CA_Piper_Hates
+  [8]  Likes    CA_Event_PickLock            (0A1B30) msg=CA_Piper_Likes
+  [9]  Dislikes CA_Event_PickLockOwnedDoor   (0A1B31) msg=CA_Piper_Dislikes
+  [10] Dislikes CA_Event_Steal               (04D8AA) msg=CA_Piper_Dislikes
+  [11] Dislikes CA_Event_StealPickpocket     (0A1B29) msg=CA_Piper_Dislikes
+  [12] Likes    MinSettlementHelp            (144356) msg=CA_Piper_Likes
+  [13] Dislikes MinSettlementRefuseHelp      (144357) msg=CA_Piper_Dislikes
+  [14] Likes    MQ302EvacuateInstitute       (19B647) msg=CA_Piper_Likes
+  [15] Dislikes SynthSuspectKillFalse        (14435A) msg=CA_Piper_Dislikes
+  [16] Likes    SynthSuspectKillTrue         (144359) msg=CA_Piper_Likes
+
+ThresholdData_Array (7 structs): — same structure as Nick
+  [0] Infatuation  stage=500 global=CA_T1_Infatuation  msg=CA_Piper_Threshold_Infatuation (1E774A)
+  [1] Confidant    stage=495 global=CA_TCustom1_Confidant (not major)
+  [2] Admiration   stage=400 global=CA_T2_Admiration   msg=CA_Piper_Threshold_Admiration (1E7747)
+  [3] Friendship   stage=405 global=CA_TCustom2_Friend (not major)
+  [4] Neutral      stage=300 global=CA_T3_Neutral      msg=CA_Piper_Threshold_Neutral (1E774C) (previously reached)
+  [5] Disdain      stage=200 global=CA_T4_Disdain      msg=CA_Piper_Threshold_Disdain (1E7748)
+  [6] Hatred       stage=100 global=CA_T5_Hatred       msg=CA_Piper_Threshold_Hatred (1E7749) conditional=Piper_AffinityCondition_HatredAllowed (21BDFC)
+
+Shared vanilla records (same across all companions):
+  MurderToggle       = CommonMurderToggle_AlwaysOff (24997D)
+  MQComplete         = MQComplete (17D5B2)
+  Tutorial           = Tutorial (160147)
+  HasItemForPlayer   = HasItemForPlayer (16FBC6)
+  Experience         = Experience (0002C9)
+  TemporaryAngerLevel = TemporaryAngerLevel (02DA12)
+  StartingThreshold  = CA_T3_Neutral (04B1C6)
+  InfatuationThreshold = CA_T1_Infatuation (04B1C4)
+  ShouldGivePlayerItems = True
+  CA_Event_Murder    = CA_Event_Murder (04D8AB)
+  WorkshopParent     = 02058E
+  playerCanStimpak   = 0AD52A
+  CompanionsNeverConsiderMurderFaction = 22118A
+
+Also has (not on Astra yet):
+  CompanionCrimeFactionHostilityScript — IgnoreSharedCrimeForAnyoneInTheseFactions
+  CompanionPowerArmorKeywordScript — PA keyword handling
