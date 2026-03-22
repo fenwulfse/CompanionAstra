@@ -346,6 +346,29 @@ namespace MQAstraALT
                         Console.WriteLine($"\nQuest: {q.EditorID} ({q.FormKey})");
                         Console.WriteLine($"  Stages: {q.Stages.Count}, Aliases: {q.Aliases.Count}");
                         Console.WriteLine($"  Flags: {q.Data?.Flags}");
+                        Console.WriteLine($"  Priority: {q.Data?.Priority}");
+                        // Quest-level DialogConditions
+                        if (q.DialogConditions != null && q.DialogConditions.Count > 0)
+                        {
+                            Console.WriteLine($"  DialogConditions ({q.DialogConditions.Count}):");
+                            foreach (var cond in q.DialogConditions)
+                            {
+                                if (cond is IConditionFloatGetter cf)
+                                {
+                                    var fd = cf.Data as IFunctionConditionDataGetter;
+                                    Console.WriteLine($"    ConditionFloat: {fd?.Function} op={cf.CompareOperator} val={cf.ComparisonValue} runOn={fd?.RunOnType} p1Num={fd?.ParameterOneNumber} p1Rec={fd?.ParameterOneRecord.FormKey} unknown3={fd?.Unknown3}");
+                                }
+                                else if (cond is IConditionGlobalGetter cg)
+                                {
+                                    var fd = cg.Data as IFunctionConditionDataGetter;
+                                    Console.WriteLine($"    ConditionGlobal: {fd?.Function} op={cg.CompareOperator} globalVal={cg.ComparisonValue.FormKey} runOn={fd?.RunOnType}");
+                                }
+                                else
+                                    Console.WriteLine($"    {cond.GetType().Name}");
+                            }
+                        }
+                        else
+                            Console.WriteLine("  DialogConditions: NONE");
                         // Show dialogue topics
                         int topicCount = 0;
                         foreach (var dt in qenv.LoadOrder.PriorityOrder.WinningOverrides<IDialogTopicGetter>())
@@ -363,6 +386,29 @@ namespace MQAstraALT
                                 if (topicCount > 30) { Console.WriteLine("  ... (truncated)"); break; }
                             }
                         }
+                    }
+                }
+                return;
+            }
+            if (HasArg("--dump-keywords"))
+            {
+                using var kwenv = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                var companions = new[] { "CompanionPiper", "CompanionCait", "PrestonGarvey", "CompanionDeacon",
+                    "CompanionNickValentine", "CompanionCurie", "CompanionMacCready", "CompanionHancock",
+                    "CompanionX6-88", "BoSPaladinDanse", "CompanionStrong", "Codsworth",
+                    "DLC03_CompanionOldLongfellow", "DLC04Gage" };
+                foreach (var npc in kwenv.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
+                {
+                    if (npc.EditorID == null) continue;
+                    bool isCompanion = companions.Any(c => npc.EditorID == c);
+                    bool isAstra = npc.EditorID == "CompanionAstra";
+                    if (!isCompanion && !isAstra) continue;
+                    Console.WriteLine($"\n{npc.EditorID} ({npc.FormKey}):");
+                    if (npc.Keywords == null || npc.Keywords.Count == 0) { Console.WriteLine("  (no keywords)"); continue; }
+                    foreach (var kw in npc.Keywords)
+                    {
+                        var resolved = kw.TryResolve(kwenv.LinkCache);
+                        Console.WriteLine($"  {kw.FormKey} = {resolved?.EditorID ?? "(unresolved)"}");
                     }
                 }
                 return;
@@ -635,7 +681,14 @@ namespace MQAstraALT
                 HeightMin = 1.0f, HeightMax = 1.0f,
                 Flags = Npc.Flag.Unique | Npc.Flag.Essential | Npc.Flag.AutoCalcStats | Npc.Flag.Female,
                 Factions = new ExtendedList<RankPlacement>(),
-                Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>> { actorTypeNpc },
+                Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>>
+                {
+                    actorTypeNpc,
+                    new FormKey(fo4, 0x1F9859).ToLink<IKeywordGetter>(),  // p-AttachPassenger (all human companions)
+                    new FormKey(fo4, 0x2049E5).ToLink<IKeywordGetter>(),  // NoRicochet (all companions)
+                    new FormKey(fo4, 0x022E49).ToLink<IKeywordGetter>(),  // AnimArchetypeConfident (Piper pattern)
+                    new FormKey(fo4, 0x0C866C).ToLink<IKeywordGetter>(),  // AnimFaceArchetypeConfident (Piper pattern)
+                },
                 Properties = new ExtendedList<ObjectProperty>
                 {
                     new ObjectProperty
@@ -1104,10 +1157,16 @@ namespace MQAstraALT
             var questFK = new FormKey(modKey, 0x00080A); // MQAstraALT quest
             string questEditorId = "MQAstraALT";
             string pscName = $"QF_{questEditorId}_{questFK.ID:X8}";
+
+            // COMAstraTalk — Talk quest (COMPiperTalk pattern)
+            var talkQuestFK = Stable("Quest:COMAstraTalk");
+            const string talkQuestEditorId = "COMAstraTalk";
+
             Console.WriteLine($"Companion quest: {companionQuestFK}");
             Console.WriteLine($"Companion fragment PSC: {companionPscName}");
             Console.WriteLine($"Quest FormKey: {questFK}");
             Console.WriteLine($"Fragment PSC: {pscName}");
+            Console.WriteLine($"Talk quest: {talkQuestFK}");
 
             var astraTravelToMuseumPkg = new Package(Stable("Package:MQAstraALT_AstraTravelToMuseumDoorPkg"), Fallout4Release.Fallout4)
             {
@@ -1665,6 +1724,13 @@ namespace MQAstraALT
                 followersQuest);
             Console.WriteLine($"Companion shell stages after creation: {companionQuest.Stages.Count}");
 
+            // COMAstraTalk quest (COMPiperTalk pattern — casual greetings + relationship status)
+            var talkQuest = COMAstraTalkBuilder.CreateTalkQuestShell(
+                talkQuestFK,
+                talkQuestEditorId,
+                claudeNpcFK);
+            Console.WriteLine($"Talk quest shell created: {talkQuestEditorId} ({talkQuestFK})");
+
             var quest = new Quest(questFK, Fallout4Release.Fallout4)
             {
                 EditorID = questEditorId,
@@ -1870,6 +1936,27 @@ namespace MQAstraALT
                 CaSceneRepeatHatredDownwardFormKey = caSceneRepeatHatredDownwardFK,
                 CaSceneRepeatInfatuationUpwardFormKey = caSceneRepeatInfatuationUpwardFK
             });
+
+            // COMAstraTalk dialogue (casual greetings + "How are things?" relationship status)
+            COMAstraTalkBuilder.BuildTalkDialogue(new COMAstraTalkBuilder.TalkBuildContext
+            {
+                TalkQuest = talkQuest,
+                TalkQuestFormKey = talkQuestFK,
+                Stable = Stable,
+                NeutralEmotion = neutralEmotion.ToLink<IKeywordGetter>(),
+                CurrentCompanionFaction = currentCompanionFaction,
+                CaCurrentThresholdFormKey = caCurrentThresholdFK,
+                CaWantsToTalkFormKey = caWantsToTalkFK,
+                CaT1InfatuationFormKey = caT1Infatuation.FormKey,
+                CaT2AdmirationFormKey = caT2Admiration.FormKey,
+                CaT3NeutralFormKey = caT3Neutral.FormKey,
+                CaT4DisdainFormKey = caT4Disdain.FormKey,
+                CaT5HatredFormKey = caT5Hatred.FormKey,
+                CaTCustom1ConfidantFormKey = caTCustom1Confidant.FormKey,
+                CaTCustom2FriendFormKey = caTCustom2Friend.FormKey,
+                PlayerDialogueSceneFlags = playerDialogueSceneFlags
+            });
+            Console.WriteLine($"Talk quest dialogue built: {talkQuest.DialogTopics.Count} topics, {talkQuest.Scenes.Count} scenes");
 
             // ======================================================================
             // DIALOGUE HELPERS
@@ -3402,6 +3489,7 @@ namespace MQAstraALT
             mod.Packages.Add(dogmeatFollowPkg);
             mod.Packages.Add(astraSandboxPkg);
             mod.Quests.Add(companionQuest);
+            mod.Quests.Add(talkQuest);
             mod.Quests.Add(quest);
 
 
