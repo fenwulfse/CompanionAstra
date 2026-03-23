@@ -235,7 +235,7 @@ namespace MQAstraALT
             }
             if (HasArg("--dump-npc"))
             {
-                // Nick Valentine = 0x00002F25, Codsworth = 0x0001CA7D, Dogmeat = 0x0001D162
+                // Nick Valentine = 0x00002F25, Codsworth = 0x000179FF (base), Dogmeat = 0x0001D15C (base)
                 // Astra NPC in CompanionAstra.esp = 0x000803
                 uint npcId = 0x00002F25; // default: Nick
                 var idxArg = Array.FindIndex(cmdArgs, a => a.StartsWith("--npc-id="));
@@ -627,8 +627,8 @@ namespace MQAstraALT
             var museumBalconyDoorFK = new FormKey(fo4, 0x0001B94A); // MQ102 Museum balcony/front route door
 
             // Vanilla NPC references (Codsworth + Dogmeat for multi-follower)
-            var codsworthFallbackFK = new FormKey(fo4, 0x0001CA7D); // Codsworth NPC
-            var dogmeatFallbackFK = new FormKey(fo4, 0x0001D162);   // Dogmeat NPC
+            var codsworthFallbackFK = new FormKey(fo4, 0x000179FF); // Codsworth base NPC (NOT placed ref 01CA7D)
+            var dogmeatFallbackFK = new FormKey(fo4, 0x0001D15C);   // Dogmeat base NPC (NOT placed ref 01D162)
             FormKey codsworthNpcFK = codsworthFallbackFK;
             FormKey dogmeatNpcFK = dogmeatFallbackFK;
             foreach (var n in env.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
@@ -850,7 +850,7 @@ namespace MQAstraALT
                 Properties = new ExtendedList<ObjectProperty>
                 {
                     // Piper-matching actor values (--dump-stats audit 2026-03-24)
-                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "SpeedMult").ToLink(), Value = 100f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "SpeedMult").ToLink(), Value = 110f }, // Slightly faster than player so she leads
                     new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Health").ToLink(), Value = 100f },
                     new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "ActionPoints").ToLink(), Value = 50f },
                     new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "CarryWeight").ToLink(), Value = -100f },
@@ -1939,6 +1939,8 @@ namespace MQAstraALT
             };
             quest.Aliases.Add(claudeAlias);
 
+            // Dogmeat alias — NO packages. Vanilla handles Dogmeat at Red Rocket.
+            // Alias kept for future dialogue references but won't alter Dogmeat's AI.
             var dogmeatAlias = new QuestReferenceAlias
             {
                 ID = 1,
@@ -1947,11 +1949,7 @@ namespace MQAstraALT
                 Flags = QuestReferenceAlias.Flag.AllowDead
                       | QuestReferenceAlias.Flag.AllowDisabled
                       | QuestReferenceAlias.Flag.AllowDestroyed
-                      | QuestReferenceAlias.Flag.Optional,
-                PackageData = new ExtendedList<IFormLinkGetter<IPackageGetter>>
-                {
-                    dogmeatFollowPkg.FormKey.ToLink<IPackageGetter>()
-                }
+                      | QuestReferenceAlias.Flag.Optional
             };
             quest.Aliases.Add(dogmeatAlias);
 
@@ -2420,22 +2418,22 @@ namespace MQAstraALT
             );
 
             // ======================================================================
-            // SCENE: RED ROCKET (Stage 9) — Threat assessment
+            // SCENE: RED ROCKET (Stage 9) — Arrival / staging point
             // ======================================================================
             Console.WriteLine("Creating Red Rocket Scene (Stage 9)...");
             var (rrScene, rr_nPos, rr_nNeg, rr_nNeu, rr_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_RedRocketScene",
                 $"{questEditorId}_RedRocket_Astra",
-                "This is the place. One more thing before Concord -- there's a dog here. If he joins us, good. If not, we move.",
-                "ThreatBrief", "PlayerChoice",
-                ($"{questEditorId}_RedRocket_Pos", "Let's move.",
-                    "Concord. Museum of Freedom. Stay sharp."),
-                ($"{questEditorId}_RedRocket_Neg", "Skip the dog.",
-                    "Fine. We move without him."),
-                ($"{questEditorId}_RedRocket_Neu", "What are we walking into?",
-                    "Raiders, civilians, tight stairs, bad angles."),
-                ($"{questEditorId}_RedRocket_Que", "How do you know that?",
-                    "I've been listening longer than anyone left alive.")
+                "Red Rocket. Good place to regroup before we push south. There's a workbench around back if you need to gear up. Take your time.",
+                "Arrival", "PlayerChoice",
+                ($"{questEditorId}_RedRocket_Pos", "Ready. What's in Concord?",
+                    "Museum of Freedom. A man named Preston Garvey and a handful of settlers are pinned down by raiders. If we help them, that's our first real ally out here. Head south when you're ready -- I'll be right behind you."),
+                ($"{questEditorId}_RedRocket_Neg", "I don't need to stop. Let's keep moving.",
+                    "Your call. Concord's south. Stay sharp."),
+                ($"{questEditorId}_RedRocket_Neu", "Tell me more about what's ahead.",
+                    "Concord's close. Raiders have been hitting a group of settlers holed up in the old museum. Their leader, Preston Garvey -- last of the Minutemen. There's also a crashed vertibird on the roof. Power armor and a minigun, if things get ugly."),
+                ($"{questEditorId}_RedRocket_Que", "How do you know all this?",
+                    "Two hundred years of watching. Listening. Every patrol route, every radio frequency, every faction's patterns. I know this Commonwealth better than anyone alive -- because I've been awake the entire time.")
             );
 
             // Bootstrap branch routing:
@@ -2462,8 +2460,13 @@ namespace MQAstraALT
             wb_nQue.Responses[0].StartScenePhase = "PlayerChoice";
             rr_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
             rr_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
-            rr_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
-            rr_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
+            rr_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
+            rr_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
+            // Loop Neutral/Question back to PlayerChoice — info-gathering, doesn't commit
+            rr_nNeu.Responses[0].StartScene.SetTo(rrScene);
+            rr_nNeu.Responses[0].StartScenePhase = "PlayerChoice";
+            rr_nQue.Responses[0].StartScene.SetTo(rrScene);
+            rr_nQue.Responses[0].StartScenePhase = "PlayerChoice";
 
             // ======================================================================
             // SCENE: COALITION PITCH (Stage 10) — Astra presents the plan

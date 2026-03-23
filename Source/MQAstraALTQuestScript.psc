@@ -144,8 +144,8 @@ endif
 
 ; Codsworth deferred ? keeping bootstrap simple for now
 
-; Scene is handled by high-priority Greeting topic (Priority 70 Hello)
-; firing when player approaches Astra exterior.
+; Auto-greet handled by AddIdleTopicToHello quest flag + Greeting topic.
+; Do NOT start BootstrapScene from Papyrus — it interferes with the greeting mechanism.
 EndFunction
 
 Function HandleFragmentStage0006Item00()
@@ -287,22 +287,8 @@ if AstraActor
   AstraActor.EvaluatePackage(abResetAI = true)
 endif
 
-; MQ106/Nick pattern: Dogmeat follows via SetPlayerTeammate + EvaluatePackage.
-; Do NOT use SetDogmeatCompanion ? it dismisses the human companion.
-Actor DogmeatActor = Alias_Dogmeat.GetActorReference()
-if DogmeatActor
-  DogmeatActor.SetPlayerTeammate(abTeammate = true, abCanDoFavor = true)
-  FollowersScript.GetScript().FollowerFollow(DogmeatActor)
-  FollowersScript.GetScript().FollowerSetDistanceMedium(DogmeatActor)
-  DogmeatActor.IgnoreFriendlyHits()
-  DogmeatActor.EvaluatePackage(abResetAI = true)
-  if DogmeatEscortScene && !DogmeatEscortScene.IsPlaying()
-    DogmeatEscortScene.Start()
-  endif
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT Dogmeat following via quest alias (MQ106 pattern)")
-  endif
-endif
+; Dogmeat: vanilla handles him at Red Rocket. Do NOT manipulate his AI here.
+; Player recruits Dogmeat naturally through vanilla greeting.
 EndFunction
 
 Function HandleFragmentStage0008Item00()
