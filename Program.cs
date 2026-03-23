@@ -497,6 +497,80 @@ namespace MQAstraALT
                 }
                 return;
             }
+            if (HasArg("--dump-stats"))
+            {
+                using var stenv = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                var companions = new[] { "CompanionPiper", "CompanionCait", "PrestonGarvey", "CompanionDeacon",
+                    "CompanionNickValentine", "CompanionCurie", "CompanionMacCready", "CompanionHancock",
+                    "CompanionX6-88", "BoSPaladinDanse", "CompanionStrong", "Codsworth",
+                    "DLC03_CompanionOldLongfellow", "DLC04Gage" };
+                // Collect all unique AV FormKeys across companions + Astra
+                var allAvKeys = new HashSet<FormKey>();
+                var npcStats = new Dictionary<string, Dictionary<FormKey, float>>();
+                foreach (var npc in stenv.LoadOrder.PriorityOrder.WinningOverrides<INpcGetter>())
+                {
+                    if (npc.EditorID == null) continue;
+                    bool isCompanion = companions.Any(c => npc.EditorID == c);
+                    bool isAstra = npc.EditorID == "CompanionAstra";
+                    if (!isCompanion && !isAstra) continue;
+                    var stats = new Dictionary<FormKey, float>();
+                    if (npc.Properties != null)
+                    {
+                        foreach (var prop in npc.Properties)
+                        {
+                            if (prop is IObjectPropertyGetter op && !op.ActorValue.IsNull)
+                            {
+                                stats[op.ActorValue.FormKey] = op.Value;
+                                allAvKeys.Add(op.ActorValue.FormKey);
+                            }
+                        }
+                    }
+                    npcStats[npc.EditorID] = stats;
+                }
+                // Resolve AV names
+                var avNames = new Dictionary<FormKey, string>();
+                foreach (var fk in allAvKeys)
+                {
+                    var resolved = fk.ToLink<IActorValueInformationGetter>().TryResolve(stenv.LinkCache);
+                    avNames[fk] = resolved?.EditorID ?? fk.ToString();
+                }
+                // Print comparison table
+                var sortedNpcs = npcStats.Keys.OrderBy(n => n).ToList();
+                var sortedAvs = allAvKeys.OrderBy(fk => avNames[fk]).ToList();
+                Console.Write($"{"ActorValue",-30}");
+                foreach (var n in sortedNpcs) Console.Write($"{n,-20}");
+                Console.WriteLine();
+                Console.Write($"{"",-30}");
+                foreach (var _ in sortedNpcs) Console.Write($"{"----",-20}");
+                Console.WriteLine();
+                foreach (var avFk in sortedAvs)
+                {
+                    Console.Write($"{avNames[avFk],-30}");
+                    foreach (var n in sortedNpcs)
+                    {
+                        if (npcStats[n].TryGetValue(avFk, out var val))
+                            Console.Write($"{val,-20}");
+                        else
+                            Console.Write($"{"—",-20}");
+                    }
+                    Console.WriteLine();
+                }
+                // Highlight Astra gaps
+                if (npcStats.ContainsKey("CompanionAstra") && npcStats.ContainsKey("CompanionPiper"))
+                {
+                    Console.WriteLine("\n=== Astra vs Piper Gaps ===");
+                    foreach (var avFk in sortedAvs)
+                    {
+                        bool piperHas = npcStats["CompanionPiper"].ContainsKey(avFk);
+                        bool astraHas = npcStats["CompanionAstra"].ContainsKey(avFk);
+                        if (piperHas && !astraHas)
+                            Console.WriteLine($"  MISSING on Astra: {avNames[avFk]} (Piper={npcStats["CompanionPiper"][avFk]})");
+                        else if (piperHas && astraHas && npcStats["CompanionPiper"][avFk] != npcStats["CompanionAstra"][avFk])
+                            Console.WriteLine($"  DIFFERS: {avNames[avFk]} Piper={npcStats["CompanionPiper"][avFk]} Astra={npcStats["CompanionAstra"][avFk]}");
+                    }
+                }
+                return;
+            }
 
             Console.WriteLine("=== MQAstraALT Generator ===");
             Console.WriteLine($"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
@@ -775,12 +849,18 @@ namespace MQAstraALT
                 },
                 Properties = new ExtendedList<ObjectProperty>
                 {
-                    new ObjectProperty
-                    {
-                        ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>()
-                            .First(av => av.EditorID == "SpeedMult").ToLink(),
-                        Value = 100f
-                    }
+                    // Piper-matching actor values (--dump-stats audit 2026-03-24)
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "SpeedMult").ToLink(), Value = 100f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Health").ToLink(), Value = 100f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "ActionPoints").ToLink(), Value = 50f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "CarryWeight").ToLink(), Value = -100f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Strength").ToLink(), Value = 5f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Perception").ToLink(), Value = 10f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Endurance").ToLink(), Value = 7f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Charisma").ToLink(), Value = 10f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Intelligence").ToLink(), Value = 8f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Agility").ToLink(), Value = 10f },
+                    new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Luck").ToLink(), Value = 8f },
                 },
                 Packages = new ExtendedList<IFormLinkGetter<IPackageGetter>>(),
                 Aggression = (Npc.AggressionType)1,     // Aggressive — attacks enemies on sight

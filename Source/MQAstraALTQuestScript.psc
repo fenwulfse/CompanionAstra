@@ -39,6 +39,38 @@ if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 5 start")
 endif
 
+; --- Late-game companion bypass ---
+; If the player is well past the intro story (MQ102 stage 200+ = left Sanctuary,
+; or MQ103 running = main quest active), skip ALL story scenes and go straight
+; to companion availability. This lets late-game saves test companion features
+; without sitting through every story beat.
+if MQ102 && MQ102.GetStage() >= 200
+  if DebugTrace
+    Debug.Trace(self + " MQAstraALT late-game bypass: MQ102 stage >= 200, skipping story")
+  endif
+  Debug.Notification("MQAstraALT: Late-game detected — companion mode active")
+  BootstrapComplete = true
+  ; Mark story stages done so story greetings don't fire.
+  ; Stage 6 blocks bootstrap greeting (GetStageDone(6)==0 fails).
+  ; Stage 9 blocks travel/workbench greetings.
+  if !GetStageDone(6)
+    SetStage(6)
+  endif
+  if !GetStageDone(9)
+    SetStage(9)
+  endif
+  ; Move Astra to the player
+  Utility.Wait(2.0)
+  Actor bypassAstra = Alias_Astra.GetActorReference()
+  if bypassAstra
+    bypassAstra.MoveTo(Game.GetPlayer())
+    bypassAstra.EvaluatePackage()
+  endif
+  ; Skip to companion availability (starts COMAstra, removes DisallowedFaction, etc.)
+  TransitionPostMuseumEscortToCompanionAvailability("LateGameBypass")
+  return
+endif
+
 ; --- Recovery branch check ---
 if EnableRecoveryBranch && !ForceBypassRecovery
   if MQ302 && MQ302.GetStage() >= 10
