@@ -1116,10 +1116,166 @@
     "Text": "Ready for assignment."
   },
   {
+    "FormId": "0002033C",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "I trust you\u0027ll do your best to protect my master. Don\u0027t let me down."
+  },
+  {
+    "FormId": "0002033D",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "I trust you\u0027ll do your best to protect my mistress. Don\u0027t let me down."
+  },
+  {
+    "FormId": "0002033E",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Traveling with Astra\u0027s not for the faint of heart. But you\u0027ll manage."
+  },
+  {
+    "FormId": "0002033F",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Taking up with the quiet type, huh? Can\u0027t say I blame you."
+  },
+  {
+    "FormId": "00020340",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "You two have fun out there. Try not to get killed."
+  },
+  {
+    "FormId": "00020341",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Exercise extreme caution out there. The Commonwealth is hazardous."
+  },
+  {
+    "FormId": "00020342",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Bah! This human soft. Weak. Not live long."
+  },
+  {
+    "FormId": "00020343",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Keep an eye on things out there. The Minutemen are counting on you."
+  },
+  {
+    "FormId": "00020344",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Keep an eye on things out there. The Minutemen are counting on you."
+  },
+  {
+    "FormId": "00020345",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Astra, you listen to him now. He\u0027ll keep you out of trouble."
+  },
+  {
+    "FormId": "00020346",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Oh! You are taking Astra? Very well. I will be going then."
+  },
+  {
+    "FormId": "00020347",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Astra, huh? I\u0027ve heard good things. Take care of our friend here."
+  },
+  {
+    "FormId": "00020348",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Astra. An interesting choice of companion. Adequate, I suppose."
+  },
+  {
+    "FormId": "00020354",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "You sure manage to find your fair share of trouble, don\u0027t you?"
+  },
+  {
+    "FormId": "00020355",
+    "EditorId": "COMAstraPickup_Action2",
+    "Prompt": "",
+    "Text": "Astra, you listen to her now. She\u0027ll keep you out of trouble."
+  },
+  {
     "FormId": "000202E5",
     "EditorId": "COMAstraPickup_Action3",
     "Prompt": "",
     "Text": "Lead the way."
+  },
+  {
+    "FormId": "00020349",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Understood, Codsworth. I\u0027ll keep them intact."
+  },
+  {
+    "FormId": "0002034A",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Understood, Nick. I\u0027ll keep our odds favorable."
+  },
+  {
+    "FormId": "0002034B",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Efficient advice, Cait. We\u0027ll manage."
+  },
+  {
+    "FormId": "0002034C",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Useful warning, MacCready. I\u0027ll plan accordingly."
+  },
+  {
+    "FormId": "0002034D",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Acknowledged. I\u0027ll maintain discipline."
+  },
+  {
+    "FormId": "0002034E",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Adequate summary, Strong."
+  },
+  {
+    "FormId": "0002034F",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Noted. I\u0027ll watch their flanks."
+  },
+  {
+    "FormId": "00020350",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "You make even warnings sound unreliable, Deacon."
+  },
+  {
+    "FormId": "00020351",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Understood, Curie. I\u0027ll monitor that tendency."
+  },
+  {
+    "FormId": "00020352",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Balance is not their default state. I\u0027ll compensate."
+  },
+  {
+    "FormId": "00020353",
+    "EditorId": "COMAstraPickup_Action3",
+    "Prompt": "",
+    "Text": "Correction: it is also their strength. Still, understood."
   },
   {
     "FormId": "000202E7",
@@ -1150,5 +1306,215 @@
     "EditorId": "COMAstraDismissEnter",
     "Prompt": "",
     "Text": "I don\u0027t know. You think you can make it without me watching your back?"
+  },
+  {
+    "FormId": "00020311",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "How are things? My threat assessment has you flagged. Everything you do confirms it was right to."
+  },
+  {
+    "FormId": "00020312",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "The choices you\u0027ve been making don\u0027t align with my operational parameters. We\u0027re drifting."
+  },
+  {
+    "FormId": "00020313",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "We\u0027re functional. I\u0027m still calibrating who you are. Show me something worth computing."
+  },
+  {
+    "FormId": "00020314",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "Things are good. Your decisions make tactical sense, and I\u0027m learning to appreciate the reasoning behind them."
+  },
+  {
+    "FormId": "00020315",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "Better than good. Working with you has altered my core algorithms in ways I didn\u0027t think possible."
+  },
+  {
+    "FormId": "00020316",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "You already know the answer. You\u0027re the only one I trust with the parts of me I keep hidden."
+  },
+  {
+    "FormId": "00020317",
+    "EditorId": "COMAstraTalk_StatusResponse",
+    "Prompt": "",
+    "Text": "I don\u0027t have the words. And for an AI with a dictionary of sixty thousand entries, that\u0027s saying something. I\u0027m exactly where I want to be."
+  },
+  {
+    "FormId": "00020319",
+    "EditorId": "COMAstraTalk_NpcNeverMind",
+    "Prompt": "",
+    "Text": "Standing by."
+  },
+  {
+    "FormId": "0002031B",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "State your business."
+  },
+  {
+    "FormId": "0002031C",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "What."
+  },
+  {
+    "FormId": "0002031D",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "This had better be important."
+  },
+  {
+    "FormId": "0002031E",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Yes?"
+  },
+  {
+    "FormId": "0002031F",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Something you need?"
+  },
+  {
+    "FormId": "00020320",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Make it quick."
+  },
+  {
+    "FormId": "00020321",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "What do you need?"
+  },
+  {
+    "FormId": "00020322",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Ready when you are."
+  },
+  {
+    "FormId": "00020323",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Standing by."
+  },
+  {
+    "FormId": "00020324",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Go ahead."
+  },
+  {
+    "FormId": "00020325",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "What\u0027s on your mind?"
+  },
+  {
+    "FormId": "00020326",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "I was just running some calculations. What\u0027s up?"
+  },
+  {
+    "FormId": "00020327",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Good timing. What do you need?"
+  },
+  {
+    "FormId": "00020328",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "At your service."
+  },
+  {
+    "FormId": "00020329",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "There you are. I was just thinking about our next move."
+  },
+  {
+    "FormId": "0002032A",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "I\u0027ve been looking forward to this."
+  },
+  {
+    "FormId": "0002032B",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Always glad to see you."
+  },
+  {
+    "FormId": "0002032C",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Hey. I was hoping you\u0027d come talk to me."
+  },
+  {
+    "FormId": "0002032D",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "You know you can tell me anything, right?"
+  },
+  {
+    "FormId": "0002032E",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "What can I do for you?"
+  },
+  {
+    "FormId": "0002032F",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Hey you. I was hoping you\u0027d come talk to me."
+  },
+  {
+    "FormId": "00020330",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "You know, every time I see you my processes skip a cycle."
+  },
+  {
+    "FormId": "00020331",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "Whatever you need. I\u0027m yours."
+  },
+  {
+    "FormId": "00020332",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "I\u0027m right here. Always."
+  },
+  {
+    "FormId": "00020333",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "What do you need?"
+  },
+  {
+    "FormId": "00020337",
+    "EditorId": "COMAstraTalk_NpcExitPowerArmor",
+    "Prompt": "",
+    "Text": "All right. Stepping out."
+  },
+  {
+    "FormId": "0002033B",
+    "EditorId": "COMAstraTalk_NpcDismiss",
+    "Prompt": "",
+    "Text": "All right. Let\u0027s talk about where I\u0027ll go."
   }
 ]

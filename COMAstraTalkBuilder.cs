@@ -18,9 +18,12 @@ namespace MQAstraALT
         {
             public required Quest TalkQuest { get; init; }
             public required FormKey TalkQuestFormKey { get; init; }
+            public required FormKey CompanionQuestFormKey { get; init; }
+            public required FormKey CompanionNpcFormKey { get; init; }
             public required Func<string, FormKey> Stable { get; init; }
             public required FormLink<IKeywordGetter> NeutralEmotion { get; init; }
             public required IFactionGetter CurrentCompanionFaction { get; init; }
+            public required FormKey PowerArmorFrameKeywordFormKey { get; init; }
             public required FormKey CaCurrentThresholdFormKey { get; init; }
             public required FormKey CaWantsToTalkFormKey { get; init; }
             public required FormKey CaT1InfatuationFormKey { get; init; }
@@ -35,7 +38,7 @@ namespace MQAstraALT
 
         /// <summary>
         /// Creates the COMAstraTalk quest shell: StartGameEnabled, 1 alias (Astra), RunOnce.
-        /// Matches COMPiperTalk flags exactly.
+        /// Matches COMPiperTalk quest flags and priority.
         /// </summary>
         public static Quest CreateTalkQuestShell(
             FormKey talkQuestFK,
@@ -51,8 +54,7 @@ namespace MQAstraALT
                     Flags = Quest.Flag.StartGameEnabled
                           | Quest.Flag.StartsEnabled
                           | Quest.Flag.AllowRepeatedStages
-                          | Quest.Flag.RunOnce
-                          | Quest.Flag.AddIdleTopicToHello,
+                          | Quest.Flag.RunOnce,
                     Priority = 30, // COMPiperTalk=30, lower than COMPiper=70 so scene greetings win
                     Type = Quest.TypeEnum.None
                 },
@@ -68,7 +70,8 @@ namespace MQAstraALT
                     {
                         CompareOperator = CompareOperator.EqualTo,
                         ComparisonValue = 1,
-                        Unknown1 = new byte[] { 0x99, 0xAB, 0x94 },
+                        // COMPiperTalk hidden-byte pattern.
+                        Unknown1 = new byte[] { 190, 58, 148 },
                         Data = new FunctionConditionData
                         {
                             Function = Condition.Function.GetIsAliasRef,
@@ -92,16 +95,17 @@ namespace MQAstraALT
                       | QuestReferenceAlias.Flag.AllowDestroyed
             });
 
-            // Stage 0: startup (minimal, matching COMPiperTalk's single stage)
+            // Stage 10: dismiss handoff, matching COMPiperTalk.
             talkQuest.Stages.Add(new QuestStage
             {
-                Index = 0,
+                Index = 10,
                 LogEntries = new ExtendedList<QuestLogEntry>
                 {
                     new QuestLogEntry
                     {
                         Flags = 0,
-                        Conditions = new ExtendedList<Condition>()
+                        Conditions = new ExtendedList<Condition>(),
+                        Note = "Dismissing Astra"
                     }
                 }
             });
@@ -116,7 +120,58 @@ namespace MQAstraALT
         {
             var talkQuest = ctx.TalkQuest;
             var talkQuestFK = ctx.TalkQuestFormKey;
-            var endSceneFlag = (DialogResponses.Flag)8;
+            const int astraAliasId = 0;
+            const short dismissTalkStage = 10;
+            // CK "End Running Scene" serializes as raw flag 64 in the generated plugin.
+            var endSceneFlag = (DialogResponses.Flag)64;
+
+            talkQuest.VirtualMachineAdapter = new QuestAdapter
+            {
+                Version = 6,
+                ObjectFormat = 2,
+                Script = new ScriptEntry
+                {
+                    Name = $"Fragments:Quests:QF_COMAstraTalk_{talkQuestFK.ID:X8}",
+                    Flags = ScriptEntry.Flag.Local,
+                    Properties = new ExtendedList<ScriptProperty>
+                    {
+                        new ScriptObjectProperty
+                        {
+                            Name = "COMAstra",
+                            Object = ctx.CompanionQuestFormKey.ToLink<IFallout4MajorRecordGetter>(),
+                            Alias = -1
+                        }
+                    }
+                },
+                Scripts = new ExtendedList<ScriptEntry>
+                {
+                    new ScriptEntry
+                    {
+                        Name = "COMTalkQuestScript",
+                        Flags = ScriptEntry.Flag.Local,
+                        Properties = new ExtendedList<ScriptProperty>
+                        {
+                            new ScriptObjectProperty { Name = "CompanionActor", Object = ctx.CompanionNpcFormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_T1_Infatuation", Object = ctx.CaT1InfatuationFormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_T3_Neutral", Object = ctx.CaT3NeutralFormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_T5_Hatred", Object = ctx.CaT5HatredFormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_T4_Disdain", Object = ctx.CaT4DisdainFormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "CA_T2_Admiration", Object = ctx.CaT2AdmirationFormKey.ToLink<IFallout4MajorRecordGetter>() }
+                        }
+                    }
+                },
+                Fragments = new ExtendedList<QuestScriptFragment>
+                {
+                    new QuestScriptFragment
+                    {
+                        Stage = (ushort)dismissTalkStage,
+                        StageIndex = 0,
+                        Unknown2 = 1,
+                        FragmentName = "Fragment_Stage_0010_Item_00",
+                        ScriptName = $"Fragments:Quests:QF_COMAstraTalk_{talkQuestFK.ID:X8}"
+                    }
+                }
+            };
 
             // ============================================================
             // CONDITION HELPERS
@@ -149,6 +204,22 @@ namespace MQAstraALT
                 }
             };
 
+            ConditionFloat WornHasKeywordCheck(FormKey keywordFK, float value) => new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = value,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.WornHasKeyword,
+                    ParameterOneRecord = keywordFK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterOneNumber = (int)keywordFK.ID,
+                    // Vanilla COMPiperTalk evaluates the PA-frame keyword on the companion alias,
+                    // not on the player dialogue subject.
+                    RunOnType = Condition.RunOnType.QuestAlias,
+                    Unknown3 = astraAliasId
+                }
+            };
+
             ConditionGlobal ThresholdCheck(FormKey thresholdGlobalFK) => new ConditionGlobal
             {
                 CompareOperator = CompareOperator.EqualTo,
@@ -167,7 +238,7 @@ namespace MQAstraALT
             // TOPIC/INFO HELPERS
             // ============================================================
 
-            DialogTopic CreateSceneTopic(string edid, string prompt, string text)
+            DialogTopic CreateSceneTopicShell(string edid)
             {
                 var topic = new DialogTopic(ctx.Stable($"TalkTopic:{edid}"), Fallout4Release.Fallout4)
                 {
@@ -178,8 +249,13 @@ namespace MQAstraALT
                     SubtypeName = "SCEN",
                     Priority = 50
                 };
+                talkQuest.DialogTopics.Add(topic);
+                return topic;
+            }
 
-                var response = new DialogResponses(ctx.Stable($"TalkInfo:{edid}"), Fallout4Release.Fallout4)
+            DialogResponses CreateSceneInfo(string stableKey, string prompt, string text)
+            {
+                var response = new DialogResponses(ctx.Stable($"TalkInfo:{stableKey}"), Fallout4Release.Fallout4)
                 {
                     Flags = new DialogResponseFlags { Flags = 0 }
                 };
@@ -196,49 +272,55 @@ namespace MQAstraALT
                 });
                 if (!string.IsNullOrEmpty(prompt))
                     response.Prompt = new TranslatedString(Language.English, prompt);
-                topic.Responses.Add(response);
-                talkQuest.DialogTopics.Add(topic);
+                return response;
+            }
+
+            DialogTopic CreateSceneTopic(string edid, string prompt, string text)
+            {
+                var topic = CreateSceneTopicShell(edid);
+                topic.Responses.Add(CreateSceneInfo(edid, prompt, text));
                 return topic;
+            }
+
+            static void AttachEndFragment(DialogResponses info, string fragmentScriptName)
+            {
+                info.VirtualMachineAdapter = new DialogResponsesAdapter
+                {
+                    Version = 6,
+                    ObjectFormat = 2,
+                    ScriptFragments = new ScriptFragments
+                    {
+                        ExtraBindDataVersion = 3,
+                        Script = new ScriptEntry
+                        {
+                            Name = $"Fragments:TopicInfos:{fragmentScriptName}",
+                            Properties = new ExtendedList<ScriptProperty>()
+                        },
+                        OnEnd = new ScriptFragment
+                        {
+                            ExtraBindDataVersion = 1,
+                            ScriptName = $"Fragments:TopicInfos:{fragmentScriptName}",
+                            FragmentName = "Fragment_End"
+                        }
+                    }
+                };
             }
 
             // Creates a SCEN topic with multiple conditioned INFO responses (one per affinity tier)
             DialogTopic CreateTieredStatusTopic(string edid, (FormKey tierFK, string text)[] tieredResponses)
             {
-                var topic = new DialogTopic(ctx.Stable($"TalkTopic:{edid}"), Fallout4Release.Fallout4)
-                {
-                    EditorID = edid,
-                    Quest = new FormLink<IQuestGetter>(talkQuestFK),
-                    Category = DialogTopic.CategoryEnum.Scene,
-                    Subtype = DialogTopic.SubtypeEnum.Custom17,
-                    SubtypeName = "SCEN",
-                    Priority = 50
-                };
+                var topic = CreateSceneTopicShell(edid);
 
                 int infoIdx = 0;
                 foreach (var (tierFK, text) in tieredResponses)
                 {
-                    var info = new DialogResponses(ctx.Stable($"TalkInfo:{edid}:{infoIdx}"), Fallout4Release.Fallout4)
-                    {
-                        Flags = new DialogResponseFlags { Flags = 0 }
-                    };
-                    info.Responses.Add(new DialogResponse
-                    {
-                        Text = new TranslatedString(Language.English, text),
-                        ResponseNumber = 1,
-                        Unknown = 1,
-                        Emotion = ctx.NeutralEmotion,
-                        InterruptPercentage = 0,
-                        CameraTargetAlias = -1,
-                        CameraLocationAlias = -1,
-                        StopOnSceneEnd = false
-                    });
+                    var info = CreateSceneInfo($"{edid}:{infoIdx}", "", text);
                     // Condition: CurrentThreshold == this tier
                     info.Conditions.Add(ThresholdCheck(tierFK));
                     topic.Responses.Add(info);
                     infoIdx++;
                 }
 
-                talkQuest.DialogTopics.Add(topic);
                 return topic;
             }
 
@@ -256,18 +338,35 @@ namespace MQAstraALT
 
             // Phase 0 "Loop01": Player chooses what to talk about
             talkScene.Phases.Add(new ScenePhase { Name = "Loop01" });
-            // Phase 1: Relationship status NPC response → end scene
-            talkScene.Phases.Add(new ScenePhase { Name = "" });
+            // Phase 1: relationship follow-up when the positive prompt is not the PA exit
+            talkScene.Phases.Add(new ScenePhase { Name = "Relationship" });
 
-            // --- Player dialogue: "How are things?" ---
-            var playerAskStatus = CreateSceneTopic("COMAstraTalk_AskStatus",
+            // --- Player dialogue: positive slot mirrors Piper ---
+            var playerPositiveTopic = CreateSceneTopicShell("COMAstraTalk_AskStatus");
+            var playerAskStatus = CreateSceneInfo("COMAstraTalk_AskStatus",
                 "How are things?",
                 "I was just wondering where you and I stand.");
+            playerPositiveTopic.Responses.Add(playerAskStatus);
+
+            var playerExitPowerArmor = CreateSceneInfo("COMAstraTalk_ExitPowerArmor",
+                "Exit power armor",
+                "Get out of your power armor.");
+            playerPositiveTopic.Responses.Add(playerExitPowerArmor);
+
+            // --- Player dialogue: neutral slot mirrors Piper dismiss ---
+            var playerDismiss = CreateSceneTopic("COMAstraTalk_Dismiss",
+                "Dismiss",
+                "I think it's time we split up.");
 
             // --- Player dialogue: "Never mind" ---
             var playerNeverMind = CreateSceneTopic("COMAstraTalk_NeverMind",
                 "Never mind",
                 "Never mind.");
+
+            // Relationship should only show while Astra is not inside a frame.
+            playerAskStatus.Conditions.Add(WornHasKeywordCheck(ctx.PowerArmorFrameKeywordFormKey, 0));
+            playerAskStatus.StartScene.SetTo(talkScene);
+            playerAskStatus.StartScenePhase = "Relationship";
 
             // --- NPC: relationship status response (tiered) ---
             var npcStatusResponse = CreateTieredStatusTopic("COMAstraTalk_StatusResponse", new[]
@@ -295,12 +394,33 @@ namespace MQAstraALT
                  "I don't have the words. And for an AI with a dictionary of sixty thousand entries, that's saying something. I'm exactly where I want to be.")
             });
 
+            // --- NPC: dismiss handoff ---
+            var npcDismiss = CreateSceneTopic("COMAstraTalk_NpcDismiss", "", "All right. Let's talk about where I'll go.");
+            npcDismiss.Responses[0].Flags = new DialogResponseFlags { Flags = endSceneFlag };
+            npcDismiss.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage
+            {
+                OnBegin = -1,
+                OnEnd = dismissTalkStage
+            };
+
             // --- NPC: "Never mind" acknowledgment ---
             var npcNeverMind = CreateSceneTopic("COMAstraTalk_NpcNeverMind", "", "Standing by.");
             npcNeverMind.Responses[0].Flags = new DialogResponseFlags { Flags = endSceneFlag };
 
+            // --- NPC: power armor exit acknowledgment ---
+            var npcExitPowerArmor = CreateSceneTopic("COMAstraTalk_NpcExitPowerArmor", "", "All right. Stepping out.");
+            npcExitPowerArmor.Responses[0].Flags = new DialogResponseFlags { Flags = endSceneFlag };
+
+            // Mirror vanilla companion talk: only expose this while the companion is actually wearing a PA frame.
+            playerExitPowerArmor.Conditions.Add(WornHasKeywordCheck(ctx.PowerArmorFrameKeywordFormKey, 1));
+            npcExitPowerArmor.Responses[0].Conditions.Add(WornHasKeywordCheck(ctx.PowerArmorFrameKeywordFormKey, 1));
+            var exitPowerArmorInfo = npcExitPowerArmor.Responses[0];
+            var exitPowerArmorFragmentName = $"TIF_COMAstraTalk_{exitPowerArmorInfo.FormKey.ID:X8}";
+            AttachEndFragment(exitPowerArmorInfo, exitPowerArmorFragmentName);
+
             // Scene Action 1: Player dialogue (phase 0)
-            // Positive = "How are things?" → phase 1 (status response)
+            // Positive = relationship or power-armor exit (mutually exclusive by PA state)
+            // Neutral = dismiss handoff
             // Negative = "Never mind" → end scene
             var playerAction = new SceneAction
             {
@@ -311,8 +431,10 @@ namespace MQAstraALT
                 EndPhase = 0,
                 Flags = SceneAction.Flag.FaceTarget | SceneAction.Flag.HeadtrackPlayer | (SceneAction.Flag)2097152
             };
-            playerAction.PlayerPositiveResponse.SetTo(playerAskStatus);
-            playerAction.NpcPositiveResponse.SetTo(npcStatusResponse);
+            playerAction.PlayerPositiveResponse.SetTo(playerPositiveTopic);
+            playerAction.NpcPositiveResponse.SetTo(npcExitPowerArmor);
+            playerAction.PlayerNeutralResponse.SetTo(playerDismiss);
+            playerAction.NpcNeutralResponse.SetTo(npcDismiss);
             playerAction.PlayerNegativeResponse.SetTo(playerNeverMind);
             playerAction.NpcNegativeResponse.SetTo(npcNeverMind);
             talkScene.Actions.Add(playerAction);

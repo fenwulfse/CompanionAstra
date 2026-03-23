@@ -113,6 +113,27 @@ namespace MQAstraALT
             public string Text { get; set; } = "";
         }
 
+        private sealed class EnvironmentVariableScope : IDisposable
+        {
+            private readonly Dictionary<string, string?> _previousValues;
+
+            public EnvironmentVariableScope(Dictionary<string, string?> values)
+            {
+                _previousValues = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+                foreach (var kvp in values)
+                {
+                    _previousValues[kvp.Key] = Environment.GetEnvironmentVariable(kvp.Key);
+                    Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var kvp in _previousValues)
+                    Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+            }
+        }
+
         // ======================================================================
         // MQAstraALT — Alternate MQ302 "Survivor Coalition" Quest
         // ======================================================================
@@ -135,9 +156,58 @@ namespace MQAstraALT
 
         static readonly string[] args = Environment.GetCommandLineArgs();
         static bool HasArg(string flag) => args.Any(a => a.Equals(flag, StringComparison.OrdinalIgnoreCase));
+        static bool HasAnyArg(params string[] flags) => flags.Any(HasArg);
+
+        static IDisposable? EnterInspectorScratchScope()
+        {
+            if (!HasAnyArg(
+                "--dump-packages",
+                "--dump-quest-aliases",
+                "--verify-alias",
+                "--dump-mq104",
+                "--dump-mq104-dialogue",
+                "--dump-npc",
+                "--dump-rr102",
+                "--dump-followers",
+                "--dump-deacon-vs-astra",
+                "--dump-companion-script",
+                "--dump-companion-talk-audit",
+                "--compare-esp",
+                "--lookup",
+                "--dump-astra-flags",
+                "--find-script",
+                "--dump-pkg",
+                "--type-probe",
+                "--find-quest"))
+            {
+                return null;
+            }
+
+            string scratchRoot = System.IO.Path.Combine(@"E:\AppData", "Fallout4", "MQAstraALT", "Inspectors");
+            string tempRoot = System.IO.Path.Combine(scratchRoot, "Temp");
+            string dotnetCliHome = System.IO.Path.Combine(@"E:\AppData", "DotNetCli");
+            string dotnetBundleRoot = System.IO.Path.Combine(@"E:\AppData", "DotNetBundle");
+
+            System.IO.Directory.CreateDirectory(tempRoot);
+            System.IO.Directory.CreateDirectory(dotnetCliHome);
+            System.IO.Directory.CreateDirectory(dotnetBundleRoot);
+
+            Console.WriteLine($"Inspector temp: {tempRoot}");
+
+            return new EnvironmentVariableScope(new Dictionary<string, string?>
+            {
+                ["TEMP"] = tempRoot,
+                ["TMP"] = tempRoot,
+                ["TMPDIR"] = tempRoot,
+                ["DOTNET_CLI_HOME"] = dotnetCliHome,
+                ["DOTNET_BUNDLE_EXTRACT_BASE_DIR"] = dotnetBundleRoot
+            });
+        }
 
         static void Main(string[] cmdArgs)
         {
+            using var inspectorScratchScope = EnterInspectorScratchScope();
+
             if (HasArg("--dump-packages"))
             {
                 DumpPackages.Run();
@@ -194,6 +264,20 @@ namespace MQAstraALT
                 var csArg = Array.FindIndex(cmdArgs, a => a.StartsWith("--npc-id="));
                 if (csArg >= 0) csId = Convert.ToUInt32(cmdArgs[csArg].Split('=')[1], 16);
                 DumpCompanionScript.Run(csId);
+                return;
+            }
+            if (HasArg("--dump-companion-talk-audit"))
+            {
+                IEnumerable<string>? requestedQuests = null;
+                var questArg = cmdArgs.FirstOrDefault(a => a.StartsWith("--quest=", StringComparison.OrdinalIgnoreCase));
+                if (questArg != null)
+                {
+                    requestedQuests = questArg
+                        .Split('=', 2)[1]
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                }
+
+                DumpCompanionTalkAudit.Run(requestedQuests);
                 return;
             }
             if (HasArg("--compare-esp"))
@@ -1942,9 +2026,12 @@ namespace MQAstraALT
             {
                 TalkQuest = talkQuest,
                 TalkQuestFormKey = talkQuestFK,
+                CompanionQuestFormKey = companionQuestFK,
+                CompanionNpcFormKey = claudeNpcFK,
                 Stable = Stable,
                 NeutralEmotion = neutralEmotion.ToLink<IKeywordGetter>(),
                 CurrentCompanionFaction = currentCompanionFaction,
+                PowerArmorFrameKeywordFormKey = new FormKey(fo4, 0x15503F),
                 CaCurrentThresholdFormKey = caCurrentThresholdFK,
                 CaWantsToTalkFormKey = caWantsToTalkFK,
                 CaT1InfatuationFormKey = caT1Infatuation.FormKey,
@@ -3504,6 +3591,7 @@ namespace MQAstraALT
 
             var summaryQuest = mod.Quests.First(q => q.EditorID == questEditorId);
             var summaryCompanionQuest = mod.Quests.First(q => q.EditorID == companionQuestEditorId);
+            var summaryTalkQuest = mod.Quests.First(q => q.EditorID == talkQuestEditorId);
 
             // ======================================================================
             // SUMMARY
@@ -3525,6 +3613,8 @@ namespace MQAstraALT
             Console.WriteLine($"Companion stages: {summaryCompanionQuest.Stages.Count}");
             Console.WriteLine($"Companion topics: {summaryCompanionQuest.DialogTopics.Count}");
             Console.WriteLine($"Companion scenes: {summaryCompanionQuest.Scenes.Count}");
+            Console.WriteLine($"Talk topics: {summaryTalkQuest.DialogTopics.Count}");
+            Console.WriteLine($"Talk scenes: {summaryTalkQuest.Scenes.Count}");
             Console.WriteLine($"Fragment PSC: {pscName}");
             Console.WriteLine($"Companion Fragment PSC: {companionPscName}");
 
@@ -3555,6 +3645,22 @@ namespace MQAstraALT
                                   || edid.EndsWith("_Follow")
                                   || edid.EndsWith("_Followup")
                                   || edid.EndsWith("Greetings");
+                if (isNpcTopic && topic.Responses.Count > 0)
+                {
+                    foreach (var info in topic.Responses)
+                    {
+                        string text = info.Responses.Count > 0 ? (info.Responses[0].Text?.String ?? "") : "";
+                        string shortText = text.Length > 60 ? text.Substring(0, 60) + "..." : text;
+                        Console.WriteLine($"  {info.FormKey.ID:X8}_1.fuz  [{edid}] {shortText}");
+                    }
+                }
+            }
+            foreach (var topic in summaryTalkQuest.DialogTopics)
+            {
+                string edid = topic.EditorID ?? "";
+                bool isNpcTopic = edid.Contains("_Npc", StringComparison.Ordinal)
+                                  || edid.Contains("StatusResponse", StringComparison.Ordinal)
+                                  || edid.EndsWith("Greetings", StringComparison.Ordinal);
                 if (isNpcTopic && topic.Responses.Count > 0)
                 {
                     foreach (var info in topic.Responses)
@@ -3609,7 +3715,9 @@ namespace MQAstraALT
                 Console.WriteLine($"Voice manifest: {System.IO.Path.GetFileName(manifestPath)} ({lines.Count} lines)");
             }
 
-            var allTopicsForVoice = summaryQuest.DialogTopics.Concat(summaryCompanionQuest.DialogTopics);
+            var allTopicsForVoice = summaryQuest.DialogTopics
+                .Concat(summaryCompanionQuest.DialogTopics)
+                .Concat(summaryTalkQuest.DialogTopics);
             ExportVoiceManifest(
                 System.IO.Path.Combine(projectDir, "npc_voice_lines.json"),
                 allTopicsForVoice,
@@ -3752,6 +3860,18 @@ namespace MQAstraALT
                         dataPath, "Sound", "Voice", "MQAstraALT.esp", "NPCFAstra");
                     System.IO.Directory.CreateDirectory(voiceDst);
 
+                    string ttsScratchRoot = System.IO.Path.Combine(@"E:\AppData", "Fallout4", "MQAstraALT", "TTS");
+                    string ttsIntermediateRoot = System.IO.Path.Combine(ttsScratchRoot, "Intermediate");
+                    string ttsTempRoot = System.IO.Path.Combine(ttsScratchRoot, "Temp");
+                    System.IO.Directory.CreateDirectory(ttsIntermediateRoot);
+                    System.IO.Directory.CreateDirectory(ttsTempRoot);
+                    Environment.SetEnvironmentVariable("TEMP", ttsTempRoot);
+                    Environment.SetEnvironmentVariable("TMP", ttsTempRoot);
+                    Environment.SetEnvironmentVariable("TMPDIR", ttsTempRoot);
+
+                    Console.WriteLine($"TTS intermediates: {ttsIntermediateRoot}");
+                    Console.WriteLine($"TTS temp: {ttsTempRoot}");
+
                     void Run(string exe, string runArgs)
                     {
                         var psi = new System.Diagnostics.ProcessStartInfo
@@ -3764,6 +3884,9 @@ namespace MQAstraALT
                             CreateNoWindow = true,
                             WorkingDirectory = toolsRoot
                         };
+                        psi.Environment["TEMP"] = ttsTempRoot;
+                        psi.Environment["TMP"] = ttsTempRoot;
+                        psi.Environment["TMPDIR"] = ttsTempRoot;
                         using var p = System.Diagnostics.Process.Start(psi);
                         if (p == null) throw new Exception($"Failed to start: {exe}");
                         p.WaitForExit();
@@ -3775,10 +3898,29 @@ namespace MQAstraALT
                     const string VOICE_PLAYER_M = "en-US-AndrewNeural"; // earnest, straightforward
 
                     string PyEscape(string s) => s.Replace("\\", "\\\\").Replace("'", "\\'");
+                    string Mp3PathFor(string wavPath) => System.IO.Path.ChangeExtension(wavPath, ".mp3") ?? (wavPath + ".mp3");
+
+                    void TryDelete(string path)
+                    {
+                        try
+                        {
+                            if (System.IO.File.Exists(path))
+                                System.IO.File.Delete(path);
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    void CleanupArtifacts(params string[] paths)
+                    {
+                        foreach (string path in paths)
+                            TryDelete(path);
+                    }
 
                     void GenerateWav(string text, string wavPath, string voice = VOICE_ASTRA)
                     {
-                        string mp3Path = wavPath.Replace(".wav", ".mp3");
+                        string mp3Path = Mp3PathFor(wavPath);
                         // edge-tts: generate MP3 with neural voice
                         Run("python", $"-m edge_tts --voice {voice} --text \"{text.Replace("\"", "\\\"")}\" --write-media \"{mp3Path}\"");
                         // miniaudio: convert MP3 to WAV (16-bit PCM, required by LipGenerator)
@@ -3812,9 +3954,12 @@ namespace MQAstraALT
                     foreach (var (formKey, text, edid) in voiceLines)
                     {
                         string id = formKey.ID.ToString("X8");
-                        string wavPath = System.IO.Path.Combine(toolsRoot, $"mq302_{id}.wav");
-                        string lipPath = System.IO.Path.Combine(toolsRoot, $"mq302_{id}.lip");
-                        string xwmPath = System.IO.Path.Combine(toolsRoot, $"mq302_{id}.xwm");
+                        string wavPath = System.IO.Path.Combine(ttsIntermediateRoot, $"mq302_{id}.wav");
+                        string lipPath = System.IO.Path.Combine(ttsIntermediateRoot, $"mq302_{id}.lip");
+                        string xwmPath = System.IO.Path.Combine(ttsIntermediateRoot, $"mq302_{id}.xwm");
+                        string mp3Path = Mp3PathFor(wavPath);
+
+                        CleanupArtifacts(mp3Path, wavPath, lipPath, xwmPath);
 
                         string shortText = text.Length > 55 ? text.Substring(0, 55) + "..." : text;
                         Console.Write($"  {id} [{edid}]\n    \"{shortText}\" ... ");
@@ -3840,6 +3985,8 @@ namespace MQAstraALT
                                 bw.Write(audioData);                               // XWM audio data
                                 bw.Flush();
                                 System.IO.File.WriteAllBytes(outFuz, ms.ToArray());
+
+                                CleanupArtifacts(mp3Path, wavPath, lipPath, xwmPath);
 
                                 // Verify legacy format: byte 4 must be 0x01
                                 var check = System.IO.File.ReadAllBytes(outFuz);
@@ -3894,9 +4041,12 @@ namespace MQAstraALT
                     foreach (var (formKey, text, edid) in playerLines)
                     {
                         string id = formKey.ID.ToString("X8");
-                        string wavPath = System.IO.Path.Combine(toolsRoot, $"player_{id}.wav");
-                        string lipPath = System.IO.Path.Combine(toolsRoot, $"player_{id}.lip");
-                        string xwmPath = System.IO.Path.Combine(toolsRoot, $"player_{id}.xwm");
+                        string wavPath = System.IO.Path.Combine(ttsIntermediateRoot, $"player_{id}.wav");
+                        string lipPath = System.IO.Path.Combine(ttsIntermediateRoot, $"player_{id}.lip");
+                        string xwmPath = System.IO.Path.Combine(ttsIntermediateRoot, $"player_{id}.xwm");
+                        string mp3Path = Mp3PathFor(wavPath);
+
+                        CleanupArtifacts(mp3Path, wavPath, lipPath, xwmPath);
 
                         string shortText = text.Length > 55 ? text.Substring(0, 55) + "..." : text;
                         Console.Write($"  {id} [{edid}]\n    \"{shortText}\" ... ");
@@ -3922,6 +4072,8 @@ namespace MQAstraALT
                                 bw.Write(audioData);
                                 bw.Flush();
                                 System.IO.File.WriteAllBytes(outFuz, ms.ToArray());
+
+                                CleanupArtifacts(mp3Path, wavPath, lipPath, xwmPath);
 
                                 var check = System.IO.File.ReadAllBytes(outFuz);
                                 if (check.Length >= 5 && check[4] == 0x01)
@@ -3955,9 +4107,12 @@ namespace MQAstraALT
                     foreach (var (formKey, text, edid) in playerLines)
                     {
                         string id = formKey.ID.ToString("X8");
-                        string wavPath = System.IO.Path.Combine(toolsRoot, $"playerm_{id}.wav");
-                        string lipPath = System.IO.Path.Combine(toolsRoot, $"playerm_{id}.lip");
-                        string xwmPath = System.IO.Path.Combine(toolsRoot, $"playerm_{id}.xwm");
+                        string wavPath = System.IO.Path.Combine(ttsIntermediateRoot, $"playerm_{id}.wav");
+                        string lipPath = System.IO.Path.Combine(ttsIntermediateRoot, $"playerm_{id}.lip");
+                        string xwmPath = System.IO.Path.Combine(ttsIntermediateRoot, $"playerm_{id}.xwm");
+                        string mp3Path = Mp3PathFor(wavPath);
+
+                        CleanupArtifacts(mp3Path, wavPath, lipPath, xwmPath);
 
                         string shortText = text.Length > 55 ? text.Substring(0, 55) + "..." : text;
                         Console.Write($"  {id} [{edid}]\n    \"{shortText}\" ... ");
@@ -3983,6 +4138,8 @@ namespace MQAstraALT
                                 bw.Write(audioData);
                                 bw.Flush();
                                 System.IO.File.WriteAllBytes(outFuz, ms.ToArray());
+
+                                CleanupArtifacts(mp3Path, wavPath, lipPath, xwmPath);
 
                                 var check = System.IO.File.ReadAllBytes(outFuz);
                                 if (check.Length >= 5 && check[4] == 0x01)
@@ -4016,7 +4173,3 @@ namespace MQAstraALT
         }
     }
 }
-
-
-
-

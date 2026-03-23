@@ -217,7 +217,8 @@ namespace MQAstraALT
         {
             var companionQuest = ctx.CompanionQuest;
             var companionQuestFK = ctx.CompanionQuestFormKey;
-            var endSceneFlag = (DialogResponses.Flag)8;
+            // CK "End Running Scene" serializes as raw flag 64 in the generated plugin.
+            var endSceneFlag = (DialogResponses.Flag)64;
 
             DialogTopic CreateCompanionSceneTopic(string edid, string prompt, string text, FormKey? sharedDialog = null)
             {
@@ -255,6 +256,75 @@ namespace MQAstraALT
                 topic.Responses.Add(response);
                 companionQuest.DialogTopics.Add(topic);
                 return topic;
+            }
+
+            DialogResponses CreateSceneInfo(string stableKey, string text, FormKey emotionFk)
+            {
+                var info = new DialogResponses(ctx.Stable(stableKey), Fallout4Release.Fallout4)
+                {
+                    Flags = new DialogResponseFlags { Flags = 0 }
+                };
+                info.Responses.Add(new DialogResponse
+                {
+                    Text = new TranslatedString(Language.English, text),
+                    ResponseNumber = 1,
+                    Unknown = 1,
+                    Emotion = emotionFk.ToLink<IKeywordGetter>(),
+                    InterruptPercentage = 0,
+                    CameraTargetAlias = -1,
+                    CameraLocationAlias = -1,
+                    StopOnSceneEnd = false
+                });
+                return info;
+            }
+
+            ConditionFloat PickupGetIsSexCondition(bool female)
+            {
+                var data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetIsSex,
+                    ParameterOneNumber = female ? 1 : 0,
+                    Reference = new FormKey(ctx.Fallout4MasterKey, 0x000014).ToLink<IFallout4MajorRecordGetter>(),
+                    RunOnType = Condition.RunOnType.Reference,
+                    Unknown2 = 30616,
+                    Unknown3 = -1
+                };
+                if (female)
+                {
+                    data.ParameterOneRecord = new FormLink<IFallout4MajorRecordGetter>(
+                        new FormKey(ctx.Fallout4MasterKey, 0x000001));
+                }
+
+                return new ConditionFloat
+                {
+                    CompareOperator = CompareOperator.EqualTo,
+                    ComparisonValue = 1,
+                    Data = data
+                };
+            }
+
+            ConditionFloat PickupGetIsIdCondition(
+                uint actorId,
+                Condition.RunOnType runOn,
+                ushort unknown2,
+                short unknown3,
+                CompareOperator compareOperator = CompareOperator.EqualTo)
+            {
+                var actorFk = new FormKey(ctx.Fallout4MasterKey, actorId);
+                return new ConditionFloat
+                {
+                    CompareOperator = compareOperator,
+                    ComparisonValue = 1,
+                    Data = new FunctionConditionData
+                    {
+                        Function = Condition.Function.GetIsID,
+                        ParameterOneNumber = (int)actorFk.ID,
+                        ParameterOneRecord = actorFk.ToLink<IFallout4MajorRecordGetter>(),
+                        RunOnType = runOn,
+                        Unknown2 = unknown2,
+                        Unknown3 = unknown3
+                    }
+                };
             }
 
             ConditionFloat CompanionFactionCheck(FormKey factionFK, float value) => new ConditionFloat
@@ -486,7 +556,6 @@ namespace MQAstraALT
             var pickupPNeu = CreateCompanionSceneTopic("COMAstraPickup_PNeu", "Trade", "Let's trade.");
             var pickupNNeu = CreateCompanionSceneTopic("COMAstraPickup_NNeu", "", "Show me what you've got.");
             pickupNNeu.Responses[0].Flags = new DialogResponseFlags { Flags = endSceneFlag };
-            pickupNNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 200 };
             var pickupPQue = CreateCompanionSceneTopic("COMAstraPickup_PQue", "Questions later", "Questions later.");
             var pickupNQue = CreateCompanionSceneTopic("COMAstraPickup_NQue", "", "Then let's move when you're ready.");
             pickupNQue.Responses[0].Flags = new DialogResponseFlags { Flags = endSceneFlag };
@@ -494,6 +563,222 @@ namespace MQAstraALT
             var pickupAction3Topic = CreateCompanionSceneTopic("COMAstraPickup_Action3", "", "Lead the way.");
             var pickupAction4Topic = CreateCompanionSceneTopic("COMAstraPickup_Action4", "", "Sorry, boy. Time for you to head home.");
             var pickupAction5Topic = CreateCompanionSceneTopic("COMAstraPickup_Action5", "", "");
+
+            pickupPNeu.Responses[0].SharedDialog.SetTo(new FormKey(ctx.Fallout4MasterKey, 0x162C82));
+            pickupNNeu.Responses[0].VirtualMachineAdapter = new DialogResponsesAdapter
+            {
+                Version = 6,
+                ObjectFormat = 2,
+                Scripts = new ExtendedList<ScriptEntry>
+                {
+                    new()
+                    {
+                        Name = "OpenInventoryInfoScript",
+                        Properties = new ExtendedList<ScriptProperty>()
+                    }
+                }
+            };
+
+            var pickupAction2Fallback = pickupAction2Topic.Responses[0];
+            pickupAction2Fallback.Conditions.Clear();
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x0179FF, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x002F24, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x002F1E, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x079249, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x02740E, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x027683, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x027682, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x019FD9, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x045AC9, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x027686, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x022613, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction2Fallback.Conditions.Add(PickupGetIsIdCondition(0x0BBEE6, Condition.RunOnType.Subject, 30616, -1, CompareOperator.NotEqualTo));
+
+            pickupAction2Topic.Responses.Insert(0, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:CodsworthMale",
+                "I trust you'll do your best to protect my master. Don't let me down.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84C)));
+            pickupAction2Topic.Responses[0].Conditions.Add(PickupGetIsSexCondition(female: false));
+            pickupAction2Topic.Responses[0].Conditions.Add(PickupGetIsIdCondition(0x0179FF, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(1, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:CodsworthFemale",
+                "I trust you'll do your best to protect my mistress. Don't let me down.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84C)));
+            pickupAction2Topic.Responses[1].Conditions.Add(PickupGetIsSexCondition(female: true));
+            pickupAction2Topic.Responses[1].Conditions.Add(PickupGetIsIdCondition(0x0179FF, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(2, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Piper",
+                "You sure manage to find your fair share of trouble, don't you?",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84D)));
+            pickupAction2Topic.Responses[2].Conditions.Add(PickupGetIsIdCondition(0x002F1E, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(3, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Nick",
+                "Traveling with Astra's not for the faint of heart. But you'll manage.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84D)));
+            pickupAction2Topic.Responses[3].Conditions.Add(PickupGetIsIdCondition(0x002F24, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(4, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Cait",
+                "Taking up with the quiet type, huh? Can't say I blame you.",
+                new FormKey(ctx.Fallout4MasterKey, 0x112004)));
+            pickupAction2Topic.Responses[4].Conditions.Add(PickupGetIsIdCondition(0x079249, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(5, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:MacCready",
+                "You two have fun out there. Try not to get killed.",
+                new FormKey(ctx.Fallout4MasterKey, 0x112004)));
+            pickupAction2Topic.Responses[5].Conditions.Add(PickupGetIsIdCondition(0x02740E, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(6, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Danse",
+                "Exercise extreme caution out there. The Commonwealth is hazardous.",
+                new FormKey(ctx.Fallout4MasterKey, 0xFFFFFF)));
+            pickupAction2Topic.Responses[6].Conditions.Add(PickupGetIsIdCondition(0x027683, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(7, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Strong",
+                "Bah! This human soft. Weak. Not live long.",
+                new FormKey(ctx.Fallout4MasterKey, 0xFFFFFF)));
+            pickupAction2Topic.Responses[7].Conditions.Add(PickupGetIsIdCondition(0x027682, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(8, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:PrestonMale",
+                "Keep an eye on things out there. The Minutemen are counting on you.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0C866F)));
+            pickupAction2Topic.Responses[8].Conditions.Add(PickupGetIsSexCondition(female: false));
+            pickupAction2Topic.Responses[8].Conditions.Add(PickupGetIsIdCondition(0x019FD9, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(9, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:PrestonFemale",
+                "Keep an eye on things out there. The Minutemen are counting on you.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0C866F)));
+            pickupAction2Topic.Responses[9].Conditions.Add(PickupGetIsSexCondition(female: true));
+            pickupAction2Topic.Responses[9].Conditions.Add(PickupGetIsIdCondition(0x019FD9, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(10, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Deacon",
+                "Astra, you listen to him now. He'll keep you out of trouble.",
+                new FormKey(ctx.Fallout4MasterKey, 0xFFFFFF)));
+            pickupAction2Topic.Responses[10].Conditions.Add(PickupGetIsSexCondition(female: false));
+            pickupAction2Topic.Responses[10].Conditions.Add(PickupGetIsIdCondition(0x045AC9, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(11, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:DeaconFemale",
+                "Astra, you listen to her now. She'll keep you out of trouble.",
+                new FormKey(ctx.Fallout4MasterKey, 0xFFFFFF)));
+            pickupAction2Topic.Responses[11].Conditions.Add(PickupGetIsSexCondition(female: true));
+            pickupAction2Topic.Responses[11].Conditions.Add(PickupGetIsIdCondition(0x045AC9, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(12, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Curie",
+                "Oh! You are taking Astra? Very well. I will be going then.",
+                new FormKey(ctx.Fallout4MasterKey, 0xFFFFFF)));
+            pickupAction2Topic.Responses[12].Conditions.Add(PickupGetIsIdCondition(0x027686, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(13, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:Hancock",
+                "Astra, huh? I've heard good things. Take care of our friend here.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0D755D)));
+            pickupAction2Topic.Responses[13].Conditions.Add(PickupGetIsIdCondition(0x022613, Condition.RunOnType.Subject, 30616, -1));
+
+            pickupAction2Topic.Responses.Insert(14, CreateSceneInfo(
+                "Info:COMAstraPickup_Action2:X688",
+                "Astra. An interesting choice of companion. Adequate, I suppose.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0D755D)));
+            pickupAction2Topic.Responses[14].Conditions.Add(PickupGetIsIdCondition(0x0BBEE6, Condition.RunOnType.Subject, 30616, -1));
+
+            var pickupAction3Fallback = pickupAction3Topic.Responses[0];
+            pickupAction3Fallback.Conditions.Clear();
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x0179FF, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x002F24, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x079249, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x02740E, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x027683, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x027682, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x019FD9, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x045AC9, Condition.RunOnType.Target, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x027686, Condition.RunOnType.Target, 30616, -1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x022613, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+            pickupAction3Fallback.Conditions.Add(PickupGetIsIdCondition(0x0BBEE6, Condition.RunOnType.QuestAlias, 30616, 1, CompareOperator.NotEqualTo));
+
+            pickupAction3Topic.Responses.Insert(0, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Codsworth",
+                "Understood, Codsworth. I'll keep them intact.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0C8670)));
+            pickupAction3Topic.Responses[0].Conditions.Add(PickupGetIsIdCondition(0x0179FF, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(1, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Nick",
+                "Understood, Nick. I'll keep our odds favorable.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84D)));
+            pickupAction3Topic.Responses[1].Conditions.Add(PickupGetIsIdCondition(0x002F24, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(2, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Cait",
+                "Efficient advice, Cait. We'll manage.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84D)));
+            pickupAction3Topic.Responses[2].Conditions.Add(PickupGetIsIdCondition(0x079249, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(3, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:MacCready",
+                "Useful warning, MacCready. I'll plan accordingly.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0FA84D)));
+            pickupAction3Topic.Responses[3].Conditions.Add(PickupGetIsIdCondition(0x02740E, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(4, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Danse",
+                "Acknowledged. I'll maintain discipline.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0C8670)));
+            pickupAction3Topic.Responses[4].Conditions.Add(PickupGetIsIdCondition(0x027683, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(5, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Strong",
+                "Adequate summary, Strong.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0D755D)));
+            pickupAction3Topic.Responses[5].Conditions.Add(PickupGetIsIdCondition(0x027682, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(6, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Preston",
+                "Noted. I'll watch their flanks.",
+                new FormKey(ctx.Fallout4MasterKey, 0x154F0E)));
+            pickupAction3Topic.Responses[6].Conditions.Add(PickupGetIsIdCondition(0x019FD9, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(7, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Deacon",
+                "You make even warnings sound unreliable, Deacon.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0C8670)));
+            pickupAction3Topic.Responses[7].Conditions.Add(PickupGetIsIdCondition(0x045AC9, Condition.RunOnType.Target, 30616, -1));
+
+            pickupAction3Topic.Responses.Insert(8, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Curie",
+                "Understood, Curie. I'll monitor that tendency.",
+                new FormKey(ctx.Fallout4MasterKey, 0x154F0E)));
+            pickupAction3Topic.Responses[8].Conditions.Add(PickupGetIsIdCondition(0x027686, Condition.RunOnType.Target, 30616, -1));
+
+            pickupAction3Topic.Responses.Insert(9, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:Hancock",
+                "Balance is not their default state. I'll compensate.",
+                new FormKey(ctx.Fallout4MasterKey, 0x0C8673)));
+            pickupAction3Topic.Responses[9].Conditions.Add(PickupGetIsIdCondition(0x022613, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            pickupAction3Topic.Responses.Insert(10, CreateSceneInfo(
+                "Info:COMAstraPickup_Action3:X688",
+                "Correction: it is also their strength. Still, understood.",
+                new FormKey(ctx.Fallout4MasterKey, 0x114CC3)));
+            pickupAction3Topic.Responses[10].Conditions.Add(PickupGetIsIdCondition(0x0BBEE6, Condition.RunOnType.QuestAlias, 30616, 1));
+
+            var pickupAction4Info = pickupAction4Topic.Responses[0];
+            pickupAction4Info.Conditions.Clear();
+            pickupAction4Info.Conditions.Add(PickupGetIsIdCondition(0x01D15C, Condition.RunOnType.QuestAlias, 30616, 2));
+
+            var pickupAction5Info = pickupAction5Topic.Responses[0];
+            pickupAction5Info.Conditions.Clear();
+            pickupAction5Info.Conditions.Add(PickupGetIsIdCondition(0x01D15C, Condition.RunOnType.Subject, 65535, -1));
+            pickupAction5Info.SharedDialog.SetTo(new FormKey(ctx.Fallout4MasterKey, 0x085596));
+            pickupAction5Info.Responses.Clear();
 
             var pickupAction1 = new SceneAction
             {
@@ -1200,26 +1485,6 @@ namespace MQAstraALT
             infatuationRepeaterRegularGreeting.Conditions.Add(WantsRomanceRetryCheck(1));
             infatuationRepeaterRegularGreeting.Conditions.Add(CurrentThresholdCheck(ctx.CaT1InfatuationFormKey));
             companionGreetingTopic.Responses.Add(infatuationRepeaterRegularGreeting);
-
-            var dismissGreeting = new DialogResponses(ctx.Stable("Info:COMAstraGreetings:Dismiss"), Fallout4Release.Fallout4)
-            {
-                Flags = new DialogResponseFlags { Flags = endSceneFlag }
-            };
-            dismissGreeting.Responses.Add(new DialogResponse
-            {
-                Text = new TranslatedString(Language.English, ""),
-                ResponseNumber = 1,
-                Unknown = 1,
-                Emotion = ctx.NeutralEmotion,
-                InterruptPercentage = 0,
-                CameraTargetAlias = -1,
-                CameraLocationAlias = -1,
-                StopOnSceneEnd = false
-            });
-            dismissGreeting.StartScene.SetTo(dismissScene);
-            dismissGreeting.StartScenePhase = "Loop01";
-            dismissGreeting.Conditions.Add(CompanionFactionCheck(ctx.CurrentCompanionFaction.FormKey, 1));
-            companionGreetingTopic.Responses.Add(dismissGreeting);
 
             var dismissEnterTopic = new DialogTopic(ctx.Stable("Topic:COMAstraDismissEnter"), Fallout4Release.Fallout4)
             {

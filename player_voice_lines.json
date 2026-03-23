@@ -970,5 +970,29 @@
     "EditorId": "COMAstraMurder_P",
     "Prompt": "Wait",
     "Text": "I can explain."
+  },
+  {
+    "FormId": "0002030D",
+    "EditorId": "COMAstraTalk_AskStatus",
+    "Prompt": "How are things?",
+    "Text": "I was just wondering where you and I stand."
+  },
+  {
+    "FormId": "00020335",
+    "EditorId": "COMAstraTalk_AskStatus",
+    "Prompt": "Exit power armor",
+    "Text": "Get out of your power armor."
+  },
+  {
+    "FormId": "0002030F",
+    "EditorId": "COMAstraTalk_NeverMind",
+    "Prompt": "Never mind",
+    "Text": "Never mind."
+  },
+  {
+    "FormId": "00020339",
+    "EditorId": "COMAstraTalk_Dismiss",
+    "Prompt": "Dismiss",
+    "Text": "I think it\u0027s time we split up."
   }
 ]
