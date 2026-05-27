@@ -1,5 +1,40 @@
 # COMAstraMQ302ALT Changelog
 
+## 2026-05-26 — Companion Astra Affinity Recovery Release Candidate
+
+### Summary
+- Promoted the currently tested live `MQAstraALT.esp` into the GitHub source branch.
+- Astra affinity now increases from real companion events during play.
+- Fixed missing `ThresholdData_Array` scene selector links so natural affinity scenes can queue through vanilla `CompanionActorScript`.
+- Confirmed in-game: Astra naturally offered an affinity scene during normal questing, without console-forcing `CA_WantsToTalk`.
+
+### Companion Fixes
+- Added Astra-friendly tinkering events to `EventData_Array`:
+  - `CA_Event_UseWorkbench`
+  - `CA_Event_ModWeapon`
+  - `CA_Event_ModArmor`
+- Added first-time affinity scene selectors:
+  - Friendship (`250`) -> `CA_Scene_Friendship`
+  - Admiration (`500`) -> `CA_Scene_Admiration`
+  - Confidant (`750`) -> `CA_Scene_Confidant`
+  - Infatuation (`1000`) -> `CA_Scene_Infatuation`
+- Added vanilla repeat/downward scene selectors where available for the negative and repeat thresholds.
+
+### Existing-Save Handling
+- Carried forward late-save readiness migration in `MQAstraALTQuestScript.psc`.
+- Existing-save path suppresses the early Red Rocket/Concord route when the player has already progressed beyond it.
+
+### Verification
+- `AstraLiveInspector` confirmed the live ESP contains the scene selector links.
+- `AstraAffinityInspector` confirmed Astra positive events include workbench, weapon mod, and armor mod events.
+- User playtest confirmed affinity rose and an affinity scene triggered naturally.
+
+### Known Caveats
+- This is still an unfinished alpha-quality release candidate.
+- Astra has some exploration/random comments, but coverage and context are not polished.
+- Combat barks/responses are likely incomplete or missing.
+- Voice files exist, but some dialogue still has missing or mismapped voice playback.
+
 ## 2026-03-12 — Codex Workspace Storyline Merge Lane
 
 ### Summary

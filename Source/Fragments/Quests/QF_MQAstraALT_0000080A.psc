@@ -304,6 +304,18 @@ kmyQuest.HandleFragmentStage0095Item00()
 EndFunction
 ;END FRAGMENT
 
+;BEGIN FRAGMENT Fragment_Stage_0096_Item_00
+Function Fragment_Stage_0096_Item_00()
+;BEGIN AUTOCAST TYPE MQAstraALTQuestScript
+Quest __temp = self as Quest
+MQAstraALTQuestScript kmyQuest = __temp as MQAstraALTQuestScript
+;END AUTOCAST
+;BEGIN CODE
+kmyQuest.HandleFragmentStage0096Item00()
+;END CODE
+EndFunction
+;END FRAGMENT
+
 ;BEGIN FRAGMENT Fragment_Stage_0100_Item_00
 Function Fragment_Stage_0100_Item_00()
 ;BEGIN AUTOCAST TYPE MQAstraALTQuestScript

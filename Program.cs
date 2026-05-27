@@ -1021,6 +1021,9 @@ namespace MQAstraALT
             var caEventPickLockOwned = new FormKey(fo4, 0x0A1B31);   // CA_Event_PickLockOwnedDoor
             var caEventPickpocket = new FormKey(fo4, 0x0A1B29);      // CA_Event_StealPickpocket
             var caEventEatCorpse = new FormKey(fo4, 0x1D2877);       // CA_Event_EatCorpse
+            var caEventModWeapon = new FormKey(fo4, 0x0A1B33);       // CA_Event_ModWeapon
+            var caEventModArmor = new FormKey(fo4, 0x0A1B34);        // CA_Event_ModArmor
+            var caEventUseWorkbench = new FormKey(fo4, 0x0A1B35);    // CA_Event_UseWorkbench
             var minSettlementHelp = new FormKey(fo4, 0x144356);      // MinSettlementHelp
             var minSettlementRefuseHelp = new FormKey(fo4, 0x144357); // MinSettlementRefuseHelp
             var mq302Evacuate = new FormKey(fo4, 0x19B647);          // MQ302EvacuateInstitute
@@ -1062,6 +1065,19 @@ namespace MQAstraALT
             eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
                 new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
                 new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventPickLock.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            // Astra likes tinkering: useful, non-destructive actions that are easy to test.
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventUseWorkbench.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventModWeapon.ToLink<IFallout4MajorRecordGetter>() }
+            }});
+            eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
+                new ScriptObjectProperty { Name = "Disposition_Global", Object = caEventLikesGlobal.ToLink<IFallout4MajorRecordGetter>() },
+                new ScriptObjectProperty { Name = "Event_Keyword", Object = caEventModArmor.ToLink<IFallout4MajorRecordGetter>() }
             }});
             // Astra dislikes: stealing, pickpocketing, eating corpses, picking owned locks
             eventDataArray.Structs.Add(new ScriptEntryStructs { Members = new ExtendedList<ScriptProperty> {
@@ -1149,7 +1165,9 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "Threshold_Global", Object = caT1Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 500 }
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 500 },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_FirstTimeReached", Object = caSceneInfatuationFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_Repeat_GoingUp", Object = caSceneRepeatInfatuationUpwardFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     },
                     new ScriptEntryStructs
@@ -1159,7 +1177,9 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "Threshold_Global", Object = caT2Admiration.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 400 }
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 400 },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_FirstTimeReached", Object = caSceneAdmirationFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_Repeat_GoingDown", Object = caSceneRepeatAdmirationDownwardFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     },
                     new ScriptEntryStructs
@@ -1170,7 +1190,8 @@ namespace MQAstraALT
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 300 },
-                            new ScriptBoolProperty { Name = "ThresholdHasBeenPreviouslyReached", Data = true }
+                            new ScriptBoolProperty { Name = "ThresholdHasBeenPreviouslyReached", Data = true },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_Repeat_GoingDown", Object = caSceneRepeatNeutralDownwardFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     },
                     new ScriptEntryStructs
@@ -1180,7 +1201,9 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "Threshold_Global", Object = caT4Disdain.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 200 }
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 200 },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_FirstTimeReached", Object = caSceneDisdainFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_Repeat_GoingDown", Object = caSceneRepeatDisdainDownwardFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     },
                     new ScriptEntryStructs
@@ -1190,7 +1213,9 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "Threshold_Global", Object = caT5Hatred.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = true },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 100 }
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 100 },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_FirstTimeReached", Object = caSceneHatredFK.ToLink<IFallout4MajorRecordGetter>() },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_Repeat_GoingDown", Object = caSceneRepeatHatredDownwardFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     },
                     new ScriptEntryStructs
@@ -1200,7 +1225,8 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "Threshold_Global", Object = caTCustom1Confidant.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = false },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 495 }
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 495 },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_FirstTimeReached", Object = caSceneConfidantFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     },
                     new ScriptEntryStructs
@@ -1210,7 +1236,8 @@ namespace MQAstraALT
                             new ScriptObjectProperty { Name = "Threshold_Global", Object = caTCustom2Friend.FormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptBoolProperty { Name = "IsMajorAffinityThreshold", Data = false },
                             new ScriptObjectProperty { Name = "Controlling_Quest", Object = claudeQuestFK.ToLink<IFallout4MajorRecordGetter>() },
-                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 405 }
+                            new ScriptIntProperty { Name = "Controlling_Quest_Stage", Data = 405 },
+                            new ScriptObjectProperty { Name = "AffinitySceneToPlay_FirstTimeReached", Object = caSceneFriendshipFK.ToLink<IFallout4MajorRecordGetter>() }
                         }
                     }
                 }
