@@ -4,6 +4,7 @@
 
 ### Voice / Mapping Polish
 - User reported that some exchange/trade-adjacent dialogue is using a robotic voice in places where it should not, including lines where characters speak to Andrew.
+- 2026-05-28 playtest note: the "thoughts"/Y-button player line is sometimes using a robotic voice for the player response. Audit player response FormIDs and `PlayerVoiceFemale01` / `PlayerVoiceMale01` file placement before deeper dialogue polish.
 - Treat this as a voice-folder and voice-type audit item: verify response FormIDs, `Sound\Voice\MQAstraALT.esp\...` folder placement, player voice folders, and any Robot voice folders copied into the package.
 - New gift handoff INFO `0203A0` has text, VMAD behavior, and a generated FUZ voice file.
 
@@ -11,6 +12,7 @@
 - Astra now uses a guarded talk greeting for `HasItemForPlayer == 1`: "I found a small supply cache. It's yours."
 - `CompanionGivePlayerItemInfoScript` is attached to the gift INFO so the item handoff clears the pending state.
 - Ordinary talk greetings are gated by `HasItemForPlayer == 0` so the gift line has a clean lane.
+- Astra's base `HasItemForPlayer` actor value is now seeded to `1` to provide one starter gift and kick the vanilla repeating timer after the handoff.
 
 ## Changes from v1 (2026-03-12)
 

@@ -861,6 +861,9 @@ namespace MQAstraALT
                     new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Intelligence").ToLink(), Value = 8f },
                     new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Agility").ToLink(), Value = 10f },
                     new ObjectProperty { ActorValue = env.LoadOrder.PriorityOrder.WinningOverrides<IActorValueInformationGetter>().First(av => av.EditorID == "Luck").ToLink(), Value = 8f },
+                    // Prime the first vanilla companion gift. The gift INFO clears this
+                    // value and starts the normal repeating gift timer after delivery.
+                    new ObjectProperty { ActorValue = hasItemForPlayerAV.ToLink(), Value = 1f },
                 },
                 Packages = new ExtendedList<IFormLinkGetter<IPackageGetter>>(),
                 Aggression = (Npc.AggressionType)1,     // Aggressive — attacks enemies on sight

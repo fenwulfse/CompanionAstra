@@ -6,6 +6,7 @@
 - Re-enabled Astra's vanilla companion gift-item timer with a real vanilla leveled item: `LL_Ammo_Any`.
 - Added a guarded `COMAstraTalkGreetings` handoff line for `HasItemForPlayer == 1`.
 - The handoff attaches `CompanionGivePlayerItemInfoScript`, so the gift is awarded and `HasItemForPlayer` is cleared instead of leaving a pending item state.
+- Seeded Astra's starting `HasItemForPlayer` actor value to `1` so a fresh Astra offers one starter supply-cache gift; that first handoff should clear the value and start the normal repeating vanilla timer.
 
 ### Verification
 - `GiftAuditInspector` confirmed `CompanionActorScript.ShouldGivePlayerItems=True`.
@@ -15,6 +16,7 @@
 
 ### Known Caveat
 - The new gift handoff line has a generated FUZ voice file.
+- 2026-05-28 playtest: manually setting `HasItemForPlayer` to `1` makes the gift handoff work, but waiting/sleeping 26 game hours did not queue a gift from `0`, so the starter gift seed is intended to prime the cycle on fresh/newly reloaded installs.
 
 ## 2026-05-28 — Inventory Hotfix
 
