@@ -1152,7 +1152,10 @@ namespace MQAstraALT
             UpsertObjectProperty(companionActorScript, "InfatuationThreshold").Object = caT1Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "HomeLocation"); // Set after redRocketTruckStopLocation is resolved
             UpsertObjectProperty(companionActorScript, "CA_Event_Murder").Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertBoolProperty(companionActorScript, "ShouldGivePlayerItems").Data = true;
+            // Astra does not have a vanilla-style companion gift item yet. Leaving
+            // this enabled with ItemToGive unset can make the companion script try
+            // to hand the player a null item.
+            UpsertBoolProperty(companionActorScript, "ShouldGivePlayerItems").Data = false;
             companionActorScript.Properties.Add(new ScriptStructListProperty
             {
                 Name = "ThresholdData_Array",

@@ -33,6 +33,7 @@ This is not a finished Bethesda-style companion yet. It is being shared as an ea
 - Relationship and thoughts dialogue
 - Some random exploration comments
 - Existing-save support that attempts to skip the early Red Rocket/Concord route if the player is already beyond it
+- Inventory hotfix disables Astra's unconfigured vanilla companion gift-item timer
 - Voice files included
 
 ### Known Issues
@@ -44,6 +45,7 @@ This is not a finished Bethesda-style companion yet. It is being shared as an ea
 - Dialogue polish is still early
 - Quest content is experimental and not the current focus
 - Existing saves that previously had Astra installed may behave differently than a clean save
+- Existing saves that already contain bad inventory stacks may still need a one-time console cleanup
 
 ### Suggested Test Setup
 
@@ -61,13 +63,14 @@ Install like a normal loose-file Fallout 4 mod:
 
 ### Current Build Notes
 
-This release candidate fixes a major affinity issue. Astra now gains affinity and can naturally offer an affinity scene during normal play.
+This release candidate fixes a major affinity issue. Astra now gains affinity and can naturally offer an affinity scene during normal play. The May 28 hotfix also disables an unconfigured vanilla companion gift-item timer that could contribute to bad inventory entries.
 
 Build fingerprint:
 
 - ESP: `MQAstraALT.esp`
-- ESP SHA256: `D2E9FE5E10636A4163F61A2A648CAC79E25299B3C7CF1DA47DF024E869F0EAC8`
-- Release package: `MQAstraALT_2026-05-26_affinity_rc.zip`
+- ESP SHA256: `F2C70A7A3964CBD45B7E77D7DFDB788261022F20BBCB47FF62242B094A47EFD0`
+- Release package: `MQAstraALT_2026-05-28_inventory_hotfix_final.zip`
+- Release package SHA256: `D6CB6CBAB32E9AF5ED2739DA55943A08D25ED14F35BEC64F124B9FE3F734EE06`
 
 ### Credits / Disclosure
 

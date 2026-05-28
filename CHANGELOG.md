@@ -1,5 +1,18 @@
 # COMAstraMQ302ALT Changelog
 
+## 2026-05-28 — Inventory Hotfix
+
+### Summary
+- Disabled Astra's vanilla companion gift-item timer because `ItemToGive` is not configured yet.
+- Updated the live-tested ESP and release package with the hotfix.
+
+### Verification
+- `CompanionActorInspector` confirmed `CompanionActorScript.ShouldGivePlayerItems=False` in the live ESP.
+- The inspector confirmed Astra's default outfit still uses vanilla armor records and her only inventory entries are the combat rifle plus ammo.
+
+### Save Note
+- This prevents Astra from creating new gift-item attempts, but saves that already contain bad inventory stacks may still need a one-time console cleanup.
+
 ## 2026-05-26 — Companion Astra Affinity Recovery Release Candidate
 
 ### Summary
