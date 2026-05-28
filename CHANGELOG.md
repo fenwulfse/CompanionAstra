@@ -14,7 +14,7 @@
 - Normal Astra talk greetings now require `HasItemForPlayer == 0`, so the gift handoff is not competing with ordinary greetings.
 
 ### Known Caveat
-- The new gift handoff line may be text-only until its FUZ is generated.
+- The new gift handoff line has a generated FUZ voice file.
 
 ## 2026-05-28 — Inventory Hotfix
 

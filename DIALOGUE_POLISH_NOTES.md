@@ -5,7 +5,7 @@
 ### Voice / Mapping Polish
 - User reported that some exchange/trade-adjacent dialogue is using a robotic voice in places where it should not, including lines where characters speak to Andrew.
 - Treat this as a voice-folder and voice-type audit item: verify response FormIDs, `Sound\Voice\MQAstraALT.esp\...` folder placement, player voice folders, and any Robot voice folders copied into the package.
-- New gift handoff INFO `0203A0` currently has text and VMAD behavior; its matching FUZ still needs to be generated.
+- New gift handoff INFO `0203A0` has text, VMAD behavior, and a generated FUZ voice file.
 
 ### Companion Gift Handoff
 - Astra now uses a guarded talk greeting for `HasItemForPlayer == 1`: "I found a small supply cache. It's yours."
