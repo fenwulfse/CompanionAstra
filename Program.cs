@@ -1152,10 +1152,11 @@ namespace MQAstraALT
             UpsertObjectProperty(companionActorScript, "InfatuationThreshold").Object = caT1Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "HomeLocation"); // Set after redRocketTruckStopLocation is resolved
             UpsertObjectProperty(companionActorScript, "CA_Event_Murder").Object = ca_Event_Murder.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            // Astra does not have a vanilla-style companion gift item yet. Leaving
-            // this enabled with ItemToGive unset can make the companion script try
-            // to hand the player a null item.
-            UpsertBoolProperty(companionActorScript, "ShouldGivePlayerItems").Data = false;
+            // Astra uses MacCready's vanilla-safe gift pattern for now: the
+            // companion timer awards a small leveled ammo cache through talk
+            // dialogue, where CompanionGivePlayerItemInfoScript clears
+            // HasItemForPlayer after delivery.
+            UpsertBoolProperty(companionActorScript, "ShouldGivePlayerItems").Data = true;
             companionActorScript.Properties.Add(new ScriptStructListProperty
             {
                 Name = "ThresholdData_Array",
@@ -1248,7 +1249,8 @@ namespace MQAstraALT
             UpsertObjectProperty(companionActorScript, "InfatuationRomanticMessage").Object = ca_AstraRomanticMessage.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "MurderToggle").Object = commonMurderToggleAlwaysOff.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "MQComplete").Object = mqComplete.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "ItemToGive");
+            UpsertObjectProperty(companionActorScript, "ItemToGive").Object =
+                new FormKey(fo4, 0x06738B).ToLink<IFallout4MajorRecordGetter>(); // LL_Ammo_Any
             UpsertObjectProperty(companionActorScript, "Tutorial").Object = tutorialQuest.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "LikesEvent").Object = ca_AstraLikesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "HasItemForPlayer").Object = hasItemForPlayerAV.FormKey.ToLink<IFallout4MajorRecordGetter>();
@@ -2140,6 +2142,7 @@ namespace MQAstraALT
                 NeutralEmotion = neutralEmotion.ToLink<IKeywordGetter>(),
                 CurrentCompanionFaction = currentCompanionFaction,
                 PowerArmorFrameKeywordFormKey = new FormKey(fo4, 0x15503F),
+                HasItemForPlayerFormKey = hasItemForPlayerAV.FormKey,
                 CaCurrentThresholdFormKey = caCurrentThresholdFK,
                 CaWantsToTalkFormKey = caWantsToTalkFK,
                 CaT1InfatuationFormKey = caT1Infatuation.FormKey,

@@ -1,5 +1,21 @@
 # COMAstraMQ302ALT Changelog
 
+## 2026-05-28 — Gift Timer Test
+
+### Summary
+- Re-enabled Astra's vanilla companion gift-item timer with a real vanilla leveled item: `LL_Ammo_Any`.
+- Added a guarded `COMAstraTalkGreetings` handoff line for `HasItemForPlayer == 1`.
+- The handoff attaches `CompanionGivePlayerItemInfoScript`, so the gift is awarded and `HasItemForPlayer` is cleared instead of leaving a pending item state.
+
+### Verification
+- `GiftAuditInspector` confirmed `CompanionActorScript.ShouldGivePlayerItems=True`.
+- `GiftAuditInspector` confirmed `ItemToGive=LL_Ammo_Any`.
+- `GiftAuditInspector` confirmed the new gift INFO `0203A0` has `GetInFaction(CurrentCompanionFaction)`, `CA_WantsToTalk == 0`, `HasItemForPlayer == 1`, and `CompanionGivePlayerItemInfoScript`.
+- Normal Astra talk greetings now require `HasItemForPlayer == 0`, so the gift handoff is not competing with ordinary greetings.
+
+### Known Caveat
+- The new gift handoff line may be text-only until its FUZ is generated.
+
 ## 2026-05-28 — Inventory Hotfix
 
 ### Summary

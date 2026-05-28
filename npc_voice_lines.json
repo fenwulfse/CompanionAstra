@@ -1506,6 +1506,12 @@
     "Text": "What do you need?"
   },
   {
+    "FormId": "000203A0",
+    "EditorId": "COMAstraTalkGreetings",
+    "Prompt": "",
+    "Text": "I found a small supply cache. It's yours."
+  },
+  {
     "FormId": "00020337",
     "EditorId": "COMAstraTalk_NpcExitPowerArmor",
     "Prompt": "",

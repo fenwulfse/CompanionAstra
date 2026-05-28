@@ -1,5 +1,17 @@
 # Dialogue Polish Notes — v2 (2026-03-13)
 
+## 2026-05-28 Field Notes
+
+### Voice / Mapping Polish
+- User reported that some exchange/trade-adjacent dialogue is using a robotic voice in places where it should not, including lines where characters speak to Andrew.
+- Treat this as a voice-folder and voice-type audit item: verify response FormIDs, `Sound\Voice\MQAstraALT.esp\...` folder placement, player voice folders, and any Robot voice folders copied into the package.
+- New gift handoff INFO `0203A0` currently has text and VMAD behavior; its matching FUZ still needs to be generated.
+
+### Companion Gift Handoff
+- Astra now uses a guarded talk greeting for `HasItemForPlayer == 1`: "I found a small supply cache. It's yours."
+- `CompanionGivePlayerItemInfoScript` is attached to the gift INFO so the item handoff clears the pending state.
+- Ordinary talk greetings are gated by `HasItemForPlayer == 0` so the gift line has a clean lane.
+
 ## Changes from v1 (2026-03-12)
 
 ### Stages 5-10 — Polished

@@ -24,6 +24,7 @@ namespace MQAstraALT
             public required FormLink<IKeywordGetter> NeutralEmotion { get; init; }
             public required IFactionGetter CurrentCompanionFaction { get; init; }
             public required FormKey PowerArmorFrameKeywordFormKey { get; init; }
+            public required FormKey HasItemForPlayerFormKey { get; init; }
             public required FormKey CaCurrentThresholdFormKey { get; init; }
             public required FormKey CaWantsToTalkFormKey { get; init; }
             public required FormKey CaT1InfatuationFormKey { get; init; }
@@ -204,6 +205,20 @@ namespace MQAstraALT
                 }
             };
 
+            ConditionFloat HasItemForPlayerCheck(float value) => new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = value,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetValue,
+                    ParameterOneRecord = ctx.HasItemForPlayerFormKey.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterOneNumber = (int)ctx.HasItemForPlayerFormKey.ID,
+                    RunOnType = Condition.RunOnType.Subject,
+                    Unknown3 = -1
+                }
+            };
+
             ConditionFloat WornHasKeywordCheck(FormKey keywordFK, float value) => new ConditionFloat
             {
                 CompareOperator = CompareOperator.EqualTo,
@@ -301,6 +316,24 @@ namespace MQAstraALT
                             ExtraBindDataVersion = 1,
                             ScriptName = $"Fragments:TopicInfos:{fragmentScriptName}",
                             FragmentName = "Fragment_End"
+                        }
+                    }
+                };
+            }
+
+            static void AttachGivePlayerItemScript(DialogResponses info)
+            {
+                info.VirtualMachineAdapter = new DialogResponsesAdapter
+                {
+                    Version = 6,
+                    ObjectFormat = 2,
+                    Scripts = new ExtendedList<ScriptEntry>
+                    {
+                        new()
+                        {
+                            Name = "CompanionGivePlayerItemInfoScript",
+                            Flags = ScriptEntry.Flag.Local,
+                            Properties = new ExtendedList<ScriptProperty>()
                         }
                     }
                 };
@@ -493,9 +526,33 @@ namespace MQAstraALT
                 // Conditions: current companion, no pending scene, at this affinity tier
                 info.Conditions.Add(FactionCheck(ctx.CurrentCompanionFaction.FormKey, 1));
                 info.Conditions.Add(WantsToTalkCheck(0));
+                info.Conditions.Add(HasItemForPlayerCheck(0));
                 info.Conditions.Add(ThresholdCheck(tierFK));
                 return info;
             }
+
+            var giftGreeting = new DialogResponses(ctx.Stable("TalkGreet:GiftSupply1"), Fallout4Release.Fallout4)
+            {
+                Flags = new DialogResponseFlags { Flags = 0 }
+            };
+            giftGreeting.Responses.Add(new DialogResponse
+            {
+                Text = new TranslatedString(Language.English, "I found a small supply cache. It's yours."),
+                ResponseNumber = 1,
+                Unknown = 1,
+                Emotion = ctx.NeutralEmotion,
+                InterruptPercentage = 0,
+                CameraTargetAlias = -1,
+                CameraLocationAlias = -1,
+                StopOnSceneEnd = false
+            });
+            giftGreeting.StartScene.SetTo(talkScene);
+            giftGreeting.StartScenePhase = "Loop01";
+            giftGreeting.Conditions.Add(FactionCheck(ctx.CurrentCompanionFaction.FormKey, 1));
+            giftGreeting.Conditions.Add(WantsToTalkCheck(0));
+            giftGreeting.Conditions.Add(HasItemForPlayerCheck(1));
+            AttachGivePlayerItemScript(giftGreeting);
+            greetingTopic.Responses.Add(giftGreeting);
 
             // --- Hatred greetings ---
             greetingTopic.Responses.Add(CreateGreetingInfo(
@@ -579,6 +636,7 @@ namespace MQAstraALT
             fallbackGreeting.StartScenePhase = "Loop01";
             fallbackGreeting.Conditions.Add(FactionCheck(ctx.CurrentCompanionFaction.FormKey, 1));
             fallbackGreeting.Conditions.Add(WantsToTalkCheck(0));
+            fallbackGreeting.Conditions.Add(HasItemForPlayerCheck(0));
             greetingTopic.Responses.Add(fallbackGreeting);
 
             // ============================================================

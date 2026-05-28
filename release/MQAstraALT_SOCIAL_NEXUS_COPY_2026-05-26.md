@@ -63,14 +63,14 @@ Install like a normal loose-file Fallout 4 mod:
 
 ### Current Build Notes
 
-This release candidate fixes a major affinity issue. Astra now gains affinity and can naturally offer an affinity scene during normal play. The May 28 hotfix also disables an unconfigured vanilla companion gift-item timer that could contribute to bad inventory entries.
+This release candidate fixes a major affinity issue. Astra now gains affinity and can naturally offer an affinity scene during normal play. The May 28 gift-timer test also gives Astra a safe vanilla companion gift item using `LL_Ammo_Any` instead of a null item.
 
 Build fingerprint:
 
 - ESP: `MQAstraALT.esp`
-- ESP SHA256: `F2C70A7A3964CBD45B7E77D7DFDB788261022F20BBCB47FF62242B094A47EFD0`
-- Release package: `MQAstraALT_2026-05-28_inventory_hotfix_final.zip`
-- Release package SHA256: `D6CB6CBAB32E9AF5ED2739DA55943A08D25ED14F35BEC64F124B9FE3F734EE06`
+- ESP SHA256: `EDFC45547F66C7C40F08296F820266A338EBA1FEA38632247B226E8B19BCE486`
+- Release package: `MQAstraALT_2026-05-28_gift_timer_test.zip`
+- Release package SHA256: `7E9C0C3820BA1B6DF557F149117BAB61C759706335D3509366E80D4E07652EA0`
 
 ### Credits / Disclosure
 

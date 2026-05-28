@@ -1,4 +1,4 @@
-# MQAstraALT 2026-05-28 Inventory Hotfix
+# MQAstraALT 2026-05-28 Gift Timer Test
 
 This is an unfinished alpha-quality build of the Astra companion / MQ alternate plugin.
 
@@ -9,12 +9,14 @@ This is an unfinished alpha-quality build of the Astra companion / MQ alternate 
 - Workbench, weapon mod, and armor mod actions now provide positive affinity.
 - Friendship affinity scene can trigger naturally during play.
 - Existing-save readiness handling suppresses the early Red Rocket/Concord route when the player is already beyond it.
-- Astra no longer has the vanilla companion gift-item timer enabled while her gift item is unset.
+- Astra's vanilla companion gift-item timer now uses `LL_Ammo_Any` instead of a null item.
+- Astra has a guarded gift handoff line when `HasItemForPlayer == 1`; the line gives the item and returns to the talk wheel.
 
 ## Known Issues
 
 - Astra still needs major dialogue polish.
 - Some voice files are missing, silent, or mismapped.
+- The new gift handoff line may be text-only until its FUZ is generated.
 - Combat responses are likely incomplete or missing.
 - Quest content is experimental and not the current polish focus.
 - Existing saves that already contain bad inventory stacks may still need a one-time console cleanup.
@@ -31,7 +33,7 @@ For manual install, copy the contents of the zip's `Data` folder into Fallout 4'
 
 ## Build Fingerprint
 
-- Live-tested ESP SHA256: `F2C70A7A3964CBD45B7E77D7DFDB788261022F20BBCB47FF62242B094A47EFD0`
-- Release package: `MQAstraALT_2026-05-28_inventory_hotfix_final.zip`
-- Release package SHA256: `D6CB6CBAB32E9AF5ED2739DA55943A08D25ED14F35BEC64F124B9FE3F734EE06`
+- Live-tested ESP SHA256: `EDFC45547F66C7C40F08296F820266A338EBA1FEA38632247B226E8B19BCE486`
+- Release package: `MQAstraALT_2026-05-28_gift_timer_test.zip`
+- Release package SHA256: `7E9C0C3820BA1B6DF557F149117BAB61C759706335D3509366E80D4E07652EA0`
 - Build date: 2026-05-28
