@@ -1149,7 +1149,8 @@ namespace MQAstraALT
             UpsertObjectProperty(companionActorScript, "LovesEvent").Object = ca_AstraLovesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "InfatuationPerk").Object = ca_AstraPerk.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "ConsideredMurderFactionList").Object = ca_AstraMurderFactionList.FormKey.ToLink<IFallout4MajorRecordGetter>();
-            UpsertObjectProperty(companionActorScript, "IdleTopic");
+            UpsertObjectProperty(companionActorScript, "IdleTopic").Object =
+                Stable("Topic:COMAstraIdles").ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "DismissScene").Object = Stable("Scene:COMAstraDismissScene").ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "DislikesEvent").Object = ca_AstraDislikesKW.FormKey.ToLink<IFallout4MajorRecordGetter>();
             UpsertObjectProperty(companionActorScript, "InfatuationThreshold").Object = caT1Infatuation.FormKey.ToLink<IFallout4MajorRecordGetter>();

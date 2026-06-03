@@ -1,5 +1,18 @@
 # Dialogue Polish Notes — v2 (2026-03-13)
 
+## 2026-06-03 Bark Field Pass
+
+### Vanilla Bark Audit
+- Ran a dedicated companion bark audit across base-game companions, DLC companions/robots, and live Astra.
+- Audit result: vanilla companions use large `CompanionActorScript.IdleTopic` pools, plus separate Hello, `CA_Event_*`, combat/damage, gift, and talk-greeting lanes.
+- Key lesson: ambient travel barks must stand alone while walking; command-wheel greetings and relationship/status lines should stay in talk scenes unless rewritten to work without a player prompt.
+- Report saved at `docs/ASTRA_BARK_AUDIT_2026-06-03.md`.
+
+### Astra Ambient Pass 1
+- Replaced the five `COMAstraIdles` lines that sounded like command-wheel check-ins with neutral exploration barks.
+- Regenerated matching voice files for `00020363`-`00020367`.
+- Next bark work should expand the pool to 20-30 ambient lines, then add condition-specific location/story barks and combat barks as separate passes.
+
 ## 2026-05-28 Field Notes
 
 ### Voice / Mapping Polish

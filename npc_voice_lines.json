@@ -1506,6 +1506,36 @@
     "Text": "What do you need?"
   },
   {
+    "FormId": "00020363",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Area scan is clean enough. Not clean, just clean enough."
+  },
+  {
+    "FormId": "00020364",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "I'm tracking movement patterns. Nothing close yet."
+  },
+  {
+    "FormId": "00020365",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "This place has been picked over, but not understood."
+  },
+  {
+    "FormId": "00020366",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Route is open. Mostly."
+  },
+  {
+    "FormId": "00020367",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Signal noise is heavy here. Stay sharp."
+  },
+  {
     "FormId": "000203A0",
     "EditorId": "COMAstraTalkGreetings",
     "Prompt": "",

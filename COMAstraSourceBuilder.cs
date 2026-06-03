@@ -278,6 +278,50 @@ namespace MQAstraALT
                 return info;
             }
 
+            DialogTopic CreateCompanionIdleTopic()
+            {
+                var topic = new DialogTopic(ctx.Stable("Topic:COMAstraIdles"), Fallout4Release.Fallout4)
+                {
+                    EditorID = "COMAstraIdles",
+                    Quest = new FormLink<IQuestGetter>(companionQuestFK),
+                    Category = DialogTopic.CategoryEnum.Misc,
+                    Subtype = DialogTopic.SubtypeEnum.Idle,
+                    SubtypeName = "IDLE",
+                    Priority = 50
+                };
+
+                var lines = new (string StableKey, string Text)[]
+                {
+                    ("Info:COMAstraIdles:Ambient01", "Area scan is clean enough. Not clean, just clean enough."),
+                    ("Info:COMAstraIdles:Ambient02", "I'm tracking movement patterns. Nothing close yet."),
+                    ("Info:COMAstraIdles:Ambient03", "This place has been picked over, but not understood."),
+                    ("Info:COMAstraIdles:Ambient04", "Route is open. Mostly."),
+                    ("Info:COMAstraIdles:Ambient05", "Signal noise is heavy here. Stay sharp.")
+                };
+
+                foreach (var (stableKey, text) in lines)
+                {
+                    var info = new DialogResponses(ctx.Stable(stableKey), Fallout4Release.Fallout4)
+                    {
+                        Flags = new DialogResponseFlags { Flags = DialogResponses.Flag.Random }
+                    };
+                    info.Responses.Add(new DialogResponse
+                    {
+                        Text = new TranslatedString(Language.English, text),
+                        ResponseNumber = 1,
+                        Unknown = 1,
+                        Emotion = ctx.NeutralEmotion,
+                        InterruptPercentage = 0,
+                        CameraTargetAlias = -1,
+                        CameraLocationAlias = -1,
+                        StopOnSceneEnd = false
+                    });
+                    topic.Responses.Add(info);
+                }
+
+                return topic;
+            }
+
             ConditionFloat PickupGetIsSexCondition(bool female)
             {
                 var data = new FunctionConditionData
@@ -1300,6 +1344,8 @@ namespace MQAstraALT
             var murN = CreateCompanionSceneTopic("COMAstraMurder_N", "", "Unjustified termination of a civilian entity. Partnership terminated.");
             AddExchange(murderScene, 0, 1, murP, murN);
 
+            var companionIdleTopic = CreateCompanionIdleTopic();
+
             var companionGreetingTopic = new DialogTopic(ctx.Stable("Topic:COMAstraGreetings"), Fallout4Release.Fallout4)
             {
                 EditorID = "COMAstraGreetings",
@@ -1526,6 +1572,7 @@ namespace MQAstraALT
             companionQuest.Scenes.Add(recoveryScene);
             companionQuest.Scenes.Add(infatuationRepeaterRegularScene);
             companionQuest.Scenes.Add(murderScene);
+            companionQuest.DialogTopics.Add(companionIdleTopic);
             companionQuest.DialogTopics.Add(companionGreetingTopic);
             companionQuest.DialogTopics.Add(dismissEnterTopic);
         }

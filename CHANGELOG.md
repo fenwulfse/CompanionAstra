@@ -1,5 +1,18 @@
 # COMAstraMQ302ALT Changelog
 
+## 2026-06-03 — Bark Audit / Ambient Pass 1
+
+### Summary
+- Added `docs/ASTRA_BARK_AUDIT_2026-06-03.md`, generated from a Mutagen audit of base-game, DLC, and live Astra companion bark topics.
+- Wired `COMAstraIdles` into source with stable FormIDs `020362`-`020367`.
+- Replaced Astra's five ambient idle barks that reused command-wheel greeting/check-in lines with neutral exploration barks.
+- Regenerated matching NPCFAstra FUZ files for `00020363`-`00020367`.
+
+### Verification
+- `CompanionBarkAudit` captured 17 `CompanionActorScript` NPCs and 3,561 non-empty vanilla script-idle lines for pattern comparison.
+- Live ESP and repo ESP hashes match: `7DFA3880AAC7A036D214768AD32BFA0E8687860E10042741508E770F8F8F3DCC`.
+- Voice generation completed successfully for all five bark lines and verified legacy FUZ format.
+
 ## 2026-05-28 — Gift Timer Test
 
 ### Summary
