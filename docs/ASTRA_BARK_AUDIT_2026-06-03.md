@@ -111,6 +111,16 @@ Current and candidate neutral pool:
 ## Data Files
 - CSV dump: `E:\Codex\Scratch\CompanionBarkAudit\bin\Debug\net8.0\out\companion_bark_lines.csv`
 
+## 2026-06-07 Implementation Addendum
+
+Bark Pass 2 completed the first expansion:
+- `COMAstraIdles` now has 35 responses.
+- Existing pass-1 barks remain at `020363`-`020367`.
+- New pass-2 barks use `0203A1`-`0203BE` to avoid the relationship/status response range at `020368`-`02037F`.
+- Commonwealth/resupply lines are gated by `CommonwealthLocation`.
+- Far Harbor lines are gated by `DLC03FarHarborWorldLocation`, `DLC03FarHarborSettlementLocation`, `DLC03AcadiaLocation`, and `DLC03NucleusLocation`.
+- The plugin now requires `DLCCoast.esm`.
+
 ## Notes
 - The CSV includes raw conditions for every captured response. Use it as the canonical list when deciding exactly which vanilla patterns to mirror.
-- The next implementation step should be narrow: replace only `COMAstraIdles`, then test travel for tone before adding combat or location-specific barks.
+- Next bark work should test travel tone, then add separate combat and player-action reaction lanes.

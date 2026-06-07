@@ -1536,6 +1536,186 @@
     "Text": "Signal noise is heavy here. Stay sharp."
   },
   {
+    "FormId": "000203A1",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "No active hostiles on my sweep. That can change fast."
+  },
+  {
+    "FormId": "000203A2",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "I'm logging every route we take. Some deserve a warning label."
+  },
+  {
+    "FormId": "000203A3",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Old world architecture had confidence. Not always judgment."
+  },
+  {
+    "FormId": "000203A4",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "If there's useful tech here, it's probably behind the worst door."
+  },
+  {
+    "FormId": "000203A5",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "I hear loose metal ahead. Could be wind. Could be teeth."
+  },
+  {
+    "FormId": "000203A6",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Pack weight estimate: optimistic. That means heavy."
+  },
+  {
+    "FormId": "000203A7",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "This place is quieter than it should be."
+  },
+  {
+    "FormId": "000203A8",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "I'm marking fallback routes. Just in case forward stops being clever."
+  },
+  {
+    "FormId": "000203A9",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "I keep finding old systems still trying to do their jobs. I understand the impulse."
+  },
+  {
+    "FormId": "000203AA",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "We are low enough on comfort that I'm counting dry floors as a luxury."
+  },
+  {
+    "FormId": "000203AB",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Commonwealth signal profile restored. More static, less salt."
+  },
+  {
+    "FormId": "000203AC",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Resupply pattern recognized: ammunition first, mysteries second."
+  },
+  {
+    "FormId": "000203AD",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "If that iBot sent us here for ammunition, I hope it was feeling accurate."
+  },
+  {
+    "FormId": "000203AE",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "This route has been looted before. Not by someone as determined as you."
+  },
+  {
+    "FormId": "000203AF",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Found another good place to get ambushed. The Commonwealth is generous that way."
+  },
+  {
+    "FormId": "000203B0",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "The fog is thick enough to hide a bad idea until it is already biting us."
+  },
+  {
+    "FormId": "000203B1",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Far Harbor's air has layers. Fog, salt, radiation, and stubbornness."
+  },
+  {
+    "FormId": "000203B2",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "I'm increasing sensor gain. The island keeps swallowing my edges."
+  },
+  {
+    "FormId": "000203B3",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Every condenser here feels like a lighthouse arguing with the dark."
+  },
+  {
+    "FormId": "000203B4",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "The Children of Atom talk like radiation is listening. I'm not convinced it isn't."
+  },
+  {
+    "FormId": "000203B5",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "This island keeps asking people what they are willing to become."
+  },
+  {
+    "FormId": "000203B6",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Trappers, fog crawlers, cultists. The ecosystem is aggressively opinionated."
+  },
+  {
+    "FormId": "000203B7",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "The sea is close. So are the teeth."
+  },
+  {
+    "FormId": "000203B8",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "If the fog gets any thicker, I'm assigning it a faction."
+  },
+  {
+    "FormId": "000203B9",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Far Harbor is surviving on grit, condensers, and denial."
+  },
+  {
+    "FormId": "000203BA",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "This harbor is less a town than a stubborn refusal to drown."
+  },
+  {
+    "FormId": "000203BB",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Acadia's silence has structure. Someone taught these walls to keep secrets."
+  },
+  {
+    "FormId": "000203BC",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Every synth in Acadia is a question the Commonwealth wanted buried."
+  },
+  {
+    "FormId": "000203BD",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "The Nucleus has the emotional profile of a loaded weapon."
+  },
+  {
+    "FormId": "000203BE",
+    "EditorId": "COMAstraIdles",
+    "Prompt": "",
+    "Text": "Radiation is not a god. But this place makes a persuasive argument for fear."
+  },
+  {
     "FormId": "000203A0",
     "EditorId": "COMAstraTalkGreetings",
     "Prompt": "",

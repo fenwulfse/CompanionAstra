@@ -1,5 +1,24 @@
 # COMAstraMQ302ALT Changelog
 
+## 2026-06-07 — Far Harbor Bark Pass 2
+
+### Summary
+- Expanded `COMAstraIdles` from 5 ambient barks to 35 total barks.
+- Added 10 new general exploration barks, 5 Commonwealth/resupply barks, and 15 Far Harbor-aware barks.
+- Gated Far Harbor barks with `DLCCoast.esm` location checks for the island, Far Harbor town, Acadia, and the Nucleus.
+- Gated Commonwealth/resupply barks with the vanilla `CommonwealthLocation` check.
+- Regenerated matching NPCFAstra FUZ files for `000203A1`-`000203BE`.
+- Added deterministic master ordering for generated/patched ESP writes: `Fallout4.esm`, then `DLCCoast.esm`.
+
+### Verification
+- Repo ESP and live ESP hashes match: `E6BA284230FE6714DE0D543F7D64F18FDAB47B0D6ACE93293B5F8E22AB0A2A20`.
+- Live ESP header verified with masters `Fallout4.esm, DLCCoast.esm`.
+- `AstraDialogueDump` verified 35 `COMAstraIdles` responses in the live ESP.
+- Voice generation completed for all 30 new bark lines and verified legacy FUZ format.
+
+### Dependency Note
+- This build now requires Far Harbor (`DLCCoast.esm`) because the new island/location barks are properly gated to Far Harbor records.
+
 ## 2026-06-03 — Bark Audit / Ambient Pass 1
 
 ### Summary

@@ -1,5 +1,24 @@
 # Dialogue Polish Notes — v2 (2026-03-13)
 
+## 2026-06-07 Far Harbor Bark Pass 2
+
+### Astra Ambient Pass 2
+- Expanded `COMAstraIdles` from 5 to 35 total barks.
+- New structure:
+  - 15 general exploration barks with no location gate.
+  - 5 Commonwealth/resupply barks gated by `CommonwealthLocation`.
+  - 9 Far Harbor island barks gated by `DLC03FarHarborWorldLocation`.
+  - 2 Far Harbor town barks gated by `DLC03FarHarborSettlementLocation`.
+  - 2 Acadia barks gated by `DLC03AcadiaLocation`.
+  - 2 Nucleus barks gated by `DLC03NucleusLocation`.
+- This is the first real context-aware bark pass and intentionally targets the user's current play loop: Far Harbor questing with Commonwealth ammo/resupply breaks.
+- Because the location gates reference `DLCCoast.esm`, the plugin now requires Far Harbor.
+
+### Backlog: Combat Weapon Awareness
+- User requested future exploration of Astra changing weapons based on combat context: ranged weapon at distance, melee weapon up close.
+- Keep this separate from dialogue polish. It should be treated as an AI/package/equipment-system project and tested carefully because companion inventory/equip behavior can be fragile.
+- Possible future approach: inspect vanilla companion combat packages and equip-item behavior first, then prototype a tiny controlled script or package layer before touching Astra's normal follower setup.
+
 ## 2026-06-03 Bark Field Pass
 
 ### Vanilla Bark Audit

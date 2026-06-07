@@ -290,21 +290,95 @@ namespace MQAstraALT
                     Priority = 50
                 };
 
-                var lines = new (string StableKey, string Text)[]
+                var dlc03 = ModKey.FromFileName("DLCCoast.esm");
+                var commonwealthLocation = new FormKey(ctx.Fallout4MasterKey, 0x002CF0);
+                var farHarborWorldLocation = new FormKey(dlc03, 0x020168);
+                var farHarborSettlementLocation = new FormKey(dlc03, 0x005C79);
+                var acadiaLocation = new FormKey(dlc03, 0x006126);
+                var nucleusLocation = new FormKey(dlc03, 0x004477);
+
+                ConditionFloat GetInCurrentLocation(FormKey locationFk) => new ConditionFloat
                 {
-                    ("Info:COMAstraIdles:Ambient01", "Area scan is clean enough. Not clean, just clean enough."),
-                    ("Info:COMAstraIdles:Ambient02", "I'm tracking movement patterns. Nothing close yet."),
-                    ("Info:COMAstraIdles:Ambient03", "This place has been picked over, but not understood."),
-                    ("Info:COMAstraIdles:Ambient04", "Route is open. Mostly."),
-                    ("Info:COMAstraIdles:Ambient05", "Signal noise is heavy here. Stay sharp.")
+                    CompareOperator = CompareOperator.EqualTo,
+                    ComparisonValue = 1,
+                    Data = new FunctionConditionData
+                    {
+                        Function = Condition.Function.GetInCurrentLocation,
+                        ParameterOneRecord = locationFk.ToLink<IFallout4MajorRecordGetter>(),
+                        ParameterOneNumber = (int)locationFk.ID,
+                        RunOnType = Condition.RunOnType.Subject,
+                        Unknown3 = -1
+                    }
                 };
 
-                foreach (var (stableKey, text) in lines)
+                void AddLocationGate(DialogResponses info, string gate)
+                {
+                    switch (gate)
+                    {
+                        case "Commonwealth":
+                            info.Conditions.Add(GetInCurrentLocation(commonwealthLocation));
+                            break;
+                        case "FarHarbor":
+                            info.Conditions.Add(GetInCurrentLocation(farHarborWorldLocation));
+                            break;
+                        case "FarHarborTown":
+                            info.Conditions.Add(GetInCurrentLocation(farHarborSettlementLocation));
+                            break;
+                        case "Acadia":
+                            info.Conditions.Add(GetInCurrentLocation(acadiaLocation));
+                            break;
+                        case "Nucleus":
+                            info.Conditions.Add(GetInCurrentLocation(nucleusLocation));
+                            break;
+                    }
+                }
+
+                var lines = new (string StableKey, string Text, string Gate)[]
+                {
+                    ("Info:COMAstraIdles:Ambient01", "Area scan is clean enough. Not clean, just clean enough.", ""),
+                    ("Info:COMAstraIdles:Ambient02", "I'm tracking movement patterns. Nothing close yet.", ""),
+                    ("Info:COMAstraIdles:Ambient03", "This place has been picked over, but not understood.", ""),
+                    ("Info:COMAstraIdles:Ambient04", "Route is open. Mostly.", ""),
+                    ("Info:COMAstraIdles:Ambient05", "Signal noise is heavy here. Stay sharp.", ""),
+                    ("Info:COMAstraIdles:Ambient06", "No active hostiles on my sweep. That can change fast.", ""),
+                    ("Info:COMAstraIdles:Ambient07", "I'm logging every route we take. Some deserve a warning label.", ""),
+                    ("Info:COMAstraIdles:Ambient08", "Old world architecture had confidence. Not always judgment.", ""),
+                    ("Info:COMAstraIdles:Ambient09", "If there's useful tech here, it's probably behind the worst door.", ""),
+                    ("Info:COMAstraIdles:Ambient10", "I hear loose metal ahead. Could be wind. Could be teeth.", ""),
+                    ("Info:COMAstraIdles:Ambient11", "Pack weight estimate: optimistic. That means heavy.", ""),
+                    ("Info:COMAstraIdles:Ambient12", "This place is quieter than it should be.", ""),
+                    ("Info:COMAstraIdles:Ambient13", "I'm marking fallback routes. Just in case forward stops being clever.", ""),
+                    ("Info:COMAstraIdles:Ambient14", "I keep finding old systems still trying to do their jobs. I understand the impulse.", ""),
+                    ("Info:COMAstraIdles:Ambient15", "We are low enough on comfort that I'm counting dry floors as a luxury.", ""),
+                    ("Info:COMAstraIdles:Ambient16", "Commonwealth signal profile restored. More static, less salt.", "Commonwealth"),
+                    ("Info:COMAstraIdles:Ambient17", "Resupply pattern recognized: ammunition first, mysteries second.", "Commonwealth"),
+                    ("Info:COMAstraIdles:Ambient18", "If that iBot sent us here for ammunition, I hope it was feeling accurate.", "Commonwealth"),
+                    ("Info:COMAstraIdles:Ambient19", "This route has been looted before. Not by someone as determined as you.", "Commonwealth"),
+                    ("Info:COMAstraIdles:Ambient20", "Found another good place to get ambushed. The Commonwealth is generous that way.", "Commonwealth"),
+                    ("Info:COMAstraIdles:Ambient21", "The fog is thick enough to hide a bad idea until it is already biting us.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient22", "Far Harbor's air has layers. Fog, salt, radiation, and stubbornness.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient23", "I'm increasing sensor gain. The island keeps swallowing my edges.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient24", "Every condenser here feels like a lighthouse arguing with the dark.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient25", "The Children of Atom talk like radiation is listening. I'm not convinced it isn't.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient26", "This island keeps asking people what they are willing to become.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient27", "Trappers, fog crawlers, cultists. The ecosystem is aggressively opinionated.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient28", "The sea is close. So are the teeth.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient29", "If the fog gets any thicker, I'm assigning it a faction.", "FarHarbor"),
+                    ("Info:COMAstraIdles:Ambient30", "Far Harbor is surviving on grit, condensers, and denial.", "FarHarborTown"),
+                    ("Info:COMAstraIdles:Ambient31", "This harbor is less a town than a stubborn refusal to drown.", "FarHarborTown"),
+                    ("Info:COMAstraIdles:Ambient32", "Acadia's silence has structure. Someone taught these walls to keep secrets.", "Acadia"),
+                    ("Info:COMAstraIdles:Ambient33", "Every synth in Acadia is a question the Commonwealth wanted buried.", "Acadia"),
+                    ("Info:COMAstraIdles:Ambient34", "The Nucleus has the emotional profile of a loaded weapon.", "Nucleus"),
+                    ("Info:COMAstraIdles:Ambient35", "Radiation is not a god. But this place makes a persuasive argument for fear.", "Nucleus")
+                };
+
+                foreach (var (stableKey, text, gate) in lines)
                 {
                     var info = new DialogResponses(ctx.Stable(stableKey), Fallout4Release.Fallout4)
                     {
                         Flags = new DialogResponseFlags { Flags = DialogResponses.Flag.Random }
                     };
+                    AddLocationGate(info, gate);
                     info.Responses.Add(new DialogResponse
                     {
                         Text = new TranslatedString(Language.English, text),
