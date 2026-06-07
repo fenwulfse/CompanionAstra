@@ -587,6 +587,7 @@ namespace MQAstraALT
             using var env = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
             var fo4 = ModKey.FromFileName("Fallout4.esm");
             var dlc03 = ModKey.FromFileName("DLCCoast.esm");
+            var dlc04 = ModKey.FromFileName("DLCNukaWorld.esm");
             var modKey = new ModKey("MQAstraALT", ModType.Plugin);
             var mod = new Fallout4Mod(modKey, Fallout4Release.Fallout4);
             string stableFormKeyPath = System.IO.Path.Combine(projectDir, "stable_formkeys.json");
@@ -3868,7 +3869,7 @@ namespace MQAstraALT
             // to be present in the user's active Plugins.txt.
             mod.WriteToBinary(outputPath, new BinaryWriteParameters
             {
-                MastersListOrdering = new MastersListOrderingByLoadOrder(new[] { fo4, dlc03 })
+                MastersListOrdering = new MastersListOrderingByLoadOrder(new[] { fo4, dlc03, dlc04 })
             });
 
             var fileInfo = new System.IO.FileInfo(outputPath);

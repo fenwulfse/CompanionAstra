@@ -1,5 +1,24 @@
 # Dialogue Polish Notes — v2 (2026-03-13)
 
+## 2026-06-07 Nuka-World Bark Pass 3
+
+### Astra Ambient Pass 3
+- Expanded `COMAstraIdles` from 35 to 65 total barks.
+- New structure adds 30 Nuka-World lines:
+  - 8 park-wide barks gated by `DLC04NukaWorldLocation`.
+  - 1 Transit Center bark.
+  - 1 Gauntlet bark.
+  - 4 Nuka-Town USA/Fizztop/gang atmosphere barks.
+  - 3 Galactic Zone barks.
+  - 3 Kiddie Kingdom barks.
+  - 3 Safari Adventure barks.
+  - 2 Dry Rock Gulch barks.
+  - 2 Bottling Plant barks.
+  - 2 Power Plant barks.
+  - 1 Nukacade bark.
+- Tone target: Astra should sound amused, analytical, and lightly alarmed by the park's cheerful violence without becoming generic raider commentary.
+- Because the location gates reference `DLCNukaWorld.esm`, the plugin now requires Nuka-World as well as Far Harbor.
+
 ## 2026-06-07 Far Harbor Bark Pass 2
 
 ### Astra Ambient Pass 2

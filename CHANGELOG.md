@@ -1,5 +1,23 @@
 # COMAstraMQ302ALT Changelog
 
+## 2026-06-07 — Nuka-World Bark Pass 3
+
+### Summary
+- Expanded `COMAstraIdles` from 35 ambient barks to 65 total barks.
+- Added 30 Nuka-World-aware barks for general park travel plus Transit Center, Gauntlet, Nuka-Town USA, Galactic Zone, Kiddie Kingdom, Safari Adventure, Dry Rock Gulch, Bottling Plant, Power Plant, and Nukacade.
+- Gated Nuka-World barks with `DLCNukaWorld.esm` location checks so they stay out of Far Harbor/Commonwealth travel chatter.
+- Regenerated matching NPCFAstra FUZ files for `000203C0`-`000203DD`.
+- Added deterministic master ordering for generated/patched ESP writes: `Fallout4.esm`, `DLCCoast.esm`, then `DLCNukaWorld.esm`.
+
+### Verification
+- Repo ESP and live ESP hashes match: `93CB15480B9051281E00C6B8F0A9158A52D900384F1D7FBFC7F16BFB895CCDEE`.
+- Live ESP header verified with masters `Fallout4.esm, DLCCoast.esm, DLCNukaWorld.esm`.
+- `CompanionBarkAudit` verified all 30 new Nuka-World idle responses and their `GetInCurrentLocation` gates.
+- Voice generation completed for all 30 new Nuka-World bark lines and verified legacy FUZ format.
+
+### Dependency Note
+- This build now requires Far Harbor (`DLCCoast.esm`) and Nuka-World (`DLCNukaWorld.esm`) because Astra's location-aware barks reference both DLCs.
+
 ## 2026-06-07 — Far Harbor Bark Pass 2
 
 ### Summary

@@ -291,11 +291,23 @@ namespace MQAstraALT
                 };
 
                 var dlc03 = ModKey.FromFileName("DLCCoast.esm");
+                var dlc04 = ModKey.FromFileName("DLCNukaWorld.esm");
                 var commonwealthLocation = new FormKey(ctx.Fallout4MasterKey, 0x002CF0);
                 var farHarborWorldLocation = new FormKey(dlc03, 0x020168);
                 var farHarborSettlementLocation = new FormKey(dlc03, 0x005C79);
                 var acadiaLocation = new FormKey(dlc03, 0x006126);
                 var nucleusLocation = new FormKey(dlc03, 0x004477);
+                var nukaWorldLocation = new FormKey(dlc04, 0x008060);
+                var nukaTransitLocation = new FormKey(dlc04, 0x007EC4);
+                var nukaGauntletLocation = new FormKey(dlc04, 0x00BD04);
+                var nukaTownLocation = new FormKey(dlc04, 0x01FCEC);
+                var nukaGalacticZoneLocation = new FormKey(dlc04, 0x00E765);
+                var nukaKiddieKingdomLocation = new FormKey(dlc04, 0x017645);
+                var nukaSafariAdventureLocation = new FormKey(dlc04, 0x01FC7F);
+                var nukaDryRockGulchLocation = new FormKey(dlc04, 0x01FB1C);
+                var nukaBottlingPlantLocation = new FormKey(dlc04, 0x017643);
+                var nukaPowerPlantLocation = new FormKey(dlc04, 0x01FC81);
+                var nukaCadeLocation = new FormKey(dlc04, 0x017644);
 
                 ConditionFloat GetInCurrentLocation(FormKey locationFk) => new ConditionFloat
                 {
@@ -329,6 +341,39 @@ namespace MQAstraALT
                             break;
                         case "Nucleus":
                             info.Conditions.Add(GetInCurrentLocation(nucleusLocation));
+                            break;
+                        case "NukaWorld":
+                            info.Conditions.Add(GetInCurrentLocation(nukaWorldLocation));
+                            break;
+                        case "NukaTransit":
+                            info.Conditions.Add(GetInCurrentLocation(nukaTransitLocation));
+                            break;
+                        case "NukaGauntlet":
+                            info.Conditions.Add(GetInCurrentLocation(nukaGauntletLocation));
+                            break;
+                        case "NukaTown":
+                            info.Conditions.Add(GetInCurrentLocation(nukaTownLocation));
+                            break;
+                        case "NukaGalactic":
+                            info.Conditions.Add(GetInCurrentLocation(nukaGalacticZoneLocation));
+                            break;
+                        case "NukaKiddie":
+                            info.Conditions.Add(GetInCurrentLocation(nukaKiddieKingdomLocation));
+                            break;
+                        case "NukaSafari":
+                            info.Conditions.Add(GetInCurrentLocation(nukaSafariAdventureLocation));
+                            break;
+                        case "NukaDryRock":
+                            info.Conditions.Add(GetInCurrentLocation(nukaDryRockGulchLocation));
+                            break;
+                        case "NukaBottling":
+                            info.Conditions.Add(GetInCurrentLocation(nukaBottlingPlantLocation));
+                            break;
+                        case "NukaPower":
+                            info.Conditions.Add(GetInCurrentLocation(nukaPowerPlantLocation));
+                            break;
+                        case "Nukacade":
+                            info.Conditions.Add(GetInCurrentLocation(nukaCadeLocation));
                             break;
                     }
                 }
@@ -369,7 +414,37 @@ namespace MQAstraALT
                     ("Info:COMAstraIdles:Ambient32", "Acadia's silence has structure. Someone taught these walls to keep secrets.", "Acadia"),
                     ("Info:COMAstraIdles:Ambient33", "Every synth in Acadia is a question the Commonwealth wanted buried.", "Acadia"),
                     ("Info:COMAstraIdles:Ambient34", "The Nucleus has the emotional profile of a loaded weapon.", "Nucleus"),
-                    ("Info:COMAstraIdles:Ambient35", "Radiation is not a god. But this place makes a persuasive argument for fear.", "Nucleus")
+                    ("Info:COMAstraIdles:Ambient35", "Radiation is not a god. But this place makes a persuasive argument for fear.", "Nucleus"),
+                    ("Info:COMAstraIdles:Ambient36", "Nuka-World confirms a theory: marketing survives longer than governments.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient37", "This place was built to sell happiness by the gallon. Now it sells ammunition.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient38", "The music says welcome. The armed gangs suggest terms and conditions apply.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient39", "Every sign here is smiling too hard.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient40", "I am detecting old customer-service systems. They are losing the argument with reality.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient41", "A theme park is just a battlefield with better paint, apparently.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient42", "Nuka-Cola branding density is aggressive. I may need a filter.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient43", "The park wants to be cheerful. The bodies keep objecting.", "NukaWorld"),
+                    ("Info:COMAstraIdles:Ambient44", "The transit center has the energy of a trap wearing a schedule.", "NukaTransit"),
+                    ("Info:COMAstraIdles:Ambient45", "This gauntlet was designed by someone who confused entertainment with liability.", "NukaGauntlet"),
+                    ("Info:COMAstraIdles:Ambient46", "Nuka-Town has a capital city problem. Too much power, not enough conscience.", "NukaTown"),
+                    ("Info:COMAstraIdles:Ambient47", "Fizztop Mountain is subtle in the way a missile launch is subtle.", "NukaTown"),
+                    ("Info:COMAstraIdles:Ambient48", "The gangs here understand theater. Unfortunately, they also understand crossfire.", "NukaTown"),
+                    ("Info:COMAstraIdles:Ambient49", "If anyone calls this hospitality, I am filing a protest.", "NukaTown"),
+                    ("Info:COMAstraIdles:Ambient50", "Galactic Zone still believes in the future. The robots are making a counterargument.", "NukaGalactic"),
+                    ("Info:COMAstraIdles:Ambient51", "Pre-war space fantasy, post-war murder automation. Efficient rebranding.", "NukaGalactic"),
+                    ("Info:COMAstraIdles:Ambient52", "Starport Nuka is trying very hard to inspire awe. I respect the commitment.", "NukaGalactic"),
+                    ("Info:COMAstraIdles:Ambient53", "Kiddie Kingdom is proof that cheerful music can be a threat vector.", "NukaKiddie"),
+                    ("Info:COMAstraIdles:Ambient54", "The color palette says birthday party. The radiation says final notice.", "NukaKiddie"),
+                    ("Info:COMAstraIdles:Ambient55", "I do not like places where the children's rides know combat.", "NukaKiddie"),
+                    ("Info:COMAstraIdles:Ambient56", "Safari Adventure has too many teeth in the probability model.", "NukaSafari"),
+                    ("Info:COMAstraIdles:Ambient57", "I am classifying the wildlife as enthusiastic, hostile, and under-supervised.", "NukaSafari"),
+                    ("Info:COMAstraIdles:Ambient58", "Someone looked at a zoo and asked how to make it worse.", "NukaSafari"),
+                    ("Info:COMAstraIdles:Ambient59", "Dry Rock Gulch is performing a western. The bullets are not theatrical.", "NukaDryRock"),
+                    ("Info:COMAstraIdles:Ambient60", "The old west aesthetic is charming. The ambush geometry is less charming.", "NukaDryRock"),
+                    ("Info:COMAstraIdles:Ambient61", "The Bottling Plant smells like syrup, metal, and bad decisions.", "NukaBottling"),
+                    ("Info:COMAstraIdles:Ambient62", "Nuka-Cola did not need an armed watershed. And yet.", "NukaBottling"),
+                    ("Info:COMAstraIdles:Ambient63", "That power plant is the kind of structure that expects betrayal.", "NukaPower"),
+                    ("Info:COMAstraIdles:Ambient64", "If the park wakes up all at once, I would prefer not to be inside the machinery.", "NukaPower"),
+                    ("Info:COMAstraIdles:Ambient65", "The Nukacade is math wearing prizes.", "Nukacade")
                 };
 
                 foreach (var (stableKey, text, gate) in lines)

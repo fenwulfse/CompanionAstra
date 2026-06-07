@@ -2,6 +2,14 @@
 
 Scope: base game companions, DLC companions/robots, and live Astra. This audit separates ambient barks from talk-wheel relationship lines so Astra stops using intimate/check-in lines while questing.
 
+## 2026-06-07 Implementation Addendum
+
+- Ambient pass 2 expanded Astra from 5 to 35 `COMAstraIdles` responses with general, Commonwealth/resupply, and Far Harbor location-gated barks.
+- Ambient pass 3 expanded Astra from 35 to 65 `COMAstraIdles` responses with Nuka-World location-gated barks.
+- Current DLC-aware gates now reference `DLCCoast.esm` and `DLCNukaWorld.esm`, so the current test build requires both Far Harbor and Nuka-World.
+- Verification audit confirmed Nuka-World barks use `GetInCurrentLocation` gates for `DLC04NukaWorldLocation`, `DLC04TransitCenterLocation`, `DLC04GauntletLocation`, `DLC04NukaTownUSALocation`, `DLC04GalacticZoneLocation`, `DLC04KiddieKingdomLocation`, `DLC04SafariAdventureLocation`, `DLC04WildWestLocation`, `DLC04BottlingPlantLocation`, `DLC04NukaWorldPowerPlantLocation`, and `DLC04NukacadeLocation`.
+- Next dialogue frontier remains separate: combat barks, story/faction reactivity, and voice-folder cleanup for player-response/robotic-voice mismatches.
+
 ## Companion Idle Topic Map
 
 | Companion | Name | IdleTopic | Gift Items | Idle responses | Hello responses | Event reactions | Combat/damage topics |
