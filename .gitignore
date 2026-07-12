@@ -1,6 +1,9 @@
 bin/
 obj/
 out/
+
+# Full unfiltered Papyrus logs (filtered Astra logs ARE committed)
+logs/raw/
 *.user
 *.suo
 .vs/
