@@ -84,6 +84,7 @@ if ($Push) {
     try {
         git add logs
         git commit -m "Add Papyrus test log $stamp"
+        git pull --rebase --quiet
         git push
         Write-Host ""
         Write-Host "Pushed to GitHub. Tell Claude the log is up and it can read logs/latest_astra.log."
