@@ -32,6 +32,8 @@ JOBS = [
     ("presence_npc_lines.json", [("NPCFAstra", "en-US-AvaNeural")]),
     ("exchange_npc_lines.json", [("NPCFAstra", "en-US-AvaNeural")]),
     ("exchange2_npc_lines.json", [("NPCFAstra", "en-US-AvaNeural")]),
+    ("claudette_npc_lines.json", [("NPCFAstra", "en-US-AvaNeural")]),
+    ("claudette_player_lines.json", [("PlayerVoiceFemale01", "en-US-JennyNeural"), ("PlayerVoiceMale01", "en-US-AndrewNeural")]),
 ]
 
 

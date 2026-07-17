@@ -26,6 +26,30 @@ var dialoguePath = Path.Combine(outDir, "DIALOGUE_DUMP.md");
 var srcInfo = new FileInfo(sourcePath);
 var mod = Fallout4Mod.CreateFromBinary(sourcePath, Fallout4Release.Fallout4);
 
+// --dump-deployed: inspect Codex's live build for reconciliation
+if (args.Contains("--dump-deployed"))
+{
+    var dep = Fallout4Mod.CreateFromBinary(
+        @"E:\SteamLibrary\steamapps\common\Fallout 4\Data\CompanionClaude.esp", Fallout4Release.Fallout4);
+    var mq = dep.Quests.First(q => q.EditorID == "MQAstraALT");
+    Console.WriteLine($"MQ stages: {string.Join(",", mq.Stages.Select(s => s.Index))}");
+    Console.WriteLine($"MQ vmad script props: {string.Join(", ", (mq.VirtualMachineAdapter?.Scripts.SelectMany(s => s.Properties.Select(p => s.Name + "." + p.Name))) ?? [])}");
+    var fp = dep.Packages.First(p => p.FormKey.ID == 0x0202FB);
+    Console.WriteLine($"FollowPkg conditions:");
+    foreach (var c in fp.Conditions)
+    {
+        var f = c.Data as FunctionConditionData;
+        Console.WriteLine($"  {f?.Function} p1={f?.ParameterOneRecord.FormKey} n2={f?.ParameterTwoNumber} op={(c as ConditionFloat)?.CompareOperator} val={(c as ConditionFloat)?.ComparisonValue} flags={c.Flags}");
+    }
+    var npcD = dep.Npcs.First(n => n.EditorID == "CompanionAstra");
+    Console.WriteLine($"NPC scripts: {string.Join(", ", npcD.VirtualMachineAdapter?.Scripts.Select(s => $"{s.Name}({s.Properties.Count})") ?? [])}");
+    var talkQ = dep.Quests.First(q => q.EditorID == "COMAstraTalk");
+    var ch1 = talkQ.DialogTopics.First(t => t.EditorID == "COMAstraTalk_StoryResponse").Responses.First();
+    var ad = ch1.VirtualMachineAdapter as DialogResponsesAdapter;
+    Console.WriteLine($"memoir ch1 fragment: script={ad?.ScriptFragments?.Script.Name} onBegin={ad?.ScriptFragments?.OnBegin?.FragmentName} onEnd={ad?.ScriptFragments?.OnEnd?.FragmentName}");
+    return;
+}
+
 // --dump-dogmeat: inspect Dogmeat aliases/packages vs Astra's working
 // follow gating, then exit without building anything.
 if (args.Contains("--dump-dogmeat"))
