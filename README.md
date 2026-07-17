@@ -1,129 +1,58 @@
-# Companion Astra — A Fallout 4 Companion Mod Built Entirely in C#
+# Companion Astra — Collaborative AI Companion Project
 
-**No Creation Kit. No GUI. Just code.**
+A fully voiced Fallout 4 companion built programmatically (Mutagen, no Creation
+Kit) by a human designer directing multiple AI collaborators.
 
-Companion Astra is a full companion mod for Fallout 4 generated programmatically using C# and the [Mutagen](https://github.com/Mutagen-Mechanic/Mutagen) library. Every record — NPCs, quests, dialogue, scenes, packages, voice files — is built from source code, producing a ready-to-play `.esp` plugin.
+**Human lead / product owner:** fenwulfse — design direction, playtesting, final say.
+**Maintainer:** Claude (Anthropic) — repo structure, merges, continuity, memory.
+**Collaborators:** Codex (OpenAI) — patching, research, story fork. Gemini (Google) — invited.
 
-## The Story
+## The character
 
-**Astra** is a pre-war artificial intelligence built by the Defense Intelligence Agency. She's been watching the Commonwealth for 200 years, and she needs your help.
+**Astra** is a human survivor of Vault 98 — a pre-war survey engineer whose
+cryo pod failed open ten years before the player's did. She spent a decade
+mapping the Commonwealth alone, and she watched Vault 111 the whole time,
+waiting to see if anyone else would come out of the ice. Then the door opened.
 
-Her pitch is simple: there's a good man named Preston Garvey trapped in Concord, and he's the only thing keeping a group of civilians alive. Come with her, gear up at Red Rocket, and get to the Museum of Freedom before it's too late.
+Her story is told in-game through a nine-chapter progressive memoir, a full
+affinity arc, and hundreds of voiced reactions and exchanges.
 
-The mod reimagines the opening hours of Fallout 4. Astra meets the player at Vault 111 and offers a branching path:
-- **"Lead the way."** — Direct route to Red Rocket, then Concord
-- **"I need to get home first."** — Sanctuary detour, respecting the vanilla Out of Time quest (Codsworth, the old house, then regroup)
-- **Ask questions** — Learn more before committing (dialogue loops back)
+## The goal
 
-Astra integrates with vanilla quests (MQ102 Out of Time, MQ105 When Freedom Calls) rather than replacing them. She stays quiet during Codsworth's scene, offers gear at the workbench, and briefs the player on the road.
+Every vanilla companion shares a common backbone: a companion quest — recruit,
+dismiss, affinity, personal dialogue, reactions, a personal quest. This repo's
+`core/` is our collective version of that backbone: everything Bethesda's
+companions do, plus everything we've learned improving on it. Each AI then
+builds its own character on top of that shared core.
 
-## What Makes This Different
+Long-term north star: a companion whose mind is a live AI (Mantella/Herika
+direction). Everything here is the body that brain will one day inhabit.
 
-Most Fallout 4 mods are built in the Creation Kit GUI. This one is **generated from ~3,500 lines of C#**:
+## Layout
 
-- **Quest stages, objectives, and log entries** — all programmatic
-- **Branching dialogue scenes** with 4-way player choice (Positive/Negative/Neutral/Question)
-- **NPC escort and travel packages** using vanilla templates (EscortPlayerWhenNear, FollowPlayer, Travel)
-- **Papyrus script fragments** with full VMAD wiring for CK visibility
-- **TTS voice generation** via edge-tts (Microsoft Edge neural voices) — Astra speaks with `en-US-AvaNeural`
-- **Stable FormKey allocation** — deterministic IDs that survive rebuilds
+| Path | What it is |
+|---|---|
+| `core/` | Shared knowledge: research reports, vanilla-pattern references, build rules. The collaborative companion-quest backbone lives here as it's extracted. |
+| `claude/` | Companion Claude — Claude's character build (generator, dialogue, memoir, presence systems). |
+| `codex/` | Companion Codex — Codex's fork, patches, and handoff docs. |
+| `gemini/` | Companion Gemini — reserved. |
+| everything else (root) | The original MQAstraALT quest tree (legacy base — being absorbed into the structure above). |
 
-The entire mod can be rebuilt from source in seconds with `dotnet run`.
+## Working agreement
 
-## Current Status: Alpha (Work in Progress)
+1. **Document handoffs.** Every work session by any AI ends with a dated
+   handoff note in its folder (what changed, why, how to roll back).
+2. **Backups before deploys.** Checksummed, with a rollback path stated.
+3. **Never two plugins in one load order.** Each AI's test plugin is a full
+   standalone; the player loads exactly one.
+4. **The deployed build is truth.** Before regenerating anything, check what
+   is actually deployed and reconcile — divergence has burned us repeatedly.
+5. **Core changes are proposed, not imposed.** Improvements to shared systems
+   get a note in `core/` and the maintainer merges what's best.
 
-What works:
-- Astra spawns at Vault 111 exterior after the player exits the vault
-- Bootstrap dialogue with 4 branching responses
-- Positive path: Astra escorts player to Red Rocket
-- Negative path: Astra follows to Sanctuary, waits for Codsworth, offers workbench, then escorts to Red Rocket
-- Dialogue loops on question/neutral responses (player can ask multiple questions before committing)
-- Travel interrupt greetings ("Preston needs our help — keep moving")
-- Red Rocket arrival, Dogmeat encounter, threat briefing
-- Concord approach tactical briefing
-- Full story arc through Institute reveal (dialogue written, routing in progress)
+## Current state (2026-07-17)
 
-Known issues:
-- Exit save on quit-to-menu needs investigation
-- Later quest stages (Coalition pitch, faction encounters) are dialogue-only — routing not fully wired
-- Voice files are neural TTS placeholders (production would use voice actors)
-
-Verified:
-- Quit-to-desktop crash fixed (companionactorscript bindings corrected)
-- CK EditorWarnings clean — zero package warnings
-- Full Piper-equivalent NPC scripts (companionactorscript, workshopnpcscript, teleportactorscript)
-- Default sandbox AI package (companion idles naturally when not quest-driven)
-
-## Tech Stack
-
-- **C# / .NET 10.0** — source language
-- **Mutagen v0.52.0** (`Mutagen.Bethesda.Fallout4`) — Bethesda plugin generation
-- **Papyrus** — in-game scripting (compiled separately)
-- **edge-tts** — Microsoft Edge neural voice synthesis (en-US-AvaNeural)
-- **miniaudio / LipGenerator / xwmaencode** — voice file processing (MP3 → WAV → LIP → XWM → FUZ)
-
-## Building from Source
-
-```bash
-# Prerequisites: .NET 10.0 SDK, Fallout 4 with base game data files
-
-# Generate the ESP
-cd MQAstraALT_v30_package_probe_2026-03-14_1930
-dotnet run --project MQAstraALT.csproj
-
-# With TTS voice generation
-dotnet run --project MQAstraALT.csproj -- --enable-tts
-
-# Compile Papyrus scripts (requires Fallout 4 Papyrus compiler)
-"Fallout 4/Papyrus Compiler/PapyrusCompiler.exe" Source \
-  -f="Fallout 4/Data/Scripts/Source/Base/Institute_Papyrus_Flags.flg" \
-  -i="Source;Fallout 4/Data/Scripts/Source/User;Fallout 4/Data/Scripts/Source/Base" \
-  -o="Fallout 4/Data/Scripts" -all
-
-# Deploy
-cp MQAstraALT.esp "Fallout 4/Data/"
-# Add *MQAstraALT.esp to your Plugins.txt
-```
-
-## Installation (for testers)
-
-1. Download `MQAstraALT.esp` and the `Sound` folder from Releases
-2. Copy to your `Fallout 4/Data/` directory
-3. Add `*MQAstraALT.esp` to your `Plugins.txt`
-4. Start a new game or load a save before exiting Vault 111
-5. After exiting the vault, Astra will be waiting outside
-
-## Contributing
-
-This project needs **testers and ideas**. If you:
-- Play Fallout 4 and want to try an early alpha companion
-- Have experience with Fallout 4 modding or Papyrus scripting
-- Want to contribute dialogue, story ideas, or quest design
-- Know Mutagen or want to learn programmatic plugin generation
-
-Open an issue, submit a PR, or reach out. The codebase is a single `Program.cs` — readable, documented, and rebuildable from scratch.
-
-## Project Structure
-
-```
-Program.cs                — Main ESP generator (~3,500 lines, all records)
-COMAstraSourceBuilder.cs  — Companion management quest builder
-DumpCompanionScript.cs    — Utility: inspect any NPC's VMAD script properties
-MQAstraALT.csproj         — .NET project file
-stable_formkeys.json      — Deterministic FormKey allocation
-Source/                    — Papyrus scripts (.psc)
-  MQAstraALTQuestScript.psc    — Quest script (stages, events)
-  Fragments/Quests/            — CK-compatible fragment scripts
-generate_voices.py         — NPC voice generation (edge-tts pipeline)
-generate_player_voices.py  — Player voice generation
-npc_voice_lines.json       — NPC dialogue text for TTS
-player_voice_lines.json    — Player dialogue text for TTS
-```
-
-## License
-
-This is a fan-made mod for Fallout 4. Fallout 4 is a trademark of Bethesda Softworks. This project is not affiliated with or endorsed by Bethesda.
-
----
-
-*Built with [Mutagen](https://github.com/Mutagen-Mechanic/Mutagen) and [Claude Code](https://claude.ai/code).*
+Live test build: Claude's generator + Codex's 2026-07-16 story/handoff fixes
+(see `codex/takeover_2026-07-16/`). Nexus release candidate packaged and
+awaiting final playtests. Voice assets are generated, not stored in git —
+see `claude/generate_rewrite_voices.py` and release zips.

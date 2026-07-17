@@ -1,0 +1,202 @@
+[
+  {
+    "FormId": "00020460",
+    "Text": "Contact!"
+  },
+  {
+    "FormId": "00020461",
+    "Text": "Target marked. Dropping them."
+  },
+  {
+    "FormId": "00020462",
+    "Text": "You picked the wrong road!"
+  },
+  {
+    "FormId": "00020463",
+    "Text": "Engaging. Stay mobile."
+  },
+  {
+    "FormId": "00020464",
+    "Text": "Hit. Still standing."
+  },
+  {
+    "FormId": "00020465",
+    "Text": "That one connected. It won\u0027t happen twice."
+  },
+  {
+    "FormId": "00020466",
+    "Text": "Grazed. Keep the pressure on them."
+  },
+  {
+    "FormId": "00020467",
+    "Text": "Enough of you!"
+  },
+  {
+    "FormId": "00020468",
+    "Text": "Down you go!"
+  },
+  {
+    "FormId": "00020469",
+    "Text": "I\u0027m down! Could use a hand!"
+  },
+  {
+    "FormId": "0002046A",
+    "Text": "Pinned and bleeding here. Anytime now!"
+  },
+  {
+    "FormId": "0002046B",
+    "Text": "Ten years out here. You\u0027re not the worst I\u0027ve seen."
+  },
+  {
+    "FormId": "0002046C",
+    "Text": "I\u0027ve mapped graveyards friendlier than you!"
+  },
+  {
+    "FormId": "0002046D",
+    "Text": "Wrong survivor to ambush!"
+  },
+  {
+    "FormId": "0002046E",
+    "Text": "Not today!"
+  },
+  {
+    "FormId": "0002046F",
+    "Text": "Blocked. Try again."
+  },
+  {
+    "FormId": "00020470",
+    "Text": "Regrouping! This position is bad!"
+  },
+  {
+    "FormId": "00020471",
+    "Text": "Contact! Weapons up!"
+  },
+  {
+    "FormId": "00020472",
+    "Text": "There! Hostile!"
+  },
+  {
+    "FormId": "00020473",
+    "Text": "Movement. It\u0027s a fight."
+  },
+  {
+    "FormId": "00020474",
+    "Text": "Clear. Logging that one."
+  },
+  {
+    "FormId": "00020475",
+    "Text": "Done. Check yourself for holes."
+  },
+  {
+    "FormId": "00020476",
+    "Text": "That\u0027s the last of them. Breathe."
+  },
+  {
+    "FormId": "00020477",
+    "Text": "Where did you go..."
+  },
+  {
+    "FormId": "00020478",
+    "Text": "Still out there. I can feel it."
+  },
+  {
+    "FormId": "00020479",
+    "Text": "Lost visual. Watching the lanes."
+  },
+  {
+    "FormId": "0002047A",
+    "Text": "Quiet. Too deliberate."
+  },
+  {
+    "FormId": "0002047B",
+    "Text": "Something\u0027s off. Stay sharp."
+  },
+  {
+    "FormId": "0002047C",
+    "Text": "I heard it too. Hold."
+  },
+  {
+    "FormId": "0002047D",
+    "Text": "Wait. Listen."
+  },
+  {
+    "FormId": "0002047E",
+    "Text": "Something moved."
+  },
+  {
+    "FormId": "0002047F",
+    "Text": "Nothing. Nerves and wind."
+  },
+  {
+    "FormId": "00020480",
+    "Text": "False alarm. Mostly."
+  },
+  {
+    "FormId": "00020481",
+    "Text": "Knew it! Contact!"
+  },
+  {
+    "FormId": "00020482",
+    "Text": "There they are!"
+  },
+  {
+    "FormId": "00020483",
+    "Text": "They broke off. Eyes open."
+  },
+  {
+    "FormId": "00020484",
+    "Text": "Lost them. They\u0027re circling."
+  },
+  {
+    "FormId": "00020485",
+    "Text": "Gone quiet. I don\u0027t like quiet."
+  },
+  {
+    "FormId": "00020486",
+    "Text": "No visual. Stay low."
+  },
+  {
+    "FormId": "00020487",
+    "Text": "Still with you."
+  },
+  {
+    "FormId": "00020488",
+    "Text": "Need something?"
+  },
+  {
+    "FormId": "00020489",
+    "Text": "Road\u0027s waiting."
+  },
+  {
+    "FormId": "0002048A",
+    "Text": "I\u0027m listening."
+  },
+  {
+    "FormId": "0002048B",
+    "Text": "Quiet out here. I don\u0027t trust it."
+  },
+  {
+    "FormId": "0002048C",
+    "Text": "You holding up? Good."
+  },
+  {
+    "FormId": "0002048D",
+    "Text": "Ten years I walked alone. This is better."
+  },
+  {
+    "FormId": "0002048E",
+    "Text": "Say the word."
+  },
+  {
+    "FormId": "0002048F",
+    "Text": "Take your time. The apocalypse is patient."
+  },
+  {
+    "FormId": "00020490",
+    "Text": "Still here. Still waiting."
+  },
+  {
+    "FormId": "00020491",
+    "Text": "Whenever you\u0027re ready."
+  }
+]

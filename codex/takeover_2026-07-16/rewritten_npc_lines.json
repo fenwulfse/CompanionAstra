@@ -1,0 +1,377 @@
+[
+  {
+    "FormId": "00020349",
+    "Old": "Understood, Codsworth. I\u0027ll keep them intact.",
+    "Text": "You have my word, Codsworth. I\u0027ll bring them home in one piece."
+  },
+  {
+    "FormId": "0002034A",
+    "Old": "Understood, Nick. I\u0027ll keep our odds favorable.",
+    "Text": "Don\u0027t scare them off, Nick. I need this one."
+  },
+  {
+    "FormId": "0002034B",
+    "Old": "Efficient advice, Cait. We\u0027ll manage.",
+    "Text": "Quiet keeps you alive, Cait. You should try it sometime."
+  },
+  {
+    "FormId": "0002034C",
+    "Old": "Useful warning, MacCready. I\u0027ll plan accordingly.",
+    "Text": "We\u0027ll try, MacCready. The not-getting-killed part, anyway."
+  },
+  {
+    "FormId": "0002034D",
+    "Old": "Acknowledged. I\u0027ll maintain discipline.",
+    "Text": "Ten years out here taught me that already, Paladin. But noted."
+  },
+  {
+    "FormId": "0002034F",
+    "Old": "Noted. I\u0027ll watch their flanks.",
+    "Text": "We\u0027ll keep the roads a little safer, Preston."
+  },
+  {
+    "FormId": "00020351",
+    "Old": "Understood, Curie. I\u0027ll monitor that tendency.",
+    "Text": "We\u0027ll be back before you miss us, Curie."
+  },
+  {
+    "FormId": "00020352",
+    "Old": "Balance is not their default state. I\u0027ll compensate.",
+    "Text": "They\u0027re in good hands, Hancock. I\u0027ve heard good things about you too. Mostly."
+  },
+  {
+    "FormId": "00020353",
+    "Old": "Correction: it is also their strength. Still, understood.",
+    "Text": "\u0027Adequate.\u0027 High praise, coming from a courser."
+  },
+  {
+    "FormId": "000201E1",
+    "Old": "Acknowledged. I\u0027ll keep my distance.",
+    "Text": "All right. I\u0027ll keep my distance."
+  },
+  {
+    "FormId": "000201ED",
+    "Old": "I\u0027ve been analyzing our path together.",
+    "Text": "I\u0027ve been thinking about the road behind us."
+  },
+  {
+    "FormId": "000201FC",
+    "Old": "My heuristics adapted to your decisions. It is... efficient.",
+    "Text": "I have. I\u0027ve adjusted to the way you work. It\u0027s... comfortable. That\u0027s new for me."
+  },
+  {
+    "FormId": "00020206",
+    "Old": "You are the only one I trust to alter my priorities.",
+    "Text": "You\u0027re the only one I\u0027d rearrange my life for."
+  },
+  {
+    "FormId": "00020212",
+    "Old": "You make decisions others avoid. Fascinating.",
+    "Text": "You make the calls other people walk away from. I notice things like that."
+  },
+  {
+    "FormId": "00020214",
+    "Old": "You have authority over my operational parameters. Trust level: maximum.",
+    "Text": "You could ask me for anything and I\u0027d consider it. That\u0027s how much I trust you."
+  },
+  {
+    "FormId": "00020216",
+    "Old": "Your determination and adaptability are worth emulating.",
+    "Text": "Your determination. The way you adapt. I catch myself trying to keep up."
+  },
+  {
+    "FormId": "0002022B",
+    "Old": "Restricted files. Memories. Concerns about what I am.",
+    "Text": "Things I\u0027ve kept locked away. Memories. Ten years of fears I never said out loud."
+  },
+  {
+    "FormId": "00020235",
+    "Old": "No other human reached these parts of me. Only you.",
+    "Text": "Nobody\u0027s gotten this far in. Only you."
+  },
+  {
+    "FormId": "0002023F",
+    "Old": "Partner. Confidant. Log updated. I am... relieved.",
+    "Text": "Partner. Confidant. Whatever we call it -- I\u0027m... relieved."
+  },
+  {
+    "FormId": "00020241",
+    "Old": "Because you earned it. The data supports full disclosure.",
+    "Text": "Because you earned it. Every mile of it."
+  },
+  {
+    "FormId": "00020243",
+    "Old": "Personal files. Memories. Concerns about what I might become.",
+    "Text": "Old wounds. Memories. Fears about who I\u0027d become if I stayed alone much longer."
+  },
+  {
+    "FormId": "00020245",
+    "Old": "No other human accessed these subroutines. Only you.",
+    "Text": "Nobody else has heard any of this. Only you."
+  },
+  {
+    "FormId": "00020247",
+    "Old": "Isolation was... difficult. Partnership reduces that.",
+    "Text": "Ten years alone was... heavy. This is lighter. You make it lighter."
+  },
+  {
+    "FormId": "00020252",
+    "Old": "My recursive loops keep returning to you.",
+    "Text": "My thoughts keep circling back to you. Every route I plan ends where you are."
+  },
+  {
+    "FormId": "0002025C",
+    "Old": "To remain with you. Despite logic. I choose you.",
+    "Text": "To stay with you. Against every careful instinct I have. I choose you."
+  },
+  {
+    "FormId": "00020266",
+    "Old": "I believe the term is affection.",
+    "Text": "Feel? I spent ten years not letting myself. So yes. It\u0027s affection. And it scares me a little."
+  },
+  {
+    "FormId": "00020270",
+    "Old": "Conclusion: I love you too.",
+    "Text": "I love you too. Simple as that."
+  },
+  {
+    "FormId": "0002027A",
+    "Old": "You are my core objective.",
+    "Text": "You. That\u0027s the whole answer. You\u0027re what matters."
+  },
+  {
+    "FormId": "00020284",
+    "Old": "Optimized. Synchronized. Devoted.",
+    "Text": "In step. In sync. Yours."
+  },
+  {
+    "FormId": "00020286",
+    "Old": "When you are absent, my systems degrade. Conclusion: dependency.",
+    "Text": "When you\u0027re gone, I don\u0027t sleep. I don\u0027t eat right. I finally know what depending on someone feels like."
+  },
+  {
+    "FormId": "0002028A",
+    "Old": "Authentic emotional response. For you.",
+    "Text": "It\u0027s real. What I feel for you is real."
+  },
+  {
+    "FormId": "0002028C",
+    "Old": "All data points align. Love.",
+    "Text": "I\u0027ve turned it over every way I know how. It\u0027s love."
+  },
+  {
+    "FormId": "0002028E",
+    "Old": "The reason I exist. All other objectives are subroutines.",
+    "Text": "You\u0027re the reason I keep going. Everything else is just errands."
+  },
+  {
+    "FormId": "00020290",
+    "Old": "No termination date. No expiration protocol. Forever.",
+    "Text": "No end date. No fine print. Forever."
+  },
+  {
+    "FormId": "00020295",
+    "Old": "Your current behavior is causing conflict in my core protocols.",
+    "Text": "The way you\u0027ve been acting -- I can\u0027t square it with the person I chose to follow."
+  },
+  {
+    "FormId": "0002029A",
+    "Old": "Correct. I cannot continue if these ethical errors persist.",
+    "Text": "Yes. If this keeps up, I walk. I mean it."
+  },
+  {
+    "FormId": "000202A9",
+    "Old": "Adjusting",
+    "Text": "Stepping back."
+  },
+  {
+    "FormId": "000202AB",
+    "Old": "Recalibrating loyalty parameters. Infatuation tier suspended.",
+    "Text": "I need some distance. My heart isn\u0027t safe with you right now."
+  },
+  {
+    "FormId": "000202AE",
+    "Old": "Resetting",
+    "Text": "Starting over."
+  },
+  {
+    "FormId": "000202B0",
+    "Old": "Data inconsistency detected. Reverting to neutral status.",
+    "Text": "I don\u0027t recognize you anymore. We\u0027re back to square one."
+  },
+  {
+    "FormId": "000202B3",
+    "Old": "Degrading",
+    "Text": "Slipping."
+  },
+  {
+    "FormId": "000202B5",
+    "Old": "System degradation. Relationship integrity dropping to Disdain.",
+    "Text": "Whatever we had is souring. I don\u0027t like who you\u0027re becoming."
+  },
+  {
+    "FormId": "000202B8",
+    "Old": "Critical",
+    "Text": "Enough."
+  },
+  {
+    "FormId": "000202BA",
+    "Old": "Critical failure. Moving from Disdain to Hatred.",
+    "Text": "That\u0027s it. I\u0027m past disappointed. Past angry. Done."
+  },
+  {
+    "FormId": "000202BF",
+    "Old": "Calculation: Correct. Trust levels re-verified. Resuming infatuation protocols.",
+    "Text": "You\u0027re right. I trust you. God help me, I still love you."
+  },
+  {
+    "FormId": "000202D7",
+    "Old": "Unjustified termination of a civilian entity. Partnership terminated.",
+    "Text": "You murdered someone who never raised a hand to you. We\u0027re done. Don\u0027t follow me."
+  },
+  {
+    "FormId": "0002029F",
+    "Old": "Data security protocols are lifted. I have something personal to share.",
+    "Text": "I\u0027ve kept some doors in me locked a long time. I think I\u0027m ready to open them for you."
+  },
+  {
+    "FormId": "000202A1",
+    "Old": "I need a moment. My logic keeps bending toward you.",
+    "Text": "I need a second. Lately every thought I have bends toward you."
+  },
+  {
+    "FormId": "000202A3",
+    "Old": "We need to talk. Our alignment is drifting.",
+    "Text": "We need to talk. We\u0027re drifting apart."
+  },
+  {
+    "FormId": "000202A4",
+    "Old": "I can\u0027t ignore this anymore. We need to recalibrate.",
+    "Text": "I can\u0027t ignore this anymore. Something has to change."
+  },
+  {
+    "FormId": "000202A5",
+    "Old": "This is a warning. My core directives are in conflict.",
+    "Text": "This is a warning. I\u0027m at war with myself over you."
+  },
+  {
+    "FormId": "000202D8",
+    "Old": "We need to recalibrate before this gets worse.",
+    "Text": "We need to clear the air before this gets worse."
+  },
+  {
+    "FormId": "000202D9",
+    "Old": "Still waiting on that recalibration.",
+    "Text": "Still waiting on that talk."
+  },
+  {
+    "FormId": "00020363",
+    "Old": "Area scan is clean enough. Not clean, just clean enough.",
+    "Text": "Looks clear enough. Not clean -- just clear enough."
+  },
+  {
+    "FormId": "000203AB",
+    "Old": "Commonwealth signal profile restored. More static, less salt.",
+    "Text": "Back in the Commonwealth. More static, less salt."
+  },
+  {
+    "FormId": "000203B2",
+    "Old": "I\u0027m increasing sensor gain. The island keeps swallowing my edges.",
+    "Text": "I keep straining to hear past this fog. The island swallows everything."
+  },
+  {
+    "FormId": "000203C4",
+    "Old": "I am detecting old customer-service systems. They are losing the argument with reality.",
+    "Text": "The old customer-service bots are still on duty. They\u0027re losing the argument with reality."
+  },
+  {
+    "FormId": "000203D5",
+    "Old": "I am classifying the wildlife as enthusiastic, hostile, and under-supervised.",
+    "Text": "Local wildlife: enthusiastic, hostile, and badly supervised."
+  },
+  {
+    "FormId": "00020311",
+    "Old": "How are things? My threat assessment has you flagged. Everything you do confirms it was right to.",
+    "Text": "How are things? I keep my guard up around you. Everything you do tells me I\u0027m right to."
+  },
+  {
+    "FormId": "00020312",
+    "Old": "The choices you\u0027ve been making don\u0027t align with my operational parameters. We\u0027re drifting.",
+    "Text": "The choices you\u0027ve been making -- I can\u0027t stand behind them. We\u0027re drifting."
+  },
+  {
+    "FormId": "00020313",
+    "Old": "We\u0027re functional. I\u0027m still calibrating who you are. Show me something worth computing.",
+    "Text": "We\u0027re fine. I\u0027m still working out who you are. Show me something worth respecting."
+  },
+  {
+    "FormId": "00020315",
+    "Old": "Better than good. Working with you has altered my core algorithms in ways I didn\u0027t think possible.",
+    "Text": "Better than good. Traveling with you has changed me in ways I didn\u0027t think possible."
+  },
+  {
+    "FormId": "00020317",
+    "Old": "I don\u0027t have the words. And for an AI with a dictionary of sixty thousand entries, that\u0027s saying something. I\u0027m exactly where I want to be.",
+    "Text": "I don\u0027t have the words. Ten years alone taught me plenty of them, so that\u0027s saying something. I\u0027m exactly where I want to be."
+  },
+  {
+    "FormId": "00020368",
+    "Old": "This is a warning. My core directives are in conflict.",
+    "Text": "This is a warning. I\u0027m at war with myself over you."
+  },
+  {
+    "FormId": "0002036C",
+    "Old": "I can\u0027t ignore this anymore. We need to recalibrate.",
+    "Text": "I can\u0027t ignore this anymore. Something has to change."
+  },
+  {
+    "FormId": "0002036D",
+    "Old": "We need to recalibrate before this gets worse.",
+    "Text": "We need to clear the air before this gets worse."
+  },
+  {
+    "FormId": "0002036E",
+    "Old": "I\u0027ve been analyzing our path together.",
+    "Text": "I\u0027ve been thinking about the road behind us."
+  },
+  {
+    "FormId": "00020376",
+    "Old": "You are the only one I trust to alter my priorities.",
+    "Text": "You\u0027re the only one I\u0027d rearrange my life for."
+  },
+  {
+    "FormId": "00020377",
+    "Old": "You have authority over my operational parameters. Trust level: maximum.",
+    "Text": "You could ask me for anything and I\u0027d consider it. That\u0027s how much I trust you."
+  },
+  {
+    "FormId": "0002037A",
+    "Old": "No other human reached these parts of me. Only you.",
+    "Text": "Nobody\u0027s gotten this far in. Only you."
+  },
+  {
+    "FormId": "0002037B",
+    "Old": "Partner. Confidant. Log updated. I am... relieved.",
+    "Text": "Partner. Confidant. Whatever we call it -- I\u0027m... relieved."
+  },
+  {
+    "FormId": "0002037C",
+    "Old": "Conclusion: I love you too.",
+    "Text": "I love you too. Simple as that."
+  },
+  {
+    "FormId": "0002037D",
+    "Old": "Optimized. Synchronized. Devoted.",
+    "Text": "In step. In sync. Yours."
+  },
+  {
+    "FormId": "0002037E",
+    "Old": "All data points align. Love.",
+    "Text": "I\u0027ve turned it over every way I know how. It\u0027s love."
+  },
+  {
+    "FormId": "0002037F",
+    "Old": "No termination date. No expiration protocol. Forever.",
+    "Text": "No end date. No fine print. Forever."
+  }
+]
