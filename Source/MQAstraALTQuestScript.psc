@@ -97,55 +97,55 @@ if PlayerInstitute_Destroyed
   endif
 endif
 
-; --- Pre-war gate --- TEMPORARILY DISABLED FOR VOICE TESTING
+; --- Pre-war gate ---
 ; MQ102 (Out of Time) starts when the player exits Vault 111 post-war.
-; Without this, Astra spawns in pre-war Sanctuary on a new game.
-; RE-ENABLE AFTER TESTING:
-; if MQ102
-;   while !MQ102.IsRunning()
-;     Utility.Wait(2.0)
-;   endwhile
-; endif
+; Without this gate, Astra spawns during the pre-war Sanctuary sequence.
+if MQ102
+  while !MQ102.IsRunning()
+    Utility.Wait(2.0)
+  endwhile
+endif
 
 ; --- Normal bootstrap ---
 BootstrapComplete = true
 SetObjectiveDisplayed(5)
+SetObjectiveDisplayed(911)  ; [S5] Stage entered
 
 ; Wait for alias to fill after quest initialization
 Utility.Wait(2.0)
 
-; Block standard pickup greeting IMMEDIATELY after alias fills (before vault wait)
+; Block standard pickup greeting IMMEDIATELY after alias fills
 Actor AstraActor = Alias_Astra.GetActorReference()
 if AstraActor
+  SetObjectiveDisplayed(912)  ; [S5] Astra alias filled
   if DisallowedCompanionFaction
     AstraActor.AddToFaction(DisallowedCompanionFaction)
-    if DebugTrace
-      Debug.Trace(self + " MQAstraALT suppressed standard greeting (early)")
-    endif
   endif
 endif
 
-; Vault 111 exterior guard:
-; Belt-and-suspenders — also wait for player to be outdoors
+; Wait for player to exit vault (be outdoors)
 Actor PlayerRef = Game.GetPlayer()
 while PlayerRef && PlayerRef.IsInInterior()
   Utility.Wait(1.0)
 endwhile
+SetObjectiveDisplayed(913)  ; [S5] Player outdoors
 
-; Move Astra AND Codsworth to the player
-; Narrative: Astra tracked the vault opening, brought Codsworth as proof of trust
-if AstraActor
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT moving Astra to player")
-  endif
-  AstraActor.MoveTo(Game.GetPlayer())
+; Wait for the vault exit cinematic (blurry sun-in-eyes) to finish.
+; The elevator reaches the surface ~10s before the player gets camera control.
+; Without this delay, ForceGreet fires during the cinematic and the player
+; has to re-interact after the fade clears.
+Utility.Wait(12.0)
+
+; Move Astra to the Vault 111 exit marker (fixed location, like Dogmeat at Red Rocket).
+; ForceGreet Keys 1+2 also point to this marker with 1000-unit trigger radius.
+; When player exits vault and approaches, ForceGreet activates and Astra walks to player.
+if AstraActor && Vault111ExitMarkerRef
+  AstraActor.MoveTo(Vault111ExitMarkerRef)
+  SetObjectiveDisplayed(914)  ; [S5] Astra moved to vault exit marker
+  Utility.Wait(1.0)
   AstraActor.EvaluatePackage()
+  SetObjectiveDisplayed(915)  ; [S5] ForceGreet package evaluated
 endif
-
-; Codsworth deferred ? keeping bootstrap simple for now
-
-; Auto-greet handled by AddIdleTopicToHello quest flag + Greeting topic.
-; Do NOT start BootstrapScene from Papyrus — it interferes with the greeting mechanism.
 EndFunction
 
 Function HandleFragmentStage0006Item00()
@@ -188,6 +188,13 @@ endif
 EscortBranchSelected = true
 SetObjectiveCompleted(5)
 SetObjectiveDisplayed(9)
+; FIX 2026-07-14: the 205 branch never set stage 6 (greet-done marker), so
+; on Red Rocket arrival the travel package expired, follow stayed gated
+; (needs 6 done), and the still-valid bootstrap forcegreet sent Astra
+; sprinting back to its Vault 111 GoTo marker. Log-proven.
+if !GetStageDone(6)
+  SetStage(6)
+endif
 RedRocketArrivalWatchArmed = true
 
 Actor AstraActor = Alias_Astra.GetActorReference()
@@ -283,8 +290,9 @@ if AstraActor
   if RedRocketScene && !RedRocketScene.IsPlaying()
     RedRocketScene.Start()
   endif
-  ; No FollowerWait — Astra is not in the Followers quest
-  AstraActor.EvaluatePackage(abResetAI = true)
+  ; No resetAI — abResetAI=true can teleport NPC back to origin (interior cell).
+  ; Normal EvaluatePackage re-evaluates the package stack without resetting position.
+  AstraActor.EvaluatePackage()
 endif
 
 ; Dogmeat: vanilla handles him at Red Rocket. Do NOT manipulate his AI here.
@@ -404,13 +412,16 @@ TransitionPostMuseumEscortToCompanionAvailability("Stage15")
 InfoFirstAccepted = true
 SetObjectiveCompleted(10)
 SetObjectiveDisplayed(15)
+SetObjectiveCompleted(15)
 if CoalitionPitchScene
   CoalitionPitchScene.Stop()
 endif
-Utility.Wait(0.5)
-if InfoFirstScene
-  InfoFirstScene.Start()
-endif
+; COALITION ARC RETIRED 2026-07-13: the post-pitch scene chain (InfoFirst ->
+; ConvergencePrep -> ... -> Emergence, stages 25-85) had no world-gating and
+; cascaded start-to-finish in ~2 minutes of back-to-back forcegreets
+; (log-proven). The prologue ends here; the memoir and affinity system now
+; carry Astra's story. Stages 25+ remain in the plugin, dormant.
+Debug.Trace("[ASTRALOG] Prologue complete (info-first) - coalition arc dormant, companion mode active")
 EndFunction
 
 Function HandleFragmentStage0020Item00()
@@ -423,13 +434,12 @@ TransitionPostMuseumEscortToCompanionAvailability("Stage20")
 NotNowChosen = true
 SetObjectiveCompleted(10)
 SetObjectiveDisplayed(20)
+SetObjectiveCompleted(20)
 if CoalitionPitchScene
   CoalitionPitchScene.Stop()
 endif
-Utility.Wait(0.5)
-if NotNowScene
-  NotNowScene.Start()
-endif
+; COALITION ARC RETIRED 2026-07-13 — see stage 15 handler note.
+Debug.Trace("[ASTRALOG] Prologue complete (not-now) - coalition arc dormant, companion mode active")
 EndFunction
 
 Function HandleFragmentStage0025Item00()
@@ -1414,5 +1424,6 @@ Bool Property RedRocketArrivalPolling Auto
 ObjectReference Property SanctuaryWorkshopRef Auto
 ObjectReference Property MinRecruitWorkshopRef Auto
 ObjectReference Property RedRocketCenterMarker Auto
+ObjectReference Property Vault111ExitMarkerRef Auto
 Location Property RedRocketTruckStopLocation Auto
 

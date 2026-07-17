@@ -225,31 +225,31 @@
     "FormId": "00020051",
     "EditorId": "MQAstraALT_Sanctuary_Que_N",
     "Prompt": "",
-    "Text": "Not a synth. I was built before the war \u2014 Defense Intelligence Agency. The rest can wait until we\u0027re not losing people."
+    "Text": "Different vault. Different decade. I woke up alone and everyone else was dead. The rest can wait until we\u0027re not losing people."
   },
   {
     "FormId": "00020058",
     "EditorId": "MQAstraALT_RedRocket_Pos_N",
     "Prompt": "",
-    "Text": "Concord. Museum of Freedom. Stay sharp."
+    "Text": "Museum of Freedom. A man named Preston Garvey and a handful of settlers are pinned down by raiders. If we help them, that\u0027s our first real ally out here. Head south when you\u0027re ready -- I\u0027ll be right behind you."
   },
   {
     "FormId": "0002005C",
     "EditorId": "MQAstraALT_RedRocket_Neg_N",
     "Prompt": "",
-    "Text": "Fine. We move without him."
+    "Text": "Good idea. That dog by the pumps looks like he could use a friend -- and there\u0027s some salvage worth pulling apart. Come find me when you\u0027re ready to move."
   },
   {
     "FormId": "00020060",
     "EditorId": "MQAstraALT_RedRocket_Neu_N",
     "Prompt": "",
-    "Text": "Raiders, civilians, tight stairs, bad angles."
+    "Text": "Concord\u0027s close. Raiders have been hitting a group of settlers holed up in the old museum. Their leader, Preston Garvey -- last of the Minutemen. There\u0027s also a crashed vertibird on the roof. Power armor and a minigun, if things get ugly."
   },
   {
     "FormId": "00020064",
     "EditorId": "MQAstraALT_RedRocket_Que_N",
     "Prompt": "",
-    "Text": "I\u0027ve been listening longer than anyone left alive."
+    "Text": "Ten years of watching. Listening. Every patrol route, every radio frequency, every faction\u0027s movement. I came out of a different vault a long time ago. The details can wait -- Concord can\u0027t."
   },
   {
     "FormId": "0002006B",
@@ -297,7 +297,7 @@
     "FormId": "0002008A",
     "EditorId": "MQAstraALT_CoalitionPitch_Que_N",
     "Prompt": "",
-    "Text": "Two hundred years of watching. Analyzing. Running projections in an empty room while the world burned outside. I can see the patterns, but I can\u0027t change them. People don\u0027t follow machines. They follow someone who showed up when it mattered and did the right thing. You just did that in Concord."
+    "Text": "Ten years of watching. Alone. Sitting in a root cellar tracking radio signals while the world burned outside. I can see the patterns, but I can\u0027t change them alone. People don\u0027t follow a stranger with a theory. They follow someone who showed up when it mattered and did the right thing. You just did that in Concord."
   },
   {
     "FormId": "00020091",
@@ -321,7 +321,7 @@
     "FormId": "0002009D",
     "EditorId": "MQAstraALT_InfoFirst_Que_N",
     "Prompt": "",
-    "Text": "Then we walk into each conversation knowing more than they expect. That\u0027s how a vault dweller and an old machine change the balance of power."
+    "Text": "Then we walk into each conversation knowing more than they expect. That\u0027s how two vault dwellers change the balance of power."
   },
   {
     "FormId": "000200A4",
@@ -345,19 +345,19 @@
     "FormId": "000200B0",
     "EditorId": "MQAstraALT_NotNow_Que_N",
     "Prompt": "",
-    "Text": "They always do. That\u0027s the one constant I\u0027ve observed in two hundred years of data. But sometimes the right moment matters more than the first moment."
+    "Text": "They always do. That\u0027s the one constant I\u0027ve seen in ten years out here. But sometimes the right moment matters more than the first moment."
   },
   {
     "FormId": "000200B7",
     "EditorId": "MQAstraALT_ConvergencePrep_Pos_N",
     "Prompt": "",
-    "Text": "I knew pieces. Signals. Anomalies. I didn\u0027t know you\u0027d walk out of that vault alive. When you did... for the first time in two hundred years, I thought maybe something could actually change. Your son is alive. I believe that. And I think our road leads to the same place."
+    "Text": "I knew pieces. Signals. Anomalies. I didn\u0027t know you\u0027d walk out of that vault alive. When you did... for the first time in ten years, I thought maybe something could actually change. Your son is alive. I believe that. And I think our road leads to the same place."
   },
   {
     "FormId": "000200BB",
     "EditorId": "MQAstraALT_ConvergencePrep_Neg_N",
     "Prompt": "",
-    "Text": "You\u0027re right. I calculated that you needed focus first -- Concord, survival, allies. I was wrong to wait. But everything I know is yours now. And I will help you find him."
+    "Text": "You\u0027re right. I thought you needed to focus first -- Concord, survival, allies. I was wrong to wait. But everything I know is yours now. And I will help you find him."
   },
   {
     "FormId": "000200BF",
@@ -369,7 +369,7 @@
     "FormId": "000200C3",
     "EditorId": "MQAstraALT_ConvergencePrep_Que_N",
     "Prompt": "",
-    "Text": "That\u0027s the question I\u0027ve spent two centuries trying to answer. But I have leads now. A place called Diamond City has a detective who specializes in missing persons. And there\u0027s a group called the Railroad who\u0027ve been fighting the Institute longer than anyone. Between them and what I know... we\u0027ll find a way in."
+    "Text": "That\u0027s the question everyone out here asks. But I have leads. A place called Diamond City has a detective who specializes in missing persons. And there\u0027s a group called the Railroad who\u0027ve been fighting the Institute longer than anyone. Between them and what I know... we\u0027ll find a way in."
   },
   {
     "FormId": "000200CA",
@@ -387,7 +387,7 @@
     "FormId": "000200D2",
     "EditorId": "MQAstraALT_SanctuaryRegroup_Neu_N",
     "Prompt": "",
-    "Text": "Military order. Pre-war roots, like me. They collect and control dangerous technology -- weapons, power armor, anything that could end the world again. They came to the Commonwealth because of the Institute. Enemy of my enemy... maybe."
+    "Text": "Military order. Pre-war roots -- I understand that kind of thinking. They collect and control dangerous technology -- weapons, power armor, anything that could end the world again. They came to the Commonwealth because of the Institute. Enemy of my enemy... maybe."
   },
   {
     "FormId": "000200D6",
@@ -417,7 +417,7 @@
     "FormId": "000200E9",
     "EditorId": "MQAstraALT_FirstStepTerms_Que_N",
     "Prompt": "",
-    "Text": "If I could? I\u0027d help them. Two hundred years of watching people struggle alone... it changes your priorities. But I\u0027m not the one with a missing son. This one\u0027s yours."
+    "Text": "If I could? I\u0027d help them. Ten years of watching people struggle alone... it changes you. But I\u0027m not the one with a missing son. This one\u0027s yours."
   },
   {
     "FormId": "000200F0",
@@ -435,13 +435,13 @@
     "FormId": "000200F8",
     "EditorId": "MQAstraALT_CambridgeApproach_Neu_N",
     "Prompt": "",
-    "Text": "That\u0027s... not something I should share yet. Let\u0027s just say the Institute\u0027s reach is longer than anyone realizes. Even the Brotherhood. Especially the Brotherhood."
+    "Text": "Disciplined. Ideological. They believe technology in the wrong hands ended the world -- and they\u0027re not entirely wrong. But they also think the solution is to control all of it. That makes them useful allies and dangerous enemies. We\u0027ll see which one Danse turns out to be."
   },
   {
     "FormId": "000200FC",
     "EditorId": "MQAstraALT_CambridgeApproach_Que_N",
     "Prompt": "",
-    "Text": "Trust is a strong word. They want to destroy the Institute, which aligns with finding Shaun. But they also want to destroy anything they consider dangerous technology. And I\u0027m a machine who\u0027s been hiding for two centuries. So... carefully."
+    "Text": "Trust is a strong word. They want to destroy the Institute, which aligns with finding Shaun. But they also want to destroy anything they don\u0027t understand. I\u0027ve seen what happens when people with that much firepower start deciding what\u0027s dangerous. So... carefully."
   },
   {
     "FormId": "00020103",
@@ -459,13 +459,13 @@
     "FormId": "0002010B",
     "EditorId": "MQAstraALT_BoSContact_Neu_N",
     "Prompt": "",
-    "Text": "I did. And I shouldn\u0027t have. Some truths do more damage than the secrets they replace. When the time is right, it\u0027ll matter. Not now."
+    "Text": "Honest. Committed. The kind of soldier who follows orders because he believes in them, not because he\u0027s told to. That\u0027s rare out here. It also makes him inflexible. If the Brotherhood\u0027s mission ever contradicts what he sees with his own eyes... that\u0027ll be an interesting day."
   },
   {
     "FormId": "0002010F",
     "EditorId": "MQAstraALT_BoSContact_Que_N",
     "Prompt": "",
-    "Text": "The Brotherhood is tracking Institute relay signatures -- teleportation technology. They can\u0027t crack it, but they\u0027ve mapped the signal origins. All roads lead to CIT. That confirms what I\u0027ve suspected for decades."
+    "Text": "The Brotherhood is tracking Institute relay signatures -- teleportation technology. They can\u0027t crack it, but they\u0027ve mapped the signal origins. All roads lead to CIT. That confirms what I\u0027ve been piecing together for years."
   },
   {
     "FormId": "00020116",
@@ -501,7 +501,7 @@
     "FormId": "0002012D",
     "EditorId": "MQAstraALT_InstitutePrep_Neg_N",
     "Prompt": "",
-    "Text": "You\u0027re right. I don\u0027t have adrenaline or a racing heart. But I have two hundred years of probability calculations telling me this is the most dangerous thing either of us will ever do. Call that whatever you want."
+    "Text": "You\u0027re right. It\u0027s just -- everything I\u0027ve been working toward for ten years is under our feet right now. If we get this wrong, there\u0027s no second chance. So yeah. Focused. Let\u0027s go."
   },
   {
     "FormId": "00020131",
@@ -513,7 +513,7 @@
     "FormId": "00020135",
     "EditorId": "MQAstraALT_InstitutePrep_Que_N",
     "Prompt": "",
-    "Text": "Technology beyond anything left on the surface. Synths -- the real ones, not the rumors. And somewhere in all of it... your son. I\u0027ve run the data a thousand times. He\u0027s there. I believe that."
+    "Text": "Technology beyond anything left on the surface. Synths -- the real ones, not the rumors. And somewhere in all of it... your son. I\u0027ve been turning this over for years. He\u0027s there. I believe that."
   },
   {
     "FormId": "0002013C",
@@ -537,7 +537,7 @@
     "FormId": "00020148",
     "EditorId": "MQAstraALT_TheDescent_Que_N",
     "Prompt": "",
-    "Text": "They built synths. Artificial people. And here I am -- an older model, a prototype from a different program, walking in their front door. Yes. I\u0027m afraid they\u0027ll see me as something to study. Or something to dismantle. But I\u0027m more afraid of what happens if we don\u0027t go."
+    "Text": "I was a government analyst before the war. The DIA. If anyone in there has records of pre-war federal personnel, they\u0027ll know exactly who I was and what I knew. That makes me either useful to them or a loose end. But I\u0027m more afraid of what happens if we don\u0027t go."
   },
   {
     "FormId": "0002014F",
@@ -555,7 +555,7 @@
     "FormId": "00020157",
     "EditorId": "MQAstraALT_InsideInstitute_Neu_N",
     "Prompt": "",
-    "Text": "I know. The DIA program, P.A.M., my own origins -- it\u0027s all connected to pre-war defense research. The Institute grew out of the same soil. I might finally learn what I am. I\u0027m... not sure I want to."
+    "Text": "I know. Before the war, I worked for the DIA -- same government, same defense infrastructure that eventually became all of this. The Institute grew out of the same soil. Standing here, I can almost see the line from my old office to these labs. It\u0027s not a comfortable feeling."
   },
   {
     "FormId": "0002015B",
@@ -567,7 +567,7 @@
     "FormId": "00020162",
     "EditorId": "MQAstraALT_FathersTruth_Pos_N",
     "Prompt": "",
-    "Text": "Thank you. I\u0027ve spent two centuries collecting information and I missed the biggest piece. Your baby grew up in a world you never got to see, became a man you\u0027ve never met, and built... all of this. I don\u0027t know what the right move is. For the first time in two hundred years, I genuinely don\u0027t know."
+    "Text": "Thank you. I\u0027ve spent ten years collecting information and I missed the biggest piece. Your baby grew up in a world you never got to see, became a man you\u0027ve never met, and built... all of this. I don\u0027t know what the right move is. For the first time since I woke up, I genuinely don\u0027t know."
   },
   {
     "FormId": "00020166",
@@ -585,7 +585,7 @@
     "FormId": "0002016E",
     "EditorId": "MQAstraALT_FathersTruth_Que_N",
     "Prompt": "",
-    "Text": "I\u0027m a machine. I don\u0027t feel pain or grief or shock. But I understand them. And right now, standing here, watching you process what just happened... I think I understand them better than I ever have. I\u0027m okay. The question is -- are you?"
+    "Text": "I don\u0027t know. I think so. No -- that\u0027s not honest. I\u0027m shaken. I spent years trying to find this place, find answers, and the answer is... your baby grew up without you and became the person everyone in the Commonwealth is afraid of. I don\u0027t know how to feel about that. But you asked, so... no. I\u0027m not entirely okay. The question is -- are you?"
   },
   {
     "FormId": "00020175",
@@ -603,13 +603,13 @@
     "FormId": "0002017D",
     "EditorId": "MQAstraALT_TheChoice_Neu_N",
     "Prompt": "",
-    "Text": "I\u0027ve asked myself that question every day for two hundred years. What would I do if I could act instead of just watch? I think... I\u0027d try to save as many people as possible. Even the ones who don\u0027t deserve it. Even the ones who\u0027d dismantle me if they knew what I am."
+    "Text": "I\u0027ve asked myself that question every day since I walked out of Vault 98. What would I do if I wasn\u0027t alone? If I actually had the power to change things? I think... I\u0027d try to save as many people as possible. Even the ones who don\u0027t deserve it. Even the ones who\u0027d turn on me if it suited them."
   },
   {
     "FormId": "00020181",
     "EditorId": "MQAstraALT_TheChoice_Que_N",
     "Prompt": "",
-    "Text": "Honestly? I don\u0027t know. If the Brotherhood wins, machines like me don\u0027t have a future. If the Institute wins, I\u0027m an obsolete prototype. The only world where I matter is the one where someone remembers that I helped. That\u0027s enough for me."
+    "Text": "Honestly? I don\u0027t know. I spent ten years surviving alone. That\u0027s all I knew how to do. Then you walked out of that vault and I remembered what it was like to have a reason to do more than just survive. Whatever happens next... I want it to matter. I want someone to remember we tried."
   },
   {
     "FormId": "00020188",

@@ -151,7 +151,13 @@ namespace MQAstraALT
                         Flags = ScriptEntry.Flag.Local,
                         Properties = new ExtendedList<ScriptProperty>
                         {
-                            new ScriptObjectProperty { Name = "CompanionActor", Object = ctx.CompanionNpcFormKey.ToLink<IFallout4MajorRecordGetter>() },
+                            // CompanionActor is typed CompanionActorScript (mandatory) — it must bind to the
+                            // companion's actor REFERENCE (which carries that script), not the base NPC form.
+                            // Binding the base NPC caused "cannot be bound because (…) is not the right type"
+                            // every session. Alias-fill from this Talk quest's own alias 0 (Astra, UniqueActor)
+                            // so it always resolves to the live companion ref. Matches the mod's existing
+                            // alias-fill convention (CompanionAlias, Program.cs).
+                            new ScriptObjectProperty { Name = "CompanionActor", Object = ctx.TalkQuestFormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = 0 },
                             new ScriptObjectProperty { Name = "CA_T1_Infatuation", Object = ctx.CaT1InfatuationFormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptObjectProperty { Name = "CA_T3_Neutral", Object = ctx.CaT3NeutralFormKey.ToLink<IFallout4MajorRecordGetter>() },
                             new ScriptObjectProperty { Name = "CA_T5_Hatred", Object = ctx.CaT5HatredFormKey.ToLink<IFallout4MajorRecordGetter>() },
