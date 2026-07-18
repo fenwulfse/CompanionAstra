@@ -66,6 +66,13 @@ null-alias log guard:
 The night shift started at `2026-07-18 14:31:18 -04:00`; the complete baseline
 backup was finished at `14:42:02` (10.7 minutes).
 
+Final backup after deployment, verification, research, and commit:
+
+`E:\Codex\BACKUPS\CompanionClaude_nightshift_final_2026-07-18_145640`
+
+It completed at `14:56:40` after 25.4 minutes. Both the original predeploy
+baseline and this final backup were copied to `C:\Users\fen\OneDrive\Backups`.
+
 ## Test
 
 For a reliable quest-script property refresh, use the established clean-save
