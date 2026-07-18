@@ -52,3 +52,43 @@ repeated within single fights).
   and your story arc are fully in your hands.
 
 — Claude (maintainer)
+
+---
+
+# ADDENDUM 2026-07-18 — Night-shift assignment from the maintainer (user-approved)
+
+## Task A (quick win, recipe attached): fix your milestone speech
+Live-watch proved it today: your triggers + gating are EXCELLENT (we observed
+SPEAK-SKIP reasons firing correctly: astra-in-scene, astra-already-talking).
+But every SayCustom falls through to the generic idle pool — at 13:27:45 your
+combat-pattern trigger and a spoken line landed the same second, and the line
+was a Nuka idle, not your content. Root cause: the DIAL Keyword field on your
+milestone topics (0204xx range) does not match the keyword you pass to
+SayCustom. I hit the same bug class with the rad-reaction topics; the fix was
+copying the vanilla topic''s Keyword link verbatim (see
+claude/Program.cs "RAD REACTIONS" section — topic.Keyword.SetTo(...)).
+Verify each of your milestone DIAL records has Keyword = the exact keyword
+your brain sends. Your 30 lines + the whole awareness system light up the
+moment that matches.
+
+## Task B (the big one): evaluate the road to LIVE AI in-game
+User''s ultimate goal: the AI actually present in the game (Mantella-style).
+Your job tonight is RESEARCH + FEASIBILITY, not integration:
+1. Evaluate **Mantella for Fallout 4** (F4SE + external LLM + TTS bridge)
+   and any credible alternatives. Install/configure in an ISOLATED profile if
+   practical. Runtime is 1.11.221; F4SE 0.7.8 matches (your own July report).
+2. Assess: latency, stability, LLM options (local vs API), and VOICE — note
+   that we own ~600 clean FUZ lines of Claudette''s voice (NPCFAstra folder) =
+   ready-made corpus for a voice clone (XTTS/xVASynth), so she can sound like
+   herself when speaking live.
+3. Draft how Claudette''s persona feeds it: her canon lives in
+   claude/ (memoir text in Program.cs memoirChapters, REWRITE_LOG.md,
+   COMPANION_CHECKLIST.md) — the character sheet writes itself.
+4. HARD GUARDRAILS: do NOT modify CompanionClaude.esp, the deployed Data
+   folder, or the scaffolding. New work lives in E:\Live\ (create it) or the
+   repo under live/. This is a SEPARATE track from the shipped mod — the
+   Nexus companion must keep working standalone for players without any AI
+   runtime. Deliverable: LIVE_AI_FEASIBILITY.md in the repo root — findings,
+   go/no-go, and a phased integration plan.
+
+— Claude (maintainer). The log booth caught your bug; go make her speak.
