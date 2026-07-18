@@ -927,16 +927,16 @@ comAstraVmad.Scripts.Add(new ScriptEntry
     {
         new ScriptObjectProperty { Name = "AstraAlias", Object = comAstra.FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = 0 },
         new ScriptObjectProperty { Name = "VisitedLocations", Object = visitedLocations.FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "InteriorEntryKeyword", Object = awarenessKeywords["AstraAwarenessInteriorEntry"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "ReturnLocationKeyword", Object = awarenessKeywords["AstraAwarenessReturnLocation"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "LongInteriorKeyword", Object = awarenessKeywords["AstraAwarenessLongInterior"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "CombatResolvedKeyword", Object = awarenessKeywords["AstraAwarenessCombatResolved"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "CloseCallKeyword", Object = awarenessKeywords["AstraAwarenessCloseCall"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "MilestoneOneKeyword", Object = awarenessKeywords["AstraAwarenessMilestoneOne"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "MilestoneFiveKeyword", Object = awarenessKeywords["AstraAwarenessMilestoneFive"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "MilestoneTenKeyword", Object = awarenessKeywords["AstraAwarenessMilestoneTen"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "MilestoneTwentyFiveKeyword", Object = awarenessKeywords["AstraAwarenessMilestoneTwentyFive"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
-        new ScriptObjectProperty { Name = "MilestoneFiftyKeyword", Object = awarenessKeywords["AstraAwarenessMilestoneFifty"].FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "InteriorEntryTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessInteriorEntry").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "ReturnLocationTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessReturnLocation").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "LongInteriorTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessLongInterior").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "CombatResolvedTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessCombatResolved").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "CloseCallTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessCloseCall").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "MilestoneOneTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessMilestoneOne").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "MilestoneFiveTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessMilestoneFive").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "MilestoneTenTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessMilestoneTen").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "MilestoneTwentyFiveTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessMilestoneTwentyFive").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
+        new ScriptObjectProperty { Name = "MilestoneFiftyTopic", Object = comAstra.DialogTopics.Single(t => t.EditorID == "AstraAwarenessMilestoneFifty").FormKey.ToLink<IFallout4MajorRecordGetter>(), Alias = -1 },
         new ScriptBoolProperty { Name = "DebugTrace", Data = true, Flags = ScriptProperty.Flag.Edited },
     },
 });
@@ -1463,10 +1463,10 @@ var checkAwareness = (checkCom.VirtualMachineAdapter as QuestAdapter)?.Scripts
 var awarenessPropertyNames = checkAwareness.Properties.Select(p => p.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 var requiredAwarenessProperties = new[]
 {
-    "AstraAlias", "VisitedLocations", "InteriorEntryKeyword", "ReturnLocationKeyword",
-    "LongInteriorKeyword", "CombatResolvedKeyword", "CloseCallKeyword",
-    "MilestoneOneKeyword", "MilestoneFiveKeyword", "MilestoneTenKeyword",
-    "MilestoneTwentyFiveKeyword", "MilestoneFiftyKeyword", "DebugTrace",
+    "AstraAlias", "VisitedLocations", "InteriorEntryTopic", "ReturnLocationTopic",
+    "LongInteriorTopic", "CombatResolvedTopic", "CloseCallTopic",
+    "MilestoneOneTopic", "MilestoneFiveTopic", "MilestoneTenTopic",
+    "MilestoneTwentyFiveTopic", "MilestoneFiftyTopic", "DebugTrace",
 };
 var missingAwarenessProperties = requiredAwarenessProperties.Where(p => !awarenessPropertyNames.Contains(p)).ToArray();
 if (missingAwarenessProperties.Length > 0)
@@ -1481,6 +1481,28 @@ if (checkAwarenessTopics.Length != awarenessPools.Length || checkAwarenessTopics
         $"{checkAwarenessTopics.Sum(t => t.Responses.Count)} lines)");
 if (!check.FormLists.Any(f => f.EditorID == "AstraAwarenessVisitedLocations"))
     throw new InvalidOperationException("VERIFY FAILED: AstraAwarenessVisitedLocations is missing");
+foreach (var (name, _, _) in awarenessPools)
+{
+    var propertyName = name switch
+    {
+        "AstraAwarenessInteriorEntry" => "InteriorEntryTopic",
+        "AstraAwarenessReturnLocation" => "ReturnLocationTopic",
+        "AstraAwarenessLongInterior" => "LongInteriorTopic",
+        "AstraAwarenessCombatResolved" => "CombatResolvedTopic",
+        "AstraAwarenessCloseCall" => "CloseCallTopic",
+        "AstraAwarenessMilestoneOne" => "MilestoneOneTopic",
+        "AstraAwarenessMilestoneFive" => "MilestoneFiveTopic",
+        "AstraAwarenessMilestoneTen" => "MilestoneTenTopic",
+        "AstraAwarenessMilestoneTwentyFive" => "MilestoneTwentyFiveTopic",
+        "AstraAwarenessMilestoneFifty" => "MilestoneFiftyTopic",
+        _ => throw new InvalidOperationException($"Unknown awareness pool {name}"),
+    };
+    var expectedTopic = checkAwareness.Properties.OfType<ScriptObjectProperty>()
+        .Single(p => string.Equals(p.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+        .Object.FormKey;
+    if (checkCom.DialogTopics.Single(t => t.EditorID == name).FormKey != expectedTopic)
+        throw new InvalidOperationException($"VERIFY FAILED: awareness direct topic mismatch for {name}");
+}
 Console.WriteLine($"VERIFY: awareness script has {checkAwareness.Properties.Count} properties; " +
     $"{checkAwarenessTopics.Length} topics / {checkAwarenessTopics.Sum(t => t.Responses.Count)} lines; memory list present");
 

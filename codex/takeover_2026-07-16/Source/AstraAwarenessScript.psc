@@ -1,21 +1,21 @@
 Scriptname AstraAwarenessScript extends Quest
 
 ; Persistent, vanilla-Papyrus awareness layer for Astra. It records shared
-; travel and combat, then uses custom dialogue keywords for selective comments.
+; travel and combat, then plays exact dialogue topics for selective comments.
 
 ReferenceAlias Property AstraAlias Auto Const Mandatory
 FormList Property VisitedLocations Auto Const Mandatory
 
-Keyword Property InteriorEntryKeyword Auto Const Mandatory
-Keyword Property ReturnLocationKeyword Auto Const Mandatory
-Keyword Property LongInteriorKeyword Auto Const Mandatory
-Keyword Property CombatResolvedKeyword Auto Const Mandatory
-Keyword Property CloseCallKeyword Auto Const Mandatory
-Keyword Property MilestoneOneKeyword Auto Const Mandatory
-Keyword Property MilestoneFiveKeyword Auto Const Mandatory
-Keyword Property MilestoneTenKeyword Auto Const Mandatory
-Keyword Property MilestoneTwentyFiveKeyword Auto Const Mandatory
-Keyword Property MilestoneFiftyKeyword Auto Const Mandatory
+Topic Property InteriorEntryTopic Auto Const Mandatory
+Topic Property ReturnLocationTopic Auto Const Mandatory
+Topic Property LongInteriorTopic Auto Const Mandatory
+Topic Property CombatResolvedTopic Auto Const Mandatory
+Topic Property CloseCallTopic Auto Const Mandatory
+Topic Property MilestoneOneTopic Auto Const Mandatory
+Topic Property MilestoneFiveTopic Auto Const Mandatory
+Topic Property MilestoneTenTopic Auto Const Mandatory
+Topic Property MilestoneTwentyFiveTopic Auto Const Mandatory
+Topic Property MilestoneFiftyTopic Auto Const Mandatory
 
 Bool Property DebugTrace = True Auto Const
 Float Property CommentCooldownDays = 0.003 Auto Const
@@ -56,7 +56,11 @@ EndEvent
 
 Function InitializeAwareness(String reason)
     PlayerRef = Game.GetPlayer()
-    AstraRef = AstraAlias.GetActorRef()
+    if AstraAlias
+        AstraRef = AstraAlias.GetActorRef()
+    else
+        AstraRef = None
+    endif
 
     if PlayerRef
         RegisterForRemoteEvent(PlayerRef, "OnLocationChange")
@@ -79,6 +83,9 @@ Bool Function IsActiveCompanion()
         PlayerRef = Game.GetPlayer()
     endif
     if !AstraRef
+        if !AstraAlias
+            return False
+        endif
         AstraRef = AstraAlias.GetActorRef()
     endif
     return PlayerRef && AstraRef && AstraRef.IsPlayerTeammate()
@@ -113,10 +120,10 @@ Bool Function CanSpeak()
     return GetSpeakBlockReason() == ""
 EndFunction
 
-Bool Function TrySpeak(Keyword akKeyword, String reason, Bool ignoreCooldown = false)
-    if !akKeyword
+Bool Function TrySpeak(Topic akTopic, String reason, Bool ignoreCooldown = false)
+    if !akTopic
         if DebugTrace
-            Debug.Trace("[ASTRA_BRAIN] SPEAK-SKIP reason=" + reason + " blocked=missing-keyword")
+            Debug.Trace("[ASTRA_BRAIN] SPEAK-SKIP reason=" + reason + " blocked=missing-topic")
         endif
         return false
     endif
@@ -140,10 +147,10 @@ Bool Function TrySpeak(Keyword akKeyword, String reason, Bool ignoreCooldown = f
         return false
     endif
 
-    AstraRef.SayCustom(akKeyword)
+    AstraRef.Say(akTopic)
     LastSpokenGameTime = now
     if DebugTrace
-        Debug.Trace("[ASTRA_BRAIN] SPEAK reason=" + reason + " keyword=" + akKeyword)
+        Debug.Trace("[ASTRA_BRAIN] SPEAK reason=" + reason + " topic=" + akTopic)
     endif
     return true
 EndFunction
@@ -217,9 +224,9 @@ Function HandleInteriorEntry()
         return
     endif
     if PendingLocationWasReturn
-        TrySpeak(ReturnLocationKeyword, "return-location")
+        TrySpeak(ReturnLocationTopic, "return-location")
     else
-        TrySpeak(InteriorEntryKeyword, "new-interior")
+        TrySpeak(InteriorEntryTopic, "new-interior")
     endif
 EndFunction
 
@@ -235,7 +242,7 @@ Function HandleLongInterior()
         return
     endif
 
-    if TrySpeak(LongInteriorKeyword, "long-interior")
+    if TrySpeak(LongInteriorTopic, "long-interior")
         LongInteriorComments += 1
     endif
     StartTimer(420.0, LongInteriorTimer)
@@ -254,18 +261,18 @@ Function ResolveCombat()
     CombatsCompleted += 1
     Float duration = Utility.GetCurrentRealTime() - CombatStartedAt
     Float endHealth = PlayerRef.GetValuePercentage(Game.GetHealthAV())
-    Keyword milestoneKeyword = None
+    Topic milestoneTopic = None
 
     if CombatsCompleted == 1
-        milestoneKeyword = MilestoneOneKeyword
+        milestoneTopic = MilestoneOneTopic
     elseif CombatsCompleted == 5
-        milestoneKeyword = MilestoneFiveKeyword
+        milestoneTopic = MilestoneFiveTopic
     elseif CombatsCompleted == 10
-        milestoneKeyword = MilestoneTenKeyword
+        milestoneTopic = MilestoneTenTopic
     elseif CombatsCompleted == 25
-        milestoneKeyword = MilestoneTwentyFiveKeyword
+        milestoneTopic = MilestoneTwentyFiveTopic
     elseif CombatsCompleted == 50
-        milestoneKeyword = MilestoneFiftyKeyword
+        milestoneTopic = MilestoneFiftyTopic
     endif
 
     if endHealth < 0.40
@@ -276,12 +283,12 @@ Function ResolveCombat()
         Debug.Trace("[ASTRA_BRAIN] COMBAT-END completed=" + CombatsCompleted + " duration=" + duration + " startHealth=" + CombatStartHealth + " endHealth=" + endHealth + " closeCalls=" + CloseCalls)
     endif
 
-    if milestoneKeyword
-        TrySpeak(milestoneKeyword, "combat-milestone-" + CombatsCompleted, true)
+    if milestoneTopic
+        TrySpeak(milestoneTopic, "combat-milestone-" + CombatsCompleted, true)
     elseif endHealth < 0.40
-        TrySpeak(CloseCallKeyword, "combat-close-call", true)
+        TrySpeak(CloseCallTopic, "combat-close-call", true)
     elseif (CombatsCompleted % 3) == 0
-        TrySpeak(CombatResolvedKeyword, "combat-pattern")
+        TrySpeak(CombatResolvedTopic, "combat-pattern")
     endif
 EndFunction
 
@@ -292,5 +299,5 @@ Function PrintAwarenessStatus()
 EndFunction
 
 Function TestAwarenessVoice()
-    TrySpeak(InteriorEntryKeyword, "manual-test", true)
+    TrySpeak(InteriorEntryTopic, "manual-test", true)
 EndFunction
