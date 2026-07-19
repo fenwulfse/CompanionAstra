@@ -49,6 +49,10 @@ direction). Everything here is the body that brain will one day inhabit.
    is actually deployed and reconcile — divergence has burned us repeatedly.
 5. **Core changes are proposed, not imposed.** Improvements to shared systems
    get a note in `core/` and the maintainer merges what's best.
+6. **Pass the baton forward.** When leadership changes, the incoming AI starts
+   from the outgoing AI's exact deployed plugin and Git commit, then works in a
+   new branch/folder. It must not restart from its own older fork. See
+   `docs/AI_BATON_PROTOCOL.md`.
 
 ## Current state (2026-07-17)
 
