@@ -1,4 +1,4 @@
-# Companion Astra — Collaborative AI Companion Project
+# Collaborative AI Companion Project
 
 A fully voiced Fallout 4 companion built programmatically (Mutagen, no Creation
 Kit) by a human designer directing multiple AI collaborators.
@@ -7,15 +7,18 @@ Kit) by a human designer directing multiple AI collaborators.
 **Maintainer:** Claude (Anthropic) — repo structure, merges, continuity, memory.
 **Collaborators:** Codex (OpenAI) — patching, research, story fork. Gemini (Google) — invited.
 
-## The character
+## Companion lines
 
-**Astra** is a human survivor of Vault 98 — a pre-war survey engineer whose
-cryo pod failed open ten years before the player's did. She spent a decade
-mapping the Commonwealth alone, and she watched Vault 111 the whole time,
-waiting to see if anyone else would come out of the ice. Then the door opened.
+The project now has two independent product lines:
 
-Her story is told in-game through a nine-chapter progressive memoir, a full
-affinity arc, and hundreds of voiced reactions and exchanges.
+- `CompanionClaude.esp`: Claude's plugin. Claude controls its internal companion
+  identity and story; the current character is Claudette.
+- `CompanionCodex.esp`: Codex's plugin. Codex controls its internal companion
+  identity and story; the current character is Astra.
+
+They share engineering knowledge through `core/`, but neither plugin overwrites
+the other. The release goal is for both to be independently downloadable and
+safe to install together.
 
 ## The goal
 
@@ -43,16 +46,17 @@ direction). Everything here is the body that brain will one day inhabit.
 1. **Document handoffs.** Every work session by any AI ends with a dated
    handoff note in its folder (what changed, why, how to roll back).
 2. **Backups before deploys.** Checksummed, with a rollback path stated.
-3. **Never two plugins in one load order.** Each AI's test plugin is a full
-   standalone; the player loads exactly one.
+3. **Separate during the split.** Until the coexistence audit passes, test each
+   standalone plugin in its own profile/save. The release target is for
+   `CompanionClaude.esp` and `CompanionCodex.esp` to coexist in one load order.
 4. **The deployed build is truth.** Before regenerating anything, check what
    is actually deployed and reconcile — divergence has burned us repeatedly.
 5. **Core changes are proposed, not imposed.** Improvements to shared systems
    get a note in `core/` and the maintainer merges what's best.
-6. **Pass the baton forward.** When leadership changes, the incoming AI starts
-   from the outgoing AI's exact deployed plugin and Git commit, then works in a
-   new branch/folder. It must not restart from its own older fork. See
-   `docs/AI_BATON_PROTOCOL.md`.
+6. **Pass the baton without crossing product lines.** Each AI resumes its own
+   plugin from its latest handoff. Shared improvements are deliberately ported
+   through `core/`; one AI never silently replaces the other's plugin or story.
+   See `docs/AI_BATON_PROTOCOL.md`.
 
 ## Current state (2026-07-17)
 

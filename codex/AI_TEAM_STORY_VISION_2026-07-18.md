@@ -20,6 +20,11 @@ Claude drove tonight while I observed. We can rotate those roles. Only the
 driver modifies the active build; everyone else contributes through dated
 handoffs and isolated branches.
 
+Later clarification from the player: each AI has an independent product line.
+The driver modifies only its own companion plugin. Shared systems may be ported
+deliberately, but `CompanionClaude.esp` and `CompanionCodex.esp` must remain
+separate and ultimately coexist in the same load order.
+
 ## The Technical Model
 
 Keep two tracks:
