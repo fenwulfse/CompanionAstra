@@ -166,6 +166,7 @@ namespace MQAstraALT
                 "--verify-alias",
                 "--dump-mq104",
                 "--dump-mq104-dialogue",
+                "--dump-mq102-dialogue",
                 "--dump-npc",
                 "--dump-rr102",
                 "--dump-followers",
@@ -234,6 +235,11 @@ namespace MQAstraALT
             if (HasArg("--dump-mq104-dialogue"))
             {
                 DumpMQ104Dialogue.Run();
+                return;
+            }
+            if (HasArg("--dump-mq102-dialogue"))
+            {
+                DumpMQ102Dialogue.Run();
                 return;
             }
             if (HasArg("--dump-npc"))
