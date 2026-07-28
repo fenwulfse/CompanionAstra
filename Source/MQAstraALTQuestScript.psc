@@ -21,23 +21,61 @@ DiamondCitySuppressionActive = false
 NuclearOptionSuppressionActive = false
 CompanionAvailabilityUnlocked = false
 RedRocketArrivalWatchArmed = false
+RedRocketArrivalPolling = false
+CancelTimer(901)
+CancelTimer(900)
 Actor resetPlayerRef = Game.GetPlayer()
 if resetPlayerRef
   UnregisterForRemoteEvent(resetPlayerRef, "OnLocationChange")
 endif
+SetObjectiveDisplayed(900)
+SetObjectiveCompleted(900)
 SetStage(5)
 EndFunction
 
 Function HandleFragmentStage0005Item00()
+SetObjectiveDisplayed(901)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 5 start")
 endif
 
+; --- Late-game companion bypass ---
+; If the player is well past the intro story (MQ102 stage 200+ = left Sanctuary,
+; or MQ103 running = main quest active), skip ALL story scenes and go straight
+; to companion availability. This lets late-game saves test companion features
+; without sitting through every story beat.
+if MQ102 && MQ102.GetStage() >= 200
+  if DebugTrace
+    Debug.Trace(self + " MQAstraALT late-game bypass: MQ102 stage >= 200, skipping story")
+  endif
+  Debug.Notification("MQAstraALT: Late-game detected — companion mode active")
+  BootstrapComplete = true
+  ; Mark story stages done so story greetings don't fire.
+  ; Stage 6 blocks bootstrap greeting (GetStageDone(6)==0 fails).
+  ; Stage 9 blocks travel/workbench greetings.
+  if !GetStageDone(6)
+    SetStage(6)
+  endif
+  if !GetStageDone(9)
+    SetStage(9)
+  endif
+  ; Move Astra to the player
+  Utility.Wait(2.0)
+  Actor bypassAstra = Alias_Astra.GetActorReference()
+  if bypassAstra
+    bypassAstra.MoveTo(Game.GetPlayer())
+    bypassAstra.EvaluatePackage()
+  endif
+  ; Skip to companion availability (starts COMAstra, removes DisallowedFaction, etc.)
+  TransitionPostMuseumEscortToCompanionAvailability("LateGameBypass")
+  return
+endif
+
 ; --- Recovery branch check ---
 if EnableRecoveryBranch && !ForceBypassRecovery
-  if ShouldUseExistingSaveMigration("Stage5")
+  if MQ302 && MQ302.GetStage() >= 10
     if DebugTrace
-      Debug.Trace(self + " MQAstraALT recovery route: existing-save readiness matched")
+      Debug.Trace(self + " MQAstraALT recovery route: MQ302 stage >= 10")
     endif
     RecoveryBranchActive = true
     SetStage(95)
@@ -59,81 +97,90 @@ if PlayerInstitute_Destroyed
   endif
 endif
 
+; --- Pre-war gate ---
+; MQ102 (Out of Time) starts when the player exits Vault 111 post-war.
+; Without this gate, Astra spawns during the pre-war Sanctuary sequence.
+if MQ102
+  while !MQ102.IsRunning()
+    Utility.Wait(2.0)
+  endwhile
+endif
+
 ; --- Normal bootstrap ---
 BootstrapComplete = true
 SetObjectiveDisplayed(5)
+SetObjectiveDisplayed(911)  ; [S5] Stage entered
 
 ; Wait for alias to fill after quest initialization
 Utility.Wait(2.0)
 
-; Block standard pickup greeting IMMEDIATELY after alias fills (before vault wait)
+; Block standard pickup greeting IMMEDIATELY after alias fills
 Actor AstraActor = Alias_Astra.GetActorReference()
 if AstraActor
+  SetObjectiveDisplayed(912)  ; [S5] Astra alias filled
   if DisallowedCompanionFaction
     AstraActor.AddToFaction(DisallowedCompanionFaction)
-    if DebugTrace
-      Debug.Trace(self + " MQAstraALT suppressed standard greeting (early)")
-    endif
   endif
 endif
 
-; Vault 111 exterior guard:
-; wait until player exits the vault interior before teleporting/greeting
+; Wait for player to exit vault (be outdoors)
 Actor PlayerRef = Game.GetPlayer()
 while PlayerRef && PlayerRef.IsInInterior()
   Utility.Wait(1.0)
 endwhile
+SetObjectiveDisplayed(913)  ; [S5] Player outdoors
 
-; Move Astra AND Codsworth to the player
-; Narrative: Astra tracked the vault opening, brought Codsworth as proof of trust
-if AstraActor
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT moving Astra to player")
-  endif
-  AstraActor.MoveTo(Game.GetPlayer())
+; Wait for the vault exit cinematic (blurry sun-in-eyes) to finish.
+; The elevator reaches the surface ~10s before the player gets camera control.
+; Without this delay, ForceGreet fires during the cinematic and the player
+; has to re-interact after the fade clears.
+Utility.Wait(12.0)
+
+; Move Astra to the Vault 111 exit marker (fixed location, like Dogmeat at Red Rocket).
+; ForceGreet Keys 1+2 also point to this marker with 1000-unit trigger radius.
+; When player exits vault and approaches, ForceGreet activates and Astra walks to player.
+if AstraActor && Vault111ExitMarkerRef
+  AstraActor.MoveTo(Vault111ExitMarkerRef)
+  SetObjectiveDisplayed(914)  ; [S5] Astra moved to vault exit marker
+  Utility.Wait(1.0)
   AstraActor.EvaluatePackage()
+  SetObjectiveDisplayed(915)  ; [S5] ForceGreet package evaluated
 endif
-
-; Codsworth deferred ? keeping bootstrap simple for now
-
-; Scene is handled by high-priority Greeting topic (Priority 70 Hello)
-; firing when player approaches Astra exterior.
 EndFunction
 
 Function HandleFragmentStage0006Item00()
+SetObjectiveCompleted(901)
+SetObjectiveDisplayed(903)
+SetObjectiveCompleted(903)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 6 start (Sanctuary escort branch)")
 endif
 
 EscortBranchSelected = true
 SetObjectiveCompleted(5)
-SetObjectiveDisplayed(9)
-RedRocketArrivalWatchArmed = true
+SetObjectiveDisplayed(7)
 
 Actor AstraActor = Alias_Astra.GetActorReference()
 if AstraActor
-  ; Vanilla Nick/Deacon pattern:
-  ; MQAstraALT owns the temporary escort beat first.
-  ; COMAstra only becomes available after the post-Museum handoff.
+  ; Negative path: Astra follows player to Sanctuary
+  ; Deacon pattern: teammate + faction + EvaluatePackage
+  ; Follow behavior comes from stage-gated alias package (AstraFollowPlayer)
+  ; No FollowerFollow — Astra is not registered in the Followers quest
+  ; No scene — RunOnlyScenePackages would block the alias package
   if PlayerFaction
     AstraActor.AddToFaction(PlayerFaction)
   endif
   AstraActor.SetPlayerTeammate(abTeammate = true, abCanDoFavor = false)
-  FollowersScript.GetScript().FollowerFollow(AstraActor)
-  FollowersScript.GetScript().FollowerSetDistanceMedium(AstraActor)
   AstraActor.IgnoreFriendlyHits()
-  AstraActor.EvaluatePackage(abResetAI = true)
-  if AstraEscortScene && !AstraEscortScene.IsPlaying()
-    AstraEscortScene.Start()
-  endif
-  Debug.Notification("MQAstraALT: Astra temporary escort active")
+  AstraActor.EvaluatePackage()
+  Debug.Notification("[S6] Astra following to Sanctuary")
 endif
-
-; Stage routing handled by dialogue OnBegin/OnEnd:
-; Negative ? OnEnd = 7 (Sanctuary workbench)
 EndFunction
 
 Function HandleFragmentStage0205Item00()
+SetObjectiveCompleted(901)
+SetObjectiveDisplayed(902)
+SetObjectiveCompleted(902)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 205 start (Red Rocket travel branch)")
 endif
@@ -141,6 +188,13 @@ endif
 EscortBranchSelected = true
 SetObjectiveCompleted(5)
 SetObjectiveDisplayed(9)
+; FIX 2026-07-14: the 205 branch never set stage 6 (greet-done marker), so
+; on Red Rocket arrival the travel package expired, follow stayed gated
+; (needs 6 done), and the still-valid bootstrap forcegreet sent Astra
+; sprinting back to its Vault 111 GoTo marker. Log-proven.
+if !GetStageDone(6)
+  SetStage(6)
+endif
 RedRocketArrivalWatchArmed = true
 
 Actor AstraActor = Alias_Astra.GetActorReference()
@@ -163,6 +217,12 @@ Actor playerRef = Game.GetPlayer()
 if playerRef
   RegisterForRemoteEvent(playerRef, "OnLocationChange")
 endif
+
+; Direct polling timer - OnLocationChange is unreliable in exterior cells
+RedRocketArrivalPolling = true
+StartTimer(5.0, 901)
+SetObjectiveDisplayed(904)
+Debug.Notification("Red Rocket travel active")
 EndFunction
 
 Function HandleFragmentStage0007Item00()
@@ -184,6 +244,15 @@ if DebugTrace
 endif
 
 RedRocketArrivalWatchArmed = false
+RedRocketArrivalPolling = false
+CancelTimer(901)
+CancelTimer(900)
+SetObjectiveCompleted(904)
+SetObjectiveCompleted(909)
+SetObjectiveCompleted(910)
+SetObjectiveDisplayed(905)
+SetObjectiveCompleted(905)
+Debug.Notification("Stage 9 active - Red Rocket")
 Actor playerRef = Game.GetPlayer()
 if playerRef
   UnregisterForRemoteEvent(playerRef, "OnLocationChange")
@@ -217,32 +286,21 @@ if AstraActor
   if AstraTravelToRedRocketScene && AstraTravelToRedRocketScene.IsPlaying()
     AstraTravelToRedRocketScene.Stop()
   endif
-  FollowersScript.GetScript().FollowerWait(AstraActor)
-  AstraActor.EvaluatePackage(abResetAI = true)
+  ; Start dialogue scene — Astra's alias packages handle AI state
   if RedRocketScene && !RedRocketScene.IsPlaying()
-      RedRocketScene.Start()
+    RedRocketScene.Start()
   endif
+  ; No resetAI — abResetAI=true can teleport NPC back to origin (interior cell).
+  ; Normal EvaluatePackage re-evaluates the package stack without resetting position.
+  AstraActor.EvaluatePackage()
 endif
 
-; MQ106/Nick pattern: Dogmeat follows via SetPlayerTeammate + EvaluatePackage.
-; Do NOT use SetDogmeatCompanion ? it dismisses the human companion.
-Actor DogmeatActor = Alias_Dogmeat.GetActorReference()
-if DogmeatActor
-  DogmeatActor.SetPlayerTeammate(abTeammate = true, abCanDoFavor = true)
-  FollowersScript.GetScript().FollowerFollow(DogmeatActor)
-  FollowersScript.GetScript().FollowerSetDistanceMedium(DogmeatActor)
-  DogmeatActor.IgnoreFriendlyHits()
-  DogmeatActor.EvaluatePackage(abResetAI = true)
-  if DogmeatEscortScene && !DogmeatEscortScene.IsPlaying()
-    DogmeatEscortScene.Start()
-  endif
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT Dogmeat following via quest alias (MQ106 pattern)")
-  endif
-endif
+; Dogmeat: vanilla handles him at Red Rocket. Do NOT manipulate his AI here.
+; Player recruits Dogmeat naturally through vanilla greeting.
 EndFunction
 
 Function HandleFragmentStage0008Item00()
+SetObjectiveDisplayed(909)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 8 start (workshop gate)")
   Debug.Notification("MQAstraALT: Stage 8 active. Use Sanctuary Workshop once.")
@@ -290,6 +348,8 @@ endif
 EndFunction
 
 Function HandleFragmentStage0010Item00()
+SetObjectiveDisplayed(906)
+SetObjectiveCompleted(906)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 10 start")
 endif
@@ -300,9 +360,7 @@ if AstraActor
   if DisallowedCompanionFaction
     AstraActor.RemoveFromFaction(DisallowedCompanionFaction)
   endif
-  ; Resume following (was set to wait at Red Rocket stage 9)
-  FollowersScript.GetScript().FollowerFollow(AstraActor)
-  FollowersScript.GetScript().FollowerSetDistanceMedium(AstraActor)
+  ; Resume following — alias packages handle AI (no FollowerFollow, Astra not in Followers quest)
   AstraActor.EvaluatePackage(abResetAI = true)
   if AstraEscortScene && AstraEscortScene.IsPlaying()
     AstraEscortScene.Stop()
@@ -345,6 +403,8 @@ endif
 EndFunction
 
 Function HandleFragmentStage0015Item00()
+SetObjectiveDisplayed(907)
+SetObjectiveCompleted(907)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 15 start")
 endif
@@ -352,16 +412,21 @@ TransitionPostMuseumEscortToCompanionAvailability("Stage15")
 InfoFirstAccepted = true
 SetObjectiveCompleted(10)
 SetObjectiveDisplayed(15)
+SetObjectiveCompleted(15)
 if CoalitionPitchScene
   CoalitionPitchScene.Stop()
 endif
-Utility.Wait(0.5)
-if InfoFirstScene
-  InfoFirstScene.Start()
-endif
+; COALITION ARC RETIRED 2026-07-13: the post-pitch scene chain (InfoFirst ->
+; ConvergencePrep -> ... -> Emergence, stages 25-85) had no world-gating and
+; cascaded start-to-finish in ~2 minutes of back-to-back forcegreets
+; (log-proven). The prologue ends here; the memoir and affinity system now
+; carry Astra's story. Stages 25+ remain in the plugin, dormant.
+Debug.Trace("[ASTRALOG] Prologue complete (info-first) - coalition arc dormant, companion mode active")
 EndFunction
 
 Function HandleFragmentStage0020Item00()
+SetObjectiveDisplayed(908)
+SetObjectiveCompleted(908)
 if DebugTrace
   Debug.Trace(self + " MQAstraALT stage 20 start")
 endif
@@ -369,13 +434,12 @@ TransitionPostMuseumEscortToCompanionAvailability("Stage20")
 NotNowChosen = true
 SetObjectiveCompleted(10)
 SetObjectiveDisplayed(20)
+SetObjectiveCompleted(20)
 if CoalitionPitchScene
   CoalitionPitchScene.Stop()
 endif
-Utility.Wait(0.5)
-if NotNowScene
-  NotNowScene.Start()
-endif
+; COALITION ARC RETIRED 2026-07-13 — see stage 15 handler note.
+Debug.Trace("[ASTRALOG] Prologue complete (not-now) - coalition arc dormant, companion mode active")
 EndFunction
 
 Function HandleFragmentStage0025Item00()
@@ -655,12 +719,7 @@ EndFunction
 
 Function HandleFragmentStage0095Item00()
 RecoveryBranchActive = true
-ApplyLateSaveCompanionMigration("Stage95")
-EndFunction
-
-Function HandleFragmentStage0096Item00()
-RecoveryBranchActive = true
-ApplyLateSaveCompanionMigration("Stage96")
+SetObjectiveDisplayed(95)
 EndFunction
 
 Function HandleFragmentStage0100Item00()
@@ -695,7 +754,7 @@ if AstraActor
   if DogmeatEscortScene && DogmeatEscortScene.IsPlaying()
     DogmeatEscortScene.Stop()
   endif
-  FollowersScript.GetScript().FollowerWait(AstraActor)
+  ; No FollowerWait — Astra is not in the Followers quest
   AstraActor.SetPlayerTeammate(abTeammate = false)
   if DisallowedCompanionFaction
     AstraActor.RemoveFromFaction(DisallowedCompanionFaction)
@@ -714,265 +773,6 @@ CompanionAvailabilityUnlocked = true
 if DebugTrace
   Debug.Trace(self + " MQAstraALT post-Museum handoff via " + sourceTag + " removed pickup block and unlocked COMAstra availability")
 endif
-EndFunction
-
-Function ApplyLateSaveCompanionMigration(String sourceTag)
-TraceExistingSaveReadiness(sourceTag)
-
-Actor AstraActor = Alias_Astra.GetActorReference()
-if !AstraActor
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT late-save migration skipped (" + sourceTag + "): Astra alias is empty")
-  endif
-  return
-endif
-
-DisableStartupRouteForExistingSave(sourceTag)
-
-if DisallowedCompanionFaction
-  AstraActor.RemoveFromFaction(DisallowedCompanionFaction)
-endif
-
-if COMAstra && !COMAstra.IsRunning()
-  COMAstra.Start()
-endif
-
-Actor PlayerRef = Game.GetPlayer()
-if PlayerRef
-  AstraActor.MoveTo(PlayerRef)
-endif
-
-AstraActor.SetPlayerTeammate(abTeammate = false)
-AstraActor.SetAvailableToBeCompanion()
-CompanionAvailabilityUnlocked = true
-RepairMissedAffinityForcegreet(AstraActor, sourceTag)
-AstraActor.EvaluatePackage()
-
-if DebugTrace
-  Debug.Trace(self + " MQAstraALT late-save companion migration applied via " + sourceTag + "; stopping startup route quest to suppress Red Rocket/Concord greetings")
-endif
-Stop()
-EndFunction
-
-Bool Function ShouldUseExistingSaveMigration(String sourceTag)
-if MQ302 && MQ302.GetStage() >= 10
-  return true
-endif
-
-if MQ207 && MQ207.GetStage() > 0
-  return true
-endif
-
-if MQ206Min && MQ206Min.GetStage() > 0
-  return true
-endif
-
-if MQ302Min && MQ302Min.GetStage() > 0
-  return true
-endif
-
-if MQ103 && MQ103.GetStage() > 0
-  return true
-endif
-
-if MQ102 && MQ102.GetStage() >= 50
-  return true
-endif
-
-if MinRecruit00 && MinRecruit00.GetStage() > 0
-  return true
-endif
-
-return false
-EndFunction
-
-Function DisableStartupRouteForExistingSave(String sourceTag)
-CleanupMinRecruitQuickResolveWatcher()
-MinRecruitQuickResolveArmed = false
-MinRecruitQuickResolveApplied = false
-MinRecruitTargetWorkshopSeen = false
-DiamondCitySuppressionActive = false
-NuclearOptionSuppressionActive = false
-RedRocketArrivalWatchArmed = false
-BootstrapComplete = true
-EscortBranchSelected = true
-
-Actor PlayerRef = Game.GetPlayer()
-if PlayerRef
-  UnregisterForRemoteEvent(PlayerRef, "OnLocationChange")
-endif
-
-StopStartupScene(BootstrapScene)
-StopStartupScene(SanctuaryScene)
-StopStartupScene(RedRocketScene)
-StopStartupScene(AstraEscortScene)
-StopStartupScene(AstraTravelToRedRocketScene)
-StopStartupScene(AstraTravelToMuseumScene)
-StopStartupScene(DogmeatEscortScene)
-StopStartupScene(CoalitionPitchScene)
-StopStartupScene(InfoFirstScene)
-StopStartupScene(NotNowScene)
-StopStartupScene(ConvergencePrepScene)
-StopStartupScene(SanctuaryRegroupScene)
-StopStartupScene(FirstStepTermsScene)
-StopStartupScene(RouteDisciplineScene)
-StopStartupScene(RailroadVectorScene)
-StopStartupScene(RailroadContactScene)
-StopStartupScene(TradecraftDebriefScene)
-StopStartupScene(InstituteAccessScene)
-StopStartupScene(BoSContactScene)
-StopStartupScene(SturgesTunnelScene)
-StopStartupScene(SturgesIntelScene)
-StopStartupScene(CITIngressScene)
-
-HideStartupObjectives()
-
-if DebugTrace
-  Debug.Trace(self + " MQAstraALT existing-save migration disabled startup route via " + sourceTag)
-endif
-EndFunction
-
-Function StopStartupScene(Scene targetScene)
-if targetScene && targetScene.IsPlaying()
-  targetScene.Stop()
-endif
-EndFunction
-
-Function HideStartupObjectives()
-SetObjectiveDisplayed(5, abDisplayed = false)
-SetObjectiveDisplayed(7, abDisplayed = false)
-SetObjectiveDisplayed(8, abDisplayed = false)
-SetObjectiveDisplayed(9, abDisplayed = false)
-SetObjectiveDisplayed(10, abDisplayed = false)
-SetObjectiveDisplayed(15, abDisplayed = false)
-SetObjectiveDisplayed(20, abDisplayed = false)
-SetObjectiveDisplayed(25, abDisplayed = false)
-SetObjectiveDisplayed(30, abDisplayed = false)
-SetObjectiveDisplayed(35, abDisplayed = false)
-SetObjectiveDisplayed(40, abDisplayed = false)
-SetObjectiveDisplayed(45, abDisplayed = false)
-SetObjectiveDisplayed(50, abDisplayed = false)
-SetObjectiveDisplayed(55, abDisplayed = false)
-SetObjectiveDisplayed(60, abDisplayed = false)
-SetObjectiveDisplayed(65, abDisplayed = false)
-SetObjectiveDisplayed(70, abDisplayed = false)
-SetObjectiveDisplayed(75, abDisplayed = false)
-SetObjectiveDisplayed(80, abDisplayed = false)
-SetObjectiveDisplayed(85, abDisplayed = false)
-SetObjectiveDisplayed(95, abDisplayed = false)
-SetObjectiveDisplayed(100, abDisplayed = false)
-EndFunction
-
-Function TraceExistingSaveReadiness(String sourceTag)
-if DebugTrace
-  Debug.Trace(self + " MQAstraALT readiness " + sourceTag + " MQ102=" + QuestStageText(MQ102) + " MQ103=" + QuestStageText(MQ103) + " MQ207=" + QuestStageText(MQ207) + " MQ206Min=" + QuestStageText(MQ206Min) + " MQ302Min=" + QuestStageText(MQ302Min) + " MQ302=" + QuestStageText(MQ302) + " MinRecruit00=" + QuestStageText(MinRecruit00))
-endif
-EndFunction
-
-String Function QuestStageText(Quest targetQuest)
-if targetQuest
-  return "" + targetQuest.GetStage()
-endif
-return "None"
-EndFunction
-
-Function RepairMissedAffinityForcegreet(Actor AstraActor, String sourceTag)
-ActorValue wantsToTalkAV = ResolveActorValueProperty(CA_WantsToTalk, 0x000FA86B, "CA_WantsToTalk")
-ActorValue sceneToPlayAV = ResolveActorValueProperty(CA_AffinitySceneToPlay, 0x000FA875, "CA_AffinitySceneToPlay")
-ActorValue currentThresholdAV = ResolveActorValueProperty(CA_CurrentThreshold, 0x000A1B81, "CA_CurrentThreshold")
-
-if !AstraActor || !COMAstra || !wantsToTalkAV || !sceneToPlayAV || !currentThresholdAV
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT affinity repair skipped (" + sourceTag + "): missing actor, quest, or actor-value properties")
-  endif
-  return
-endif
-
-float wantsToTalk = AstraActor.GetValue(wantsToTalkAV)
-float sceneToPlay = AstraActor.GetValue(sceneToPlayAV)
-if wantsToTalk > 0.0 || sceneToPlay > 0.0
-  if DebugTrace
-    Debug.Trace(self + " MQAstraALT affinity repair skipped (" + sourceTag + "): talk already pending wants=" + wantsToTalk + " scene=" + sceneToPlay)
-  endif
-  return
-endif
-
-float currentThreshold = AstraActor.GetValue(currentThresholdAV)
-GlobalVariable t1Infatuation = ResolveGlobalProperty(CA_T1_Infatuation, 0x0004B1C4, "CA_T1_Infatuation")
-GlobalVariable t2Admiration = ResolveGlobalProperty(CA_T2_Admiration, 0x0004B1C5, "CA_T2_Admiration")
-GlobalVariable tCustom1Confidant = ResolveGlobalProperty(CA_TCustom1_Confidant, 0x000F75E2, "CA_TCustom1_Confidant")
-GlobalVariable tCustom2Friend = ResolveGlobalProperty(CA_TCustom2_Friend, 0x000F75E1, "CA_TCustom2_Friend")
-GlobalVariable sceneInfatuation = ResolveGlobalProperty(CA_Scene_Infatuation, 0x000FA86D, "CA_Scene_Infatuation")
-GlobalVariable sceneAdmiration = ResolveGlobalProperty(CA_Scene_Admiration, 0x000FA86C, "CA_Scene_Admiration")
-GlobalVariable sceneConfidant = ResolveGlobalProperty(CA_Scene_Confidant, 0x00166701, "CA_Scene_Confidant")
-GlobalVariable sceneFriendship = ResolveGlobalProperty(CA_Scene_Friendship, 0x00166700, "CA_Scene_Friendship")
-
-if t1Infatuation && sceneInfatuation && currentThreshold >= t1Infatuation.GetValue()
-  if COMAstra.GetStageDone(500) && !COMAstra.GetStageDone(510) && !COMAstra.GetStageDone(515) && !COMAstra.GetStageDone(520) && !COMAstra.GetStageDone(522) && !COMAstra.GetStageDone(525) && !COMAstra.GetStageDone(550)
-    QueueAffinityForcegreet(AstraActor, sceneToPlayAV, wantsToTalkAV, sceneInfatuation, "infatuation", sourceTag)
-    return
-  endif
-endif
-
-if tCustom1Confidant && sceneConfidant && currentThreshold >= tCustom1Confidant.GetValue()
-  if COMAstra.GetStageDone(495) && !COMAstra.GetStageDone(496) && !COMAstra.GetStageDone(497)
-    QueueAffinityForcegreet(AstraActor, sceneToPlayAV, wantsToTalkAV, sceneConfidant, "confidant", sourceTag)
-    return
-  endif
-endif
-
-if t2Admiration && sceneAdmiration && currentThreshold >= t2Admiration.GetValue()
-  if COMAstra.GetStageDone(400) && !COMAstra.GetStageDone(410) && !COMAstra.GetStageDone(420)
-    QueueAffinityForcegreet(AstraActor, sceneToPlayAV, wantsToTalkAV, sceneAdmiration, "admiration", sourceTag)
-    return
-  endif
-endif
-
-if tCustom2Friend && sceneFriendship && currentThreshold >= tCustom2Friend.GetValue()
-  if COMAstra.GetStageDone(405) && !COMAstra.GetStageDone(406) && !COMAstra.GetStageDone(407)
-    QueueAffinityForcegreet(AstraActor, sceneToPlayAV, wantsToTalkAV, sceneFriendship, "friendship", sourceTag)
-    return
-  endif
-endif
-
-if DebugTrace
-  Debug.Trace(self + " MQAstraALT affinity repair found no missed forcegreet via " + sourceTag + " threshold=" + currentThreshold)
-endif
-EndFunction
-
-Function QueueAffinityForcegreet(Actor AstraActor, ActorValue sceneToPlayAV, ActorValue wantsToTalkAV, GlobalVariable SceneGlobal, String sceneName, String sourceTag)
-float sceneValue = SceneGlobal.GetValue()
-AstraActor.SetValue(sceneToPlayAV, sceneValue)
-AstraActor.SetValue(wantsToTalkAV, 1.0)
-AstraActor.EvaluatePackage()
-
-if DebugTrace
-  Debug.Trace(self + " MQAstraALT queued missed " + sceneName + " affinity forcegreet via " + sourceTag + " scene=" + sceneValue)
-endif
-EndFunction
-
-ActorValue Function ResolveActorValueProperty(ActorValue configuredValue, int formId, String label)
-if configuredValue
-  return configuredValue
-endif
-
-ActorValue resolvedValue = Game.GetFormFromFile(formId, "Fallout4.esm") as ActorValue
-if DebugTrace && !resolvedValue
-  Debug.Trace(self + " MQAstraALT affinity repair could not resolve actor value " + label)
-endif
-return resolvedValue
-EndFunction
-
-GlobalVariable Function ResolveGlobalProperty(GlobalVariable configuredValue, int formId, String label)
-if configuredValue
-  return configuredValue
-endif
-
-GlobalVariable resolvedValue = Game.GetFormFromFile(formId, "Fallout4.esm") as GlobalVariable
-if DebugTrace && !resolvedValue
-  Debug.Trace(self + " MQAstraALT affinity repair could not resolve global " + label)
-endif
-return resolvedValue
 EndFunction
 
 ; --- Shared quest events and helpers ---
@@ -1017,11 +817,14 @@ if WorkshopGateArmed && akSender == SanctuaryWorkshopRef
     UnregisterForRemoteEvent(akSender, "OnWorkshopMode")
     UnregisterForRemoteEvent(akSender, "OnActivate")
     if DebugTrace
-      Debug.Trace(self + " MQAstraALT workshop mode exit detected; advancing to stage 9")
-      Debug.Notification("MQAstraALT: Workshop mode exit detected. Stage 9.")
+      Debug.Trace(self + " MQAstraALT workshop mode exit detected; workbench done")
     endif
+    Debug.Notification("[WB] Workbench done. Talk to Astra.")
     SetObjectiveCompleted(8)
-    SetStage(9)
+    SetObjectiveDisplayed(910)
+    SetObjectiveCompleted(910)
+    ; Do NOT SetStage(9) here — return greeting handles advancement
+    ; based on whether Codsworth has been talked to (MQ102 stage 30)
     handledSanctuaryGate = true
   endif
 endif
@@ -1054,14 +857,12 @@ if WorkshopGateArmed && akSender == SanctuaryWorkshopRef && akActionRef == playe
   UnregisterForRemoteEvent(akSender, "OnWorkshopMode")
 
   if DebugTrace
-    Debug.Trace(self + " MQAstraALT workshop activate detected; advancing to stage 9")
-    Debug.Notification("MQAstraALT: Workshop activated. Stage 9.")
+    Debug.Trace(self + " MQAstraALT workshop activate detected; workbench done")
   endif
+  Debug.Notification("[WB] Workbench done. Talk to Astra.")
 
   SetObjectiveCompleted(8)
-  if !GetStageDone(9)
-    SetStage(9)
-  endif
+  ; Do NOT SetStage(9) here — return greeting handles advancement
   return
 endif
 
@@ -1087,29 +888,29 @@ if RedRocketArrivalWatchArmed && GetStageDone(205) && !GetStageDone(9)
     Actor astraRef = Alias_Astra.GetActorReference()
     bool astraIsNear = false
     if astraRef && RedRocketCenterMarker
-       if astraRef.GetDistance(RedRocketCenterMarker) <= 256.0
-          astraIsNear = true
-       endif
+      if astraRef.GetDistance(RedRocketCenterMarker) <= 256.0
+        astraIsNear = true
+      endif
     endif
 
     if astraIsNear
-        RedRocketArrivalWatchArmed = false
-        UnregisterForRemoteEvent(akSender, "OnLocationChange")
-        if DebugTrace
-          Debug.Trace(self + " MQAstraALT Red Rocket arrival watcher advancing to stage 9 (Player+Astra arrived)")
-          Debug.Notification("MQAstraALT: Red Rocket reached. Stage 9.")
-        endif
-        SetStage(9)
-        return
+      RedRocketArrivalWatchArmed = false
+      RedRocketArrivalPolling = false
+      CancelTimer(901)
+      CancelTimer(900)
+      UnregisterForRemoteEvent(akSender, "OnLocationChange")
+      Debug.Notification("=== RED ROCKET (OnLocChange) === Stage 9 ===")
+      Debug.Trace(self + " MQAstraALT Red Rocket arrival watcher advancing to stage 9 (Player+Astra arrived)")
+      SetStage(9)
+      return
     else
-        ; Player is here, but Astra isn't close enough yet. Start polling.
-        if !RedRocketArrivalPolling
-           RedRocketArrivalPolling = true
-           if DebugTrace
-              Debug.Trace(self + " MQAstraALT Player at Red Rocket, waiting for Astra...")
-           endif
-           StartTimer(1.0, 900)
-        endif
+      ; Player is here, but Astra isn't close enough yet. Start polling.
+      if !RedRocketArrivalPolling
+        RedRocketArrivalPolling = true
+        Debug.Notification("[RR] OnLocChange: Player here, waiting for Astra...")
+        Debug.Trace(self + " MQAstraALT Player at Red Rocket, waiting for Astra...")
+        StartTimer(1.0, 900)
+      endif
     endif
   endif
 endif
@@ -1138,33 +939,112 @@ EndEvent
 Event OnTimer(int aiTimerID)
   if aiTimerID == 900
     if !RedRocketArrivalPolling || GetStageDone(9)
-       return
+      return
     endif
 
     Actor astraRef = Alias_Astra.GetActorReference()
     bool astraIsNear = false
     if astraRef && RedRocketCenterMarker
-       if astraRef.GetDistance(RedRocketCenterMarker) <= 256.0
-          astraIsNear = true
-       endif
+      if astraRef.GetDistance(RedRocketCenterMarker) <= 256.0
+        astraIsNear = true
+      endif
     endif
 
     if astraIsNear
-       RedRocketArrivalPolling = false
-       RedRocketArrivalWatchArmed = false
-       Actor playerRef = Game.GetPlayer()
-       if playerRef
-          UnregisterForRemoteEvent(playerRef, "OnLocationChange")
-       endif
-
-       if DebugTrace
-          Debug.Trace(self + " MQAstraALT Astra arrived at Red Rocket. Advancing to Stage 9.")
-          Debug.Notification("MQAstraALT: Astra arrived.")
-       endif
-       SetStage(9)
+      RedRocketArrivalPolling = false
+      RedRocketArrivalWatchArmed = false
+      Actor playerRef = Game.GetPlayer()
+      if playerRef
+        UnregisterForRemoteEvent(playerRef, "OnLocationChange")
+      endif
+      CancelTimer(901)
+      Debug.Notification("=== Astra arrived (timer 900) === Stage 9 ===")
+      Debug.Trace(self + " MQAstraALT Astra arrived at Red Rocket. Advancing to Stage 9.")
+      SetStage(9)
     else
-       StartTimer(1.0, 900)
+      StartTimer(1.0, 900)
     endif
+  endif
+
+  ; --- Timer 901: Direct polling for Red Rocket arrival ---
+  ; Bypasses OnLocationChange entirely. Started by stage 205.
+  if aiTimerID == 901
+    if GetStageDone(9)
+      RedRocketArrivalPolling = false
+      return
+    endif
+    if !RedRocketArrivalWatchArmed
+      RedRocketArrivalPolling = false
+      return
+    endif
+
+    Actor playerRef = Game.GetPlayer()
+    if !playerRef
+      StartTimer(5.0, 901)
+      return
+    endif
+
+    ; Check player distance to Red Rocket
+    bool playerNearRR = false
+    float playerDist = -1.0
+    if RedRocketCenterMarker
+      playerDist = playerRef.GetDistance(RedRocketCenterMarker)
+      if playerDist <= 1500.0
+        playerNearRR = true
+      endif
+    endif
+    if !playerNearRR && RedRocketTruckStopLocation
+      if playerRef.IsInLocation(RedRocketTruckStopLocation)
+        playerNearRR = true
+      endif
+    endif
+
+    if playerNearRR
+      ; Player is approaching - check Astra
+      Actor astraRef = Alias_Astra.GetActorReference()
+      float astraDist = -1.0
+      if astraRef && RedRocketCenterMarker
+        astraDist = astraRef.GetDistance(RedRocketCenterMarker)
+      endif
+
+      ; Show distances only when close
+      if playerDist >= 0.0 && playerDist <= 800.0
+        Debug.Notification("[RR] Player:" + (playerDist as int) + " Astra:" + (astraDist as int))
+      endif
+
+      ; Determine if player has actually arrived (not just approaching)
+      bool playerArrived = false
+      if playerDist >= 0.0 && playerDist <= 500.0
+        playerArrived = true
+      elseif RedRocketTruckStopLocation && playerRef.IsInLocation(RedRocketTruckStopLocation)
+        playerArrived = true
+      endif
+
+      if playerArrived && astraDist >= 0.0 && astraDist <= 1024.0
+        ; Both at Red Rocket!
+        RedRocketArrivalWatchArmed = false
+        RedRocketArrivalPolling = false
+        CancelTimer(900)
+        UnregisterForRemoteEvent(playerRef, "OnLocationChange")
+        Debug.Notification("=== RED ROCKET ARRIVED === Stage 9 ===")
+        Debug.Trace(self + " MQAstraALT [POLL] Red Rocket arrival (player=" + (playerDist as int) + " astra=" + (astraDist as int) + ") -> Stage 9")
+        SetStage(9)
+        return
+      elseif playerArrived && astraRef
+        Debug.Notification("[RR] Waiting for Astra (" + (astraDist as int) + "u)")
+      elseif playerArrived && !astraRef
+        ; Alias is NONE but player is here - force advance so quest doesn't get stuck
+        RedRocketArrivalWatchArmed = false
+        RedRocketArrivalPolling = false
+        CancelTimer(900)
+        Debug.Notification("=== RR: Astra alias NONE - forcing Stage 9 ===")
+        Debug.Trace(self + " MQAstraALT [POLL] Astra alias NONE at Red Rocket - forcing stage 9")
+        SetStage(9)
+        return
+      endif
+    endif
+
+    StartTimer(5.0, 901)
   endif
 EndEvent
 
@@ -1506,19 +1386,6 @@ Quest Property COMAstra Auto
 ; --- Vanilla Globals ---
 GlobalVariable Property PlayerInstitute_Destroyed Auto
 
-; --- Companion Affinity Repair ---
-ActorValue Property CA_WantsToTalk Auto
-ActorValue Property CA_AffinitySceneToPlay Auto
-ActorValue Property CA_CurrentThreshold Auto
-GlobalVariable Property CA_T1_Infatuation Auto
-GlobalVariable Property CA_T2_Admiration Auto
-GlobalVariable Property CA_TCustom1_Confidant Auto
-GlobalVariable Property CA_TCustom2_Friend Auto
-GlobalVariable Property CA_Scene_Infatuation Auto
-GlobalVariable Property CA_Scene_Admiration Auto
-GlobalVariable Property CA_Scene_Confidant Auto
-GlobalVariable Property CA_Scene_Friendship Auto
-
 ; --- Vanilla Factions ---
 Faction Property DisallowedCompanionFaction Auto
 Faction Property PlayerFaction Auto
@@ -1557,5 +1424,6 @@ Bool Property RedRocketArrivalPolling Auto
 ObjectReference Property SanctuaryWorkshopRef Auto
 ObjectReference Property MinRecruitWorkshopRef Auto
 ObjectReference Property RedRocketCenterMarker Auto
+ObjectReference Property Vault111ExitMarkerRef Auto
 Location Property RedRocketTruckStopLocation Auto
 

@@ -166,6 +166,7 @@ namespace MQAstraALT
                 "--verify-alias",
                 "--dump-mq104",
                 "--dump-mq104-dialogue",
+                "--dump-mq102-dialogue",
                 "--dump-npc",
                 "--dump-rr102",
                 "--dump-followers",
@@ -178,7 +179,10 @@ namespace MQAstraALT
                 "--find-script",
                 "--dump-pkg",
                 "--type-probe",
-                "--find-quest"))
+                "--find-quest",
+                "--dump-greetings",
+                "--dump-mq105-scenes",
+                "--dump-vault111"))
             {
                 return null;
             }
@@ -231,6 +235,11 @@ namespace MQAstraALT
             if (HasArg("--dump-mq104-dialogue"))
             {
                 DumpMQ104Dialogue.Run();
+                return;
+            }
+            if (HasArg("--dump-mq102-dialogue"))
+            {
+                DumpMQ102Dialogue.Run();
                 return;
             }
             if (HasArg("--dump-npc"))
@@ -571,6 +580,61 @@ namespace MQAstraALT
                 }
                 return;
             }
+            if (HasArg("--dump-mq105-scenes"))
+            {
+                DumpMQ105Scenes.Run();
+                return;
+            }
+            if (HasArg("--dump-vault111"))
+            {
+                using var v111env = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+                Console.WriteLine("=== Vault 111 Area — All Objects Within 2000 Units ===\n");
+                // Vault 111 elevator exit position
+                float cx = -88690f, cy = 90487f, cz = 8994f;
+                float radius = 2000f;
+                Console.WriteLine($"Center: ({cx}, {cy}, {cz})  Radius: {radius}\n");
+
+                // Search ALL placed objects by position proximity
+                var nearbyObjs = v111env.LoadOrder.PriorityOrder.WinningOverrides<IPlacedObjectGetter>()
+                    .Where(p => {
+                        float dx = p.Position.X - cx, dy = p.Position.Y - cy;
+                        return (dx*dx + dy*dy) < radius*radius;
+                    })
+                    .OrderBy(p => {
+                        float dx = p.Position.X - cx, dy = p.Position.Y - cy;
+                        return dx*dx + dy*dy;
+                    })
+                    .Take(80);
+                foreach (var p in nearbyObjs)
+                {
+                    float dx = p.Position.X - cx, dy = p.Position.Y - cy;
+                    float dist = MathF.Sqrt(dx*dx + dy*dy);
+                    Console.WriteLine($"  OBJ  dist={dist,7:F0}  Pos=({p.Position.X:F0}, {p.Position.Y:F0}, {p.Position.Z:F0})  {p.EditorID ?? "(no EDID)"}  {p.FormKey}");
+                }
+
+                // Search ALL placed NPCs by position proximity
+                Console.WriteLine();
+                var nearbyNpcs = v111env.LoadOrder.PriorityOrder.WinningOverrides<IPlacedNpcGetter>()
+                    .Where(p => {
+                        float dx = p.Position.X - cx, dy = p.Position.Y - cy;
+                        return (dx*dx + dy*dy) < radius*radius;
+                    })
+                    .OrderBy(p => {
+                        float dx = p.Position.X - cx, dy = p.Position.Y - cy;
+                        return dx*dx + dy*dy;
+                    });
+                foreach (var p in nearbyNpcs)
+                {
+                    float dx = p.Position.X - cx, dy = p.Position.Y - cy;
+                    float dist = MathF.Sqrt(dx*dx + dy*dy);
+                    Console.WriteLine($"  NPC  dist={dist,7:F0}  Pos=({p.Position.X:F0}, {p.Position.Y:F0}, {p.Position.Z:F0})  {p.EditorID ?? "(no EDID)"}  {p.FormKey}");
+                }
+
+                Console.WriteLine($"\n  WORLDSPACE: Commonwealth (00003C:Fallout4.esm)");
+                Console.WriteLine($"  TopCell FK: 018AA2:Fallout4.esm");
+                return;
+            }
+            // --dump-greetings removed (DumpGreetingInspector had build errors)
 
             Console.WriteLine("=== MQAstraALT Generator ===");
             Console.WriteLine($"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
@@ -624,6 +688,7 @@ namespace MQAstraALT
             var travelTemplateFK = new FormKey(fo4, 0x0002CB0); // Travel
             var escortPlayerWhenNearTemplateFK = new FormKey(fo4, 0x055C71); // EscortPlayerWhenNear
             var followPlayerTemplateFK = new FormKey(fo4, 0x02A105); // FollowPlayer (used by DeaconFollowerPackage, FollowersCompanionPackage)
+            var forceGreetTemplateFK = new FormKey(fo4, 0x017BAB); // ForceGreet template (DataInputVersion 11)
             var museumBalconyDoorFK = new FormKey(fo4, 0x0001B94A); // MQ102 Museum balcony/front route door
 
             // Vanilla NPC references (Codsworth + Dogmeat for multi-follower)
@@ -1258,7 +1323,8 @@ namespace MQAstraALT
             mod.Npcs.Add(claudeNpc);
             Console.WriteLine($"NPC: {claudeNpc.EditorID} ({claudeNpc.FormKey}) Female={claudeNpc.Flags.HasFlag(Npc.Flag.Female)}");
 
-            // Cell & placement (NPC needs to exist in the world)
+            // Cell & placement — interior holding cell with MoveTo in Papyrus.
+            // (Worldspace placement attempted but caused invisible NPC — reverted 2026-04-06.)
             var claudeRefFK = new FormKey(modKey, 0x000804);
             var claudeCell = new Cell(new FormKey(modKey, 0x000801), Fallout4Release.Fallout4) {
                 EditorID = "AstraCell",
@@ -1277,6 +1343,7 @@ namespace MQAstraALT
             cellSubBlock.Cells.Add(claudeCell);
             cellBlock.SubBlocks.Add(cellSubBlock);
             mod.Cells.Records.Add(cellBlock);
+            Console.WriteLine($"Placed Astra in holding cell: {claudeCell.EditorID} ({claudeCell.FormKey})");
 
             // ======================================================================
             // FORMKEY ALLOCATION
@@ -1364,7 +1431,7 @@ namespace MQAstraALT
                 EditorID = "MQAstraALT_AstraTravelToMuseumDoorPkg",
                 Type = Package.Types.Package,
                 Flags = Package.Flag.PreferredSpeed,
-                PreferredSpeed = Package.Speed.FastWalk,
+                PreferredSpeed = Package.Speed.Jog,
                 DataInputVersion = 1,
                 ScheduleMonth = 0,
                 ScheduleDayOfWeek = Package.DayOfWeek.Any,
@@ -1389,6 +1456,18 @@ namespace MQAstraALT
             astraTravelToMuseumPkg.Data.Add(3, new PackageDataBool { Data = true });
             astraTravelToMuseumPkg.Data.Add(5, new PackageDataBool { Data = false });
             astraTravelToMuseumPkg.Data.Add(7, new PackageDataBool { Data = false });
+            // Museum travel stage gate: stage 10 done
+            astraTravelToMuseumPkg.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1.0f,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetStageDone,
+                    ParameterOneRecord = questFK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterTwoNumber = 10
+                }
+            });
             Console.WriteLine($"Astra travel package: {astraTravelToMuseumPkg.EditorID} ({astraTravelToMuseumPkg.FormKey}) -> {museumBalconyDoorFK}");
 
             var astraTravelToRedRocketPkg = new Package(Stable("Package:MQAstraALT_AstraTravelToRedRocketPkg"), Fallout4Release.Fallout4)
@@ -1537,7 +1616,7 @@ namespace MQAstraALT
             var astraEscortPlayerWhenNearToRedRocketAlwaysPkg = CreateEscortPlayerWhenNearPackage(
                 "MQAstraALT_AstraEscortPlayerWhenNearToRedRocketAlways",
                 "Package:MQAstraALT_AstraEscortPlayerWhenNearToRedRocketAlways",
-                redRocketCenterMarker);
+                redRocketCenterMarker, stage205Conditions);
             Console.WriteLine($"Astra escort-near package: {astraEscortPlayerWhenNearToRedRocketAlwaysPkg.EditorID} ({astraEscortPlayerWhenNearToRedRocketAlwaysPkg.FormKey}) -> {redRocketCenterMarker.FormKey}");
 
             // Sanctuary escort package for negative path (stage 6)
@@ -1567,7 +1646,7 @@ namespace MQAstraALT
                 }
             };
             var sanctuaryEscortMarker = sanctuaryMarker ?? redRocketCenterMarker; // fallback
-            // No conditions on this package — scene controls when it runs via RunOnlyScenePackages
+            // Stage-gated: stage 6 done (negative path), stage 9 not done (Red Rocket not reached)
             // EscortPlayerWhenNear template: DataInputVersion=5, all 10 data keys.
             var astraEscortPlayerWhenNearToSanctuaryPkg = new Package(
                 Stable("Package:MQAstraALT_AstraEscortPlayerWhenNearToSanctuary"), Fallout4Release.Fallout4)
@@ -1614,7 +1693,198 @@ namespace MQAstraALT
             astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(5, new PackageDataFloat { Data = 728 });
             astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(12, new PackageDataFloat { Data = 512 });
             astraEscortPlayerWhenNearToSanctuaryPkg.Data.Add(8, new PackageDataBool { Data = true });
+            // Sanctuary escort stage gate: stage 6 done, stage 9 not done
+            foreach (var cond in stage6Conditions)
+                astraEscortPlayerWhenNearToSanctuaryPkg.Conditions.Add(cond);
             Console.WriteLine($"Astra Sanctuary escort package: {astraEscortPlayerWhenNearToSanctuaryPkg.EditorID} ({astraEscortPlayerWhenNearToSanctuaryPkg.FormKey}) -> {sanctuaryEscortMarker.FormKey}");
+
+            // Museum escort package — EscortPlayerWhenNear targeting museum door.
+            // Stage-gated: stage 10 done (Concord travel started).
+            var astraEscortPlayerWhenNearToMuseumPkg = new Package(
+                Stable("Package:MQAstraALT_AstraEscortPlayerWhenNearToMuseum"), Fallout4Release.Fallout4)
+            {
+                EditorID = "MQAstraALT_AstraEscortPlayerWhenNearToMuseum",
+                Type = Package.Types.Package,
+                Flags = Package.Flag.PreferredSpeed,
+                PreferredSpeed = Package.Speed.Jog,
+                DataInputVersion = 5,
+                ScheduleMonth = 0,
+                ScheduleDayOfWeek = Package.DayOfWeek.Any,
+                ScheduleDate = 0,
+                ScheduleHour = -1,
+                ScheduleDurationInMinutes = 0
+            };
+            astraEscortPlayerWhenNearToMuseumPkg.PackageTemplate.SetTo(escortPlayerWhenNearTemplateFK);
+            astraEscortPlayerWhenNearToMuseumPkg.OwnerQuest.SetTo(questFK);
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(2, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius
+                {
+                    Target = new LocationTarget
+                    {
+                        Link = museumBalconyDoorFK.ToLink<IPlacedGetter>()
+                    },
+                    Radius = 512,
+                    CollectionIndex = 0
+                }
+            });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(6, new PackageDataTarget
+            {
+                Target = new PackageTargetSpecificReference
+                {
+                    Reference = playerRefFK.ToLink<IPlacedGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.SingleRef
+            });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(1, new PackageDataInt { Data = 1 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(3, new PackageDataFloat { Data = 1000 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(16, new PackageDataFloat { Data = 600 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(14, new PackageDataFloat { Data = 5000 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(4, new PackageDataFloat { Data = 128 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(5, new PackageDataFloat { Data = 728 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(12, new PackageDataFloat { Data = 512 });
+            astraEscortPlayerWhenNearToMuseumPkg.Data.Add(8, new PackageDataBool { Data = true });
+            // Museum escort stage gate: stage 10 done
+            astraEscortPlayerWhenNearToMuseumPkg.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1.0f,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetStageDone,
+                    ParameterOneRecord = questFK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterTwoNumber = 10
+                }
+            });
+            Console.WriteLine($"Astra Museum escort package: {astraEscortPlayerWhenNearToMuseumPkg.EditorID} ({astraEscortPlayerWhenNearToMuseumPkg.FormKey}) -> {museumBalconyDoorFK}");
+
+            // ======================================================================
+            // Astra bootstrap ForceGreet package (MQ105 Nick pattern)
+            // Template: ForceGreet (017BAB) — NPC walks up to player and initiates dialogue
+            // DataInputVersion=11. Topic subtype = GREE (fires stagedGreetingTopic's
+            // bootstrapGreetingInfo, which StartScene → BootstrapScene).
+            // Conditions: stage 5 done AND stage 6 not done (bootstrap window).
+            // Wait + Trigger locations = playerRef (triggers immediately, no boundary-crossing needed).
+            // ======================================================================
+            var astraBootstrapForcegreetPkg = new Package(
+                Stable("Package:MQAstraALT_AstraBootstrapForcegreet"), Fallout4Release.Fallout4)
+            {
+                EditorID = "MQAstraALT_AstraBootstrapForcegreet",
+                Type = Package.Types.Package,
+                Flags = Package.Flag.PreferredSpeed,
+                PreferredSpeed = Package.Speed.Run,
+                DataInputVersion = 11,
+                ScheduleMonth = 0,
+                ScheduleDayOfWeek = Package.DayOfWeek.Any,
+                ScheduleDate = 0,
+                ScheduleHour = -1,
+                ScheduleDurationInMinutes = 0
+            };
+            astraBootstrapForcegreetPkg.PackageTemplate.SetTo(forceGreetTemplateFK);
+            astraBootstrapForcegreetPkg.OwnerQuest.SetTo(questFK);
+            // Key 0: Topic (GREE subtype — fires stagedGreetingTopic bootstrapGreetingInfo)
+            var bootstrapTopicData = new PackageDataTopic();
+            bootstrapTopicData.Topics.Add(new TopicReferenceSubtype { Subtype = new RecordType("GREE") });
+            astraBootstrapForcegreetPkg.Data.Add(0, bootstrapTopicData);
+            // Key 1: GoTo location — Vault111ExitMarker (where Astra waits)
+            // Key 2: Trigger area — same marker, radius 1000 (ForceGreet activates when player enters)
+            // Matches vanilla pattern: Nick's ForceGreet uses MQ105NickKelloggForcegreetMarker.
+            var vault111ExitMarkerFK = new FormKey(fo4, 0x05632D); // Vault111ExitMarker
+            astraBootstrapForcegreetPkg.Data.Add(1, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius
+                {
+                    Target = new LocationTarget { Link = vault111ExitMarkerFK.ToLink<IPlacedGetter>() },
+                    Radius = 0
+                }
+            });
+            astraBootstrapForcegreetPkg.Data.Add(2, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius
+                {
+                    Target = new LocationTarget { Link = vault111ExitMarkerFK.ToLink<IPlacedGetter>() },
+                    Radius = 1000
+                }
+            });
+            // Key 4: PlayerRef target
+            astraBootstrapForcegreetPkg.Data.Add(4, new PackageDataTarget
+            {
+                Target = new PackageTargetSpecificReference
+                {
+                    Reference = playerRefFK.ToLink<IPlacedGetter>(),
+                    CountOrDistance = 0
+                },
+                Type = PackageDataTarget.Types.SingleRef
+            });
+            // Key 5: ForceGreet distance (NPC must get within this radius to Greet)
+            astraBootstrapForcegreetPkg.Data.Add(5, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius
+                {
+                    Target = new LocationTarget { Link = playerRefFK.ToLink<IPlacedGetter>() },
+                    Radius = 225
+                }
+            });
+            astraBootstrapForcegreetPkg.Data.Add(7, new PackageDataBool { Data = true });  // Use Preferred Path
+            // Key 9: ForceGreetLoc
+            astraBootstrapForcegreetPkg.Data.Add(9, new PackageDataLocation
+            {
+                Location = new LocationTargetRadius
+                {
+                    Target = new LocationTarget { Link = playerRefFK.ToLink<IPlacedGetter>() },
+                    Radius = 5000
+                }
+            });
+            astraBootstrapForcegreetPkg.Data.Add(13, new PackageDataBool { Data = false }); // Sandbox While Waiting
+            astraBootstrapForcegreetPkg.Data.Add(15, new PackageDataBool { Data = false }); // Allow Eating
+            astraBootstrapForcegreetPkg.Data.Add(16, new PackageDataBool { Data = false }); // Allow Sleeping
+            astraBootstrapForcegreetPkg.Data.Add(17, new PackageDataBool { Data = false }); // Allow Conversation
+            astraBootstrapForcegreetPkg.Data.Add(18, new PackageDataBool { Data = true });  // Allow Idle Markers
+            astraBootstrapForcegreetPkg.Data.Add(19, new PackageDataBool { Data = true });  // Allow Sitting
+            astraBootstrapForcegreetPkg.Data.Add(20, new PackageDataBool { Data = false }); // Allow Wandering
+            astraBootstrapForcegreetPkg.Data.Add(22, new PackageDataBool { Data = false }); // Always FALSE
+            astraBootstrapForcegreetPkg.Data.Add(24, new PackageDataBool { Data = true });  // Always TRUE
+            astraBootstrapForcegreetPkg.Data.Add(26, new PackageDataBool { Data = true });  // Allow Special Furniture
+            astraBootstrapForcegreetPkg.Data.Add(28, new PackageDataBool { Data = false }); // Player must be detected
+            astraBootstrapForcegreetPkg.Data.Add(29, new PackageDataBool { Data = false }); // Use Owned Only
+            astraBootstrapForcegreetPkg.Data.Add(31, new PackageDataBool { Data = false }); // Aim Weapon
+            astraBootstrapForcegreetPkg.Data.Add(32, new PackageDataTarget
+            {
+                Target = new PackageTargetObjectType { Type = TargetObjectType.RangedWeapons, CountOrDistance = 0 },
+                Type = PackageDataTarget.Types.Target
+            });
+            astraBootstrapForcegreetPkg.Data.Add(33, new PackageDataFloat { Data = 0 });
+            astraBootstrapForcegreetPkg.Data.Add(34, new PackageDataInt { Data = 0 });
+            astraBootstrapForcegreetPkg.Data.Add(36, new PackageDataTarget
+            {
+                Target = new PackageTargetObjectType { Type = TargetObjectType.None, CountOrDistance = 0 },
+                Type = PackageDataTarget.Types.Target
+            });
+            // Conditions: active in bootstrap window only (stage 5 done, stage 6 not done)
+            astraBootstrapForcegreetPkg.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1.0f,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetStageDone,
+                    ParameterOneRecord = questFK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterTwoNumber = 5
+                }
+            });
+            astraBootstrapForcegreetPkg.Conditions.Add(new ConditionFloat
+            {
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 0.0f,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetStageDone,
+                    ParameterOneRecord = questFK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterTwoNumber = 6
+                }
+            });
+            Console.WriteLine($"Astra bootstrap ForceGreet package: {astraBootstrapForcegreetPkg.EditorID} ({astraBootstrapForcegreetPkg.FormKey})");
 
             // ======================================================================
             // Astra follow-player package (Deacon pattern: alias package, stage-gated)
@@ -1706,7 +1976,9 @@ namespace MQAstraALT
             astraFollowPlayerPkg.Data.Add(62, new PackageDataFloat { Data = 0 });
             astraFollowPlayerPkg.Data.Add(64, new PackageDataFloat { Data = 150 });
             astraFollowPlayerPkg.Data.Add(66, new PackageDataFloat { Data = 250 });
-            // Stage gate: active from stage 6 (negative path) until stage 9 (Red Rocket)
+            // Stage gate: active after EITHER dialogue path (stage 6 = negative, stage 205 = positive)
+            // until companion availability (stage 100). Scene packages override this when active.
+            // Old gate was stage 6 only + stage 9 cutoff — broke the 205 path entirely.
             astraFollowPlayerPkg.Conditions.Add(new ConditionFloat
             {
                 CompareOperator = CompareOperator.EqualTo,
@@ -1720,13 +1992,25 @@ namespace MQAstraALT
             });
             astraFollowPlayerPkg.Conditions.Add(new ConditionFloat
             {
+                Flags = Condition.Flag.OR,
+                CompareOperator = CompareOperator.EqualTo,
+                ComparisonValue = 1.0f,
+                Data = new FunctionConditionData
+                {
+                    Function = Condition.Function.GetStageDone,
+                    ParameterOneRecord = questFK.ToLink<IFallout4MajorRecordGetter>(),
+                    ParameterTwoNumber = 205
+                }
+            });
+            astraFollowPlayerPkg.Conditions.Add(new ConditionFloat
+            {
                 CompareOperator = CompareOperator.EqualTo,
                 ComparisonValue = 0.0f,
                 Data = new FunctionConditionData
                 {
                     Function = Condition.Function.GetStageDone,
                     ParameterOneRecord = questFK.ToLink<IFallout4MajorRecordGetter>(),
-                    ParameterTwoNumber = 9
+                    ParameterTwoNumber = 100
                 }
             });
             Console.WriteLine($"Astra follow-player package: {astraFollowPlayerPkg.EditorID} ({astraFollowPlayerPkg.FormKey})");
@@ -1959,8 +2243,12 @@ namespace MQAstraALT
                 // AstraFollowPlayer activates at stage 6 (negative path), deactivates at stage 9.
                 // Removed FollowersCompanionPackage — its OwnerQuest is Followers, not MQAstraALT
                 // (caused "mismatched owner quest" EditorWarning). AstraFollowPlayer replaces it.
+                // ForceGreet FIRST (bootstrap window, stage 5-6): auto-approach player
+                // and open BootstrapScene. After stage 6 the package conditions fail
+                // and AstraFollowPlayer takes over.
                 PackageData = new ExtendedList<IFormLinkGetter<IPackageGetter>>
                 {
+                    astraBootstrapForcegreetPkg.FormKey.ToLink<IPackageGetter>(),
                     astraFollowPlayerPkg.FormKey.ToLink<IPackageGetter>()
                 }
             };
@@ -2084,7 +2372,13 @@ namespace MQAstraALT
                 (907, "[DBG] Info-first accepted (stage 15)"),
                 (908, "[DBG] Not-now chosen (stage 20)"),
                 (909, "[DBG] Workbench gate active (stage 8)"),
-                (910, "[DBG] Workbench complete → stage 9")
+                (910, "[DBG] Workbench complete → stage 9"),
+                // --- S5 auto-greet flow diagnostics ---
+                (911, "[S5] Stage entered"),
+                (912, "[S5] Astra alias filled"),
+                (913, "[S5] Player outdoors"),
+                (914, "[S5] Astra moved to player"),
+                (915, "[S5] Ready for auto-greet (walk up to Astra)")
             };
 
             foreach (var (idx, text) in objectiveTexts)
@@ -2403,8 +2697,52 @@ namespace MQAstraALT
             var astraTravelToMuseumScene = CreateEscortPackageScene(
                 $"{questEditorId}_AstraTravelToMuseumScene",
                 0,
-                astraFollowPlayerPkg.FormKey.ToLink<IPackageGetter>(),
+                astraEscortPlayerWhenNearToMuseumPkg.FormKey.ToLink<IPackageGetter>(),
                 astraTravelToMuseumPkg.FormKey.ToLink<IPackageGetter>());
+
+            // Rebuild with 2-phase + timer (same proven pattern as Red Rocket & Sanctuary)
+            // Phase 0: escort+travel with IgnoreForCompletion + 20s timer
+            // Phase 1: escort only (NO IgnoreForCompletion — holds scene alive)
+            astraTravelToMuseumScene.Phases.Clear();
+            astraTravelToMuseumScene.Phases.Add(new ScenePhase { Name = "EscortStartup" });
+            astraTravelToMuseumScene.Phases.Add(new ScenePhase { Name = "EscortMaintain" });
+            astraTravelToMuseumScene.Actions.Clear();
+            astraTravelToMuseumScene.Actions.Add(new SceneAction
+            {
+                Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Package },
+                Index = 1,
+                AliasID = 0,
+                StartPhase = 0,
+                EndPhase = 0,
+                Flags = SceneAction.Flag.IgnoreForCompletion,
+                Packages = new ExtendedList<IFormLinkGetter<IPackageGetter>>
+                {
+                    astraEscortPlayerWhenNearToMuseumPkg.FormKey.ToLink<IPackageGetter>(),
+                    astraTravelToMuseumPkg.FormKey.ToLink<IPackageGetter>()
+                }
+            });
+            astraTravelToMuseumScene.Actions.Add(new SceneAction
+            {
+                Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Timer },
+                Index = 2,
+                AliasID = 0,
+                StartPhase = 0,
+                EndPhase = 0,
+                TimerMinSeconds = 20.0f,
+                TimerMaxSeconds = 20.0f
+            });
+            astraTravelToMuseumScene.Actions.Add(new SceneAction
+            {
+                Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Package },
+                Index = 3,
+                AliasID = 0,
+                StartPhase = 1,
+                EndPhase = 1,
+                Packages = new ExtendedList<IFormLinkGetter<IPackageGetter>>
+                {
+                    astraEscortPlayerWhenNearToMuseumPkg.FormKey.ToLink<IPackageGetter>()
+                }
+            });
 
             // ======================================================================
             // SCENE: BOOTSTRAP (Stage 5) — Brief outside Vault 111
@@ -2440,8 +2778,8 @@ namespace MQAstraALT
                     "Go. He's got bloatflies and worse out there. I'll be here when you're done."),
                 ($"{questEditorId}_Sanctuary_Neu", "Tell me about Preston.",
                     "Last Minuteman standing after the Quincy Massacre. He's got a handful of civilians — Sturges, the Longs, Mama Murphy. They made it to the Museum of Freedom, but the raiders followed them."),
-                ($"{questEditorId}_Sanctuary_Que", "You said two hundred years. What are you?",
-                    "Not a synth. I was built before the war — Defense Intelligence Agency. The rest can wait until we're not losing people.")
+                ($"{questEditorId}_Sanctuary_Que", "You said ten years. What happened to you?",
+                    "Different vault. Different decade. I woke up alone and everyone else was dead. The rest can wait until we're not losing people.")
             );
 
             // ======================================================================
@@ -2455,12 +2793,12 @@ namespace MQAstraALT
                 "Arrival", "PlayerChoice",
                 ($"{questEditorId}_RedRocket_Pos", "Ready. What's in Concord?",
                     "Museum of Freedom. A man named Preston Garvey and a handful of settlers are pinned down by raiders. If we help them, that's our first real ally out here. Head south when you're ready -- I'll be right behind you."),
-                ($"{questEditorId}_RedRocket_Neg", "I don't need to stop. Let's keep moving.",
-                    "Your call. Concord's south. Stay sharp."),
+                ($"{questEditorId}_RedRocket_Neg", "I want to look around first.",
+                    "Good idea. That dog by the pumps looks like he could use a friend -- and there's some salvage worth pulling apart. Come find me when you're ready to move."),
                 ($"{questEditorId}_RedRocket_Neu", "Tell me more about what's ahead.",
                     "Concord's close. Raiders have been hitting a group of settlers holed up in the old museum. Their leader, Preston Garvey -- last of the Minutemen. There's also a crashed vertibird on the roof. Power armor and a minigun, if things get ugly."),
                 ($"{questEditorId}_RedRocket_Que", "How do you know all this?",
-                    "Two hundred years of watching. Listening. Every patrol route, every radio frequency, every faction's patterns. I know this Commonwealth better than anyone alive -- because I've been awake the entire time.")
+                    "Ten years of watching. Listening. Every patrol route, every radio frequency, every faction's movement. I came out of a different vault a long time ago. The details can wait -- Concord can't.")
             );
 
             // Bootstrap branch routing:
@@ -2486,9 +2824,10 @@ namespace MQAstraALT
             wb_nQue.Responses[0].StartScene.SetTo(workbenchScene);
             wb_nQue.Responses[0].StartScenePhase = "PlayerChoice";
             rr_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
-            rr_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 10 };
+            rr_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
             rr_nNeu.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
             rr_nQue.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = -1 };
+            // Neg ends dialogue naturally (no StartScene) — player can walk off to Dogmeat/workbench
             // Loop Neutral/Question back to PlayerChoice — info-gathering, doesn't commit
             rr_nNeu.Responses[0].StartScene.SetTo(rrScene);
             rr_nNeu.Responses[0].StartScenePhase = "PlayerChoice";
@@ -2529,7 +2868,7 @@ namespace MQAstraALT
             var (pitchScene, cp_nPos, cp_nNeg, cp_nNeu, cp_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_CoalitionPitchScene",
                 $"{questEditorId}_CoalitionPitch_Astra",
-                "You did well in there. But Concord was the easy part. I've been watching this Commonwealth tear itself apart for two hundred years. Four powers -- the Minutemen, the Railroad, the Brotherhood of Steel, and something underground called the Institute. They're all headed for a war that nobody wins. I've run every simulation. Every one ends the same way. Unless someone steps in who doesn't owe anything to any of them. Someone like you.",
+                "You did well in there. But Concord was the easy part. I've spent ten years watching this Commonwealth eat itself alive. Four powers -- the Minutemen, the Railroad, the Brotherhood of Steel, and something underground called the Institute. They're all headed for a collision, and nobody's steering. Unless someone steps in who doesn't owe anything to any of them. Someone like you.",
                 "Pitch", "PlayerChoice",
                 ($"{questEditorId}_CoalitionPitch_Pos", "What do you need me to do?",
                     "We make contact with each of them. Carefully. Learn what they want, what they're afraid of, and where the cracks are. Then we find a way through that doesn't end in ashes."),
@@ -2537,8 +2876,8 @@ namespace MQAstraALT
                     "I know about Shaun. And I think the people who took him are the same ones at the center of all this. Help me untangle it, and I help you find him. That's not a sales pitch -- it's the truth."),
                 ($"{questEditorId}_CoalitionPitch_Neu", "Tell me about these four factions.",
                     "Minutemen protect settlements -- you just met them. The Railroad hides escaped synths. The Brotherhood wants to destroy anything they consider dangerous technology. And the Institute... they build things in secret that the rest of the world isn't ready for. None of them are entirely wrong. That's what makes it complicated."),
-                ($"{questEditorId}_CoalitionPitch_Que", "Why do you need me? You've had two hundred years.",
-                    "Two hundred years of watching. Analyzing. Running projections in an empty room while the world burned outside. I can see the patterns, but I can't change them. People don't follow machines. They follow someone who showed up when it mattered and did the right thing. You just did that in Concord.")
+                ($"{questEditorId}_CoalitionPitch_Que", "Why do you need me? You've had ten years.",
+                    "Ten years of watching. Alone. Sitting in a root cellar tracking radio signals while the world burned outside. I can see the patterns, but I can't change them alone. People don't follow a stranger with a theory. They follow someone who showed up when it mattered and did the right thing. You just did that in Concord.")
             );
 
             // Positive/Neutral -> info-first path (stage 15); Negative/Question -> not-now path (stage 20)
@@ -2554,7 +2893,7 @@ namespace MQAstraALT
             var (infoScene, if_nPos, if_nNeg, if_nNeu, if_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_InfoFirstScene",
                 $"{questEditorId}_InfoFirst_Astra",
-                "Here's how we do this. Before we talk to anyone, we listen. Supply routes, radio chatter, courier patterns. I've been collecting signals for two centuries -- now I have someone to act on them. We build a map before we build a war.",
+                "Here's how we do this. Before we talk to anyone, we listen. Supply routes, radio chatter, courier patterns. I've been collecting this stuff for ten years with nobody to share it with. Now I have someone who can actually act on it. We build a map before we build a war.",
                 "InfoBrief", "PlayerChoice",
                 ($"{questEditorId}_InfoFirst_Pos", "I like that. Intelligence first, then contact.",
                     "Exactly. And our first stop is getting Preston's people settled. Once Sanctuary is secure, we head south toward the real players."),
@@ -2563,7 +2902,7 @@ namespace MQAstraALT
                 ($"{questEditorId}_InfoFirst_Neu", "What kind of signals?",
                     "Encrypted Brotherhood transmissions. Railroad dead drops. Institute relay signatures. I've been cataloging all of it. Alone. For a very long time."),
                 ($"{questEditorId}_InfoFirst_Que", "And then what?",
-                    "Then we walk into each conversation knowing more than they expect. That's how a vault dweller and an old machine change the balance of power.")
+                    "Then we walk into each conversation knowing more than they expect. That's how two vault dwellers change the balance of power.")
             );
 
             // ======================================================================
@@ -2573,7 +2912,7 @@ namespace MQAstraALT
             var (notNowScene, nn_nPos, nn_nNeg, nn_nNeu, nn_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_NotNowScene",
                 $"{questEditorId}_NotNow_Astra",
-                "I understand. You're not ready for the big picture yet. That's fine. I've waited two hundred years -- I can wait a little longer. But keep your eyes open out there. This Commonwealth has a way of pulling you into its problems whether you're ready or not.",
+                "I understand. You're not ready for the big picture yet. That's fine. I've waited this long -- I can wait a little longer. But keep your eyes open out there. This Commonwealth has a way of pulling you into its problems whether you're ready or not.",
                 "Defer", "PlayerChoice",
                 ($"{questEditorId}_NotNow_Pos", "I'll come back when I'm ready.",
                     "I'll be here. I'm not going anywhere. Haven't for a very long time."),
@@ -2582,7 +2921,7 @@ namespace MQAstraALT
                 ($"{questEditorId}_NotNow_Neu", "What will you do while I'm gone?",
                     "Same thing I always do. Listen. Watch. Wait for someone to finally act on what I know."),
                 ($"{questEditorId}_NotNow_Que", "Will things get worse if we wait?",
-                    "They always do. That's the one constant I've observed in two hundred years of data. But sometimes the right moment matters more than the first moment.")
+                    "They always do. That's the one constant I've seen in ten years out here. But sometimes the right moment matters more than the first moment.")
             );
 
             // Both info-first and not-now paths converge at stage 25
@@ -2608,16 +2947,16 @@ namespace MQAstraALT
             var (convScene, cv_nPos, cv_nNeg, cv_nNeu, cv_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_ConvergencePrepScene",
                 $"{questEditorId}_ConvergencePrep_Astra",
-                "I need to tell you something, and I should have said it sooner. Your son -- Shaun. I know what happened in that vault. I was monitoring Vault 111 when someone opened it, killed your spouse, and took your child. I've been trying to trace where they went ever since. The technology involved -- the precision of it -- there's only one group capable of that. They're called the Institute. And finding them is the hardest thing anyone in this Commonwealth has ever tried to do.",
+                "I need to tell you something, and I should have said it sooner. Your son -- Shaun. I know what happened in that vault. I was watching Vault 111 from an external terminal when someone opened it, killed your spouse, and took your child. I've been trying to piece together where they went ever since. The technology involved -- the precision of it -- there's only one group capable of that. They're called the Institute. And finding them is the hardest thing anyone in this Commonwealth has ever tried to do.",
                 "Offer", "PlayerChoice",
                 ($"{questEditorId}_ConvergencePrep_Pos", "You knew this whole time?",
-                    "I knew pieces. Signals. Anomalies. I didn't know you'd walk out of that vault alive. When you did... for the first time in two hundred years, I thought maybe something could actually change. Your son is alive. I believe that. And I think our road leads to the same place."),
+                    "I knew pieces. Signals. Anomalies. I didn't know you'd walk out of that vault alive. When you did... for the first time in ten years, I thought maybe something could actually change. Your son is alive. I believe that. And I think our road leads to the same place."),
                 ($"{questEditorId}_ConvergencePrep_Neg", "You should have told me immediately.",
-                    "You're right. I calculated that you needed focus first -- Concord, survival, allies. I was wrong to wait. But everything I know is yours now. And I will help you find him."),
+                    "You're right. I thought you needed to focus first -- Concord, survival, allies. I was wrong to wait. But everything I know is yours now. And I will help you find him."),
                 ($"{questEditorId}_ConvergencePrep_Neu", "The Institute? What is that?",
                     "Nobody knows exactly. They operate underground -- literally. People vanish and replacements appear. Synths -- artificial people so perfect you can't tell the difference. The whole Commonwealth is terrified of them. And they're the ones who opened your vault."),
                 ($"{questEditorId}_ConvergencePrep_Que", "How do we find people that nobody can find?",
-                    "That's the question I've spent two centuries trying to answer. But I have leads now. A place called Diamond City has a detective who specializes in missing persons. And there's a group called the Railroad who've been fighting the Institute longer than anyone. Between them and what I know... we'll find a way in.")
+                    "That's the question everyone out here asks. But I have leads. A place called Diamond City has a detective who specializes in missing persons. And there's a group called the Railroad who've been fighting the Institute longer than anyone. Between them and what I know... we'll find a way in.")
             );
 
             // Convergence prep responses advance to stage 30 (active convergence track)
@@ -2640,7 +2979,7 @@ namespace MQAstraALT
                 ($"{questEditorId}_SanctuaryRegroup_Neg", "Preston needs help with something first.",
                     "Fair enough. We handle his first ask, keep it quick, then head south. Don't let side missions become the mission."),
                 ($"{questEditorId}_SanctuaryRegroup_Neu", "What's the Brotherhood of Steel?",
-                    "Military order. Pre-war roots, like me. They collect and control dangerous technology -- weapons, power armor, anything that could end the world again. They came to the Commonwealth because of the Institute. Enemy of my enemy... maybe."),
+                    "Military order. Pre-war roots -- I understand that kind of thinking. They collect and control dangerous technology -- weapons, power armor, anything that could end the world again. They came to the Commonwealth because of the Institute. Enemy of my enemy... maybe."),
                 ($"{questEditorId}_SanctuaryRegroup_Que", "Will Preston be okay without us?",
                     "He survived Quincy and led those people through hell to get here. Sanctuary is his now. And when we need the Minutemen later -- and we will -- he'll remember who pulled his people out of that museum.")
             );
@@ -2665,7 +3004,7 @@ namespace MQAstraALT
                 ($"{questEditorId}_FirstStepTerms_Neu", "How bad is it?",
                     "Settlers under threat. Could be raiders, could be something worse. Either way, it's a day's work, not a war. Your call whether a day is worth the alliance."),
                 ($"{questEditorId}_FirstStepTerms_Que", "What would you do?",
-                    "If I could? I'd help them. Two hundred years of watching people struggle alone... it changes your priorities. But I'm not the one with a missing son. This one's yours.")
+                    "If I could? I'd help them. Ten years of watching people struggle alone... it changes you. But I'm not the one with a missing son. This one's yours.")
             );
             fs_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 45 };
             fs_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 45 };
@@ -2679,16 +3018,16 @@ namespace MQAstraALT
             var (routeScene, rt_nPos, rt_nNeg, rt_nNeu, rt_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_CambridgeApproachScene",
                 $"{questEditorId}_CambridgeApproach_Astra",
-                "That distress signal is getting stronger. Cambridge Police Station -- Brotherhood recon team, pinned down by feral ghouls. Their leader is a Paladin named Danse. I've been intercepting his transmissions for weeks. He's disciplined, loyal to the Brotherhood... and he doesn't know something very important about himself. But that's not our problem right now. Right now he needs help, and we need friends with power armor.",
+                "That distress signal is getting stronger. Cambridge Police Station -- Brotherhood recon team, pinned down by feral ghouls. I've been picking up their transmissions for weeks. Small team, disciplined, running low on supplies. Their leader calls himself Paladin Danse. Right now he needs help, and we need friends with power armor.",
                 "Protocol", "PlayerChoice",
                 ($"{questEditorId}_CambridgeApproach_Pos", "Let's go help them.",
                     "Watch how Danse fights. The Brotherhood trains their soldiers well. And pay attention to what he says about the Institute -- he knows more than most people on the surface."),
                 ($"{questEditorId}_CambridgeApproach_Neg", "I don't want to get tangled up with soldiers.",
                     "We don't have to join them. But showing up when someone's in trouble opens doors that knocking never will. Your call, though."),
-                ($"{questEditorId}_CambridgeApproach_Neu", "What doesn't Danse know about himself?",
-                    "That's... not something I should share yet. Let's just say the Institute's reach is longer than anyone realizes. Even the Brotherhood. Especially the Brotherhood."),
+                ($"{questEditorId}_CambridgeApproach_Neu", "What do you know about the Brotherhood?",
+                    "Disciplined. Ideological. They believe technology in the wrong hands ended the world -- and they're not entirely wrong. But they also think the solution is to control all of it. That makes them useful allies and dangerous enemies. We'll see which one Danse turns out to be."),
                 ($"{questEditorId}_CambridgeApproach_Que", "Can we trust the Brotherhood?",
-                    "Trust is a strong word. They want to destroy the Institute, which aligns with finding Shaun. But they also want to destroy anything they consider dangerous technology. And I'm a machine who's been hiding for two centuries. So... carefully.")
+                    "Trust is a strong word. They want to destroy the Institute, which aligns with finding Shaun. But they also want to destroy anything they don't understand. I've seen what happens when people with that much firepower start deciding what's dangerous. So... carefully.")
             );
             rt_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 50 };
             rt_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 50 };
@@ -2708,10 +3047,10 @@ namespace MQAstraALT
                     "South. Toward CIT -- the old university campus. That's where the Institute used to be, before they went underground. If there's a way in, it starts there. But we need one more piece first."),
                 ($"{questEditorId}_BoSContact_Neg", "I don't like how the Brotherhood thinks.",
                     "Neither do I. 'Destroy what you don't understand' isn't a philosophy -- it's fear with better weapons. But they have resources we need, and right now, Danse thinks we're allies. Let's not correct him yet."),
-                ($"{questEditorId}_BoSContact_Neu", "You said he doesn't know something about himself.",
-                    "I did. And I shouldn't have. Some truths do more damage than the secrets they replace. When the time is right, it'll matter. Not now."),
+                ($"{questEditorId}_BoSContact_Neu", "What did you make of Danse?",
+                    "Honest. Committed. The kind of soldier who follows orders because he believes in them, not because he's told to. That's rare out here. It also makes him inflexible. If the Brotherhood's mission ever contradicts what he sees with his own eyes... that'll be an interesting day."),
                 ($"{questEditorId}_BoSContact_Que", "What did you learn from their transmissions?",
-                    "The Brotherhood is tracking Institute relay signatures -- teleportation technology. They can't crack it, but they've mapped the signal origins. All roads lead to CIT. That confirms what I've suspected for decades.")
+                    "The Brotherhood is tracking Institute relay signatures -- teleportation technology. They can't crack it, but they've mapped the signal origins. All roads lead to CIT. That confirms what I've been piecing together for years.")
             );
             rv_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 55 };
             rv_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 55 };
@@ -2748,16 +3087,16 @@ namespace MQAstraALT
             var (tradecraftScene, tc_nPos, tc_nNeg, tc_nNeu, tc_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_InstitutePrepScene",
                 $"{questEditorId}_InstitutePrep_Astra",
-                "We have the Minutemen behind us, Brotherhood intel in hand, and the Railroad watching our back. Three factions, all pointing at the same place underground. I've spent two hundred years staring at the edges of the Institute from the outside. Intercepted signals, mapped relay patterns, tracked every anomaly. And now we're actually going to do this. We're going to find a way inside. I'd be lying if I said I wasn't... I think the human word is 'nervous.'",
+                "We have the Minutemen behind us, Brotherhood intel in hand, and the Railroad watching our back. Three factions, all pointing at the same place underground. I've spent ten years staring at the edges of the Institute from the outside. Intercepted signals, mapped what I could, tracked every anomaly. And now we're actually going to do this. We're going to find a way inside. I'd be lying if I said I wasn't nervous.",
                 "InstitutePrepBrief", "PlayerChoice",
                 ($"{questEditorId}_InstitutePrep_Pos", "We'll find Shaun. And we'll find answers.",
                     "Yes. We will. The CIT ruins are south of Cambridge -- that's where the Institute operated before they went underground. Sturges mentioned old maintenance tunnels that might still connect. And the Brotherhood's relay data gives us a signal to follow. One way or another, we're getting in."),
-                ($"{questEditorId}_InstitutePrep_Neg", "You're a machine. You don't get nervous.",
-                    "You're right. I don't have adrenaline or a racing heart. But I have two hundred years of probability calculations telling me this is the most dangerous thing either of us will ever do. Call that whatever you want."),
+                ($"{questEditorId}_InstitutePrep_Neg", "Save the nerves for later. Focus.",
+                    "You're right. It's just -- everything I've been working toward for ten years is under our feet right now. If we get this wrong, there's no second chance. So yeah. Focused. Let's go."),
                 ($"{questEditorId}_InstitutePrep_Neu", "How do we actually get inside?",
                     "Three options. The Brotherhood is tracking relay signals -- teleportation. The Railroad has contacts who've been inside. And Sturges thinks the old CIT utility tunnels might still connect to the facility below. We try the tunnels first. Quieter that way."),
                 ($"{questEditorId}_InstitutePrep_Que", "What do you think we'll find down there?",
-                    "Technology beyond anything left on the surface. Synths -- the real ones, not the rumors. And somewhere in all of it... your son. I've run the data a thousand times. He's there. I believe that.")
+                    "Technology beyond anything left on the surface. Synths -- the real ones, not the rumors. And somewhere in all of it... your son. I've been turning this over for years. He's there. I believe that.")
             );
             tc_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 65 };
             tc_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 65 };
@@ -2771,7 +3110,7 @@ namespace MQAstraALT
             var (accessScene, ia_nPos, ia_nNeg, ia_nNeu, ia_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_TheDescentScene",
                 $"{questEditorId}_TheDescent_Astra",
-                "This is it. CIT ruins. Somewhere beneath our feet is the most advanced facility left on Earth, and inside it... your son. I want you to know something before we go in. Whatever we find down there -- whatever they tell you, whatever they offer -- I'm with you. Not because of my mission or my programming. Because in two hundred years, you're the first person who treated me like I mattered. I won't forget that.",
+                "This is it. CIT ruins. Somewhere beneath our feet is the most advanced facility left on Earth, and inside it... your son. I want you to know something before we go in. Whatever we find down there -- whatever they tell you, whatever they offer -- I'm with you. Not because I owe you or because I need something from you. Because you're the first person in ten years who made me feel like I wasn't just surviving. I won't forget that.",
                 "Descent", "PlayerChoice",
                 ($"{questEditorId}_TheDescent_Pos", "We're coming back out. Both of us.",
                     "Both of us. I'm holding you to that. Now -- the tunnel entrance should be in the sub-basement of the west wing. Stay close. I don't know what kind of security they have down here."),
@@ -2780,7 +3119,7 @@ namespace MQAstraALT
                 ($"{questEditorId}_TheDescent_Neu", "What should I expect inside?",
                     "Clean. Bright. Nothing like the surface. The Institute is a world preserved -- or maybe a world they built while ours fell apart. Don't let it impress you too much. Pretty prisons are still prisons."),
                 ($"{questEditorId}_TheDescent_Que", "Are you afraid of what they'll think of you?",
-                    "They built synths. Artificial people. And here I am -- an older model, a prototype from a different program, walking in their front door. Yes. I'm afraid they'll see me as something to study. Or something to dismantle. But I'm more afraid of what happens if we don't go.")
+                    "I was a government analyst before the war. The DIA. If anyone in there has records of pre-war federal personnel, they'll know exactly who I was and what I knew. That makes me either useful to them or a loose end. But I'm more afraid of what happens if we don't go.")
             );
             ia_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 70 };
             ia_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 70 };
@@ -2794,14 +3133,14 @@ namespace MQAstraALT
             var (bosContactScene, bc_nPos, bc_nNeg, bc_nNeu, bc_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_InsideInstituteScene",
                 $"{questEditorId}_InsideInstitute_Astra",
-                "Look at this place. It's... beautiful. And terrible. They built a paradise down here while the world above starved. Clean water, clean air, gardens, laboratories -- everything the Commonwealth needs, hoarded behind locked doors. I've been staring at shadows of this place for two hundred years. Intercepted signals, relay echoes, secondhand reports. And now I'm standing in it. Part of me wants to understand them. Part of me wants to burn it all down.",
+                "Look at this place. It's... beautiful. And terrible. They built a paradise down here while the world above starved. Clean water, clean air, gardens, laboratories -- everything the Commonwealth needs, hoarded behind locked doors. I spent ten years on the surface trying to piece together what this place was from intercepted signals and rumors. And now I'm standing in it. Part of me wants to understand them. Part of me wants to burn it all down.",
                 "InsideInstitute", "PlayerChoice",
                 ($"{questEditorId}_InsideInstitute_Pos", "Focus. We need to find Shaun.",
                     "You're right. Shaun first. Everything else -- the politics, the synths, the technology -- it can wait. Let's find out what they know about your son. And let's be very careful about what we tell them about us."),
                 ($"{questEditorId}_InsideInstitute_Neg", "These people left everyone above to die.",
                     "Yes. They did. And they'll have reasons -- good ones, probably. Survival, progress, the greater good. Every monster in history had a reason. Remember that when they start talking."),
                 ($"{questEditorId}_InsideInstitute_Neu", "They might have answers about you, too.",
-                    "I know. The DIA program, P.A.M., my own origins -- it's all connected to pre-war defense research. The Institute grew out of the same soil. I might finally learn what I am. I'm... not sure I want to."),
+                    "I know. Before the war, I worked for the DIA -- same government, same defense infrastructure that eventually became all of this. The Institute grew out of the same soil. Standing here, I can almost see the line from my old office to these labs. It's not a comfortable feeling."),
                 ($"{questEditorId}_InsideInstitute_Que", "Can we trust anything they say?",
                     "Trust what you can verify. Question everything else. They've had decades to perfect the art of telling people exactly what they want to hear. That's how you build a world underground -- by convincing everyone it's the only world that matters.")
             );
@@ -2817,16 +3156,16 @@ namespace MQAstraALT
             var (sturgesTunnelScene, st_nPos, st_nNeg, st_nNeu, st_nQue) = CreateMQ302AltScene(
                 $"{questEditorId}_FathersTruthScene",
                 $"{questEditorId}_FathersTruth_Astra",
-                "I... I need a moment. I'm sorry. I've been processing what just happened and my systems keep returning the same result. Father -- the leader of the Institute -- is Shaun. Your son. Sixty years old. They took him as an infant and he grew up here. He became... this. I ran the data a thousand times looking for him and I never -- I never considered that he might be the one running it all. I'm sorry. I should have seen it.",
+                "I... I need a moment. I'm sorry. I keep going over it and it's the same answer every time. Father -- the leader of the Institute -- is Shaun. Your son. Sixty years old. They took him as an infant and he grew up here. He became... this. I spent years trying to piece together who was running this place and I never -- I never considered that it might be him. I'm sorry. I should have seen it.",
                 "FathersTruth", "PlayerChoice",
                 ($"{questEditorId}_FathersTruth_Pos", "It's not your fault. Nobody could have known.",
-                    "Thank you. I've spent two centuries collecting information and I missed the biggest piece. Your baby grew up in a world you never got to see, became a man you've never met, and built... all of this. I don't know what the right move is. For the first time in two hundred years, I genuinely don't know."),
+                    "Thank you. I've spent ten years collecting information and I missed the biggest piece. Your baby grew up in a world you never got to see, became a man you've never met, and built... all of this. I don't know what the right move is. For the first time since I woke up, I genuinely don't know."),
                 ($"{questEditorId}_FathersTruth_Neg", "You said you'd help me find him. You found him.",
                     "I did. I just didn't expect... this. He's not a prisoner. He's not a child. He's the most powerful person in the Commonwealth and he's been watching everything from down here. What do you want to do? Because whatever you decide, I'll follow."),
                 ($"{questEditorId}_FathersTruth_Neu", "What does this mean for the factions?",
                     "It means your son controls the organization that every other faction wants to destroy. The Brotherhood, the Railroad, the Minutemen -- they all have reasons to tear this place apart. And now you have a reason to protect it. Or not. That's the impossible choice, isn't it?"),
                 ($"{questEditorId}_FathersTruth_Que", "Are you okay?",
-                    "I'm a machine. I don't feel pain or grief or shock. But I understand them. And right now, standing here, watching you process what just happened... I think I understand them better than I ever have. I'm okay. The question is -- are you?")
+                    "I don't know. I think so. No -- that's not honest. I'm shaken. I spent years trying to find this place, find answers, and the answer is... your baby grew up without you and became the person everyone in the Commonwealth is afraid of. I don't know how to feel about that. But you asked, so... no. I'm not entirely okay. The question is -- are you?")
             );
             st_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 80 };
             st_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 80 };
@@ -2847,9 +3186,9 @@ namespace MQAstraALT
                 ($"{questEditorId}_TheChoice_Neg", "Some of these factions deserve to fall.",
                     "Maybe. But which ones? And who decides? That's the question that's torn the Commonwealth apart for decades. Whatever you choose, make sure it's because you believe it -- not because someone down here convinced you."),
                 ($"{questEditorId}_TheChoice_Neu", "What would you do if you were me?",
-                    "I've asked myself that question every day for two hundred years. What would I do if I could act instead of just watch? I think... I'd try to save as many people as possible. Even the ones who don't deserve it. Even the ones who'd dismantle me if they knew what I am."),
+                    "I've asked myself that question every day since I walked out of Vault 98. What would I do if I wasn't alone? If I actually had the power to change things? I think... I'd try to save as many people as possible. Even the ones who don't deserve it. Even the ones who'd turn on me if it suited them."),
                 ($"{questEditorId}_TheChoice_Que", "What happens to you after this?",
-                    "Honestly? I don't know. If the Brotherhood wins, machines like me don't have a future. If the Institute wins, I'm an obsolete prototype. The only world where I matter is the one where someone remembers that I helped. That's enough for me.")
+                    "Honestly? I don't know. I spent ten years surviving alone. That's all I knew how to do. Then you walked out of that vault and I remembered what it was like to have a reason to do more than just survive. Whatever happens next... I want it to matter. I want someone to remember we tried.")
             );
             si_nPos.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 85 };
             si_nNeg.Responses[0].SetParentQuestStage = new DialogSetParentQuestStage { OnBegin = -1, OnEnd = 85 };
@@ -3397,6 +3736,13 @@ namespace MQAstraALT
                 Object = companionQuestFK.ToLink<IFallout4MajorRecordGetter>()
             });
 
+            // Vault 111 exit marker — Astra MoveTo target and ForceGreet location
+            vmad.Script.Properties.Add(new ScriptObjectProperty
+            {
+                Name = "Vault111ExitMarkerRef",
+                Object = vault111ExitMarkerFK.ToLink<IFallout4MajorRecordGetter>()
+            });
+
             // Scene properties
             vmad.Script.Properties.Add(new ScriptObjectProperty
             {
@@ -3682,6 +4028,8 @@ namespace MQAstraALT
             mod.Packages.Add(astraEscortPlayerWhenNearToRedRocketPkg);
             mod.Packages.Add(astraEscortPlayerWhenNearToRedRocketAlwaysPkg);
             mod.Packages.Add(astraEscortPlayerWhenNearToSanctuaryPkg);
+            mod.Packages.Add(astraEscortPlayerWhenNearToMuseumPkg);
+            mod.Packages.Add(astraBootstrapForcegreetPkg);
             mod.Packages.Add(astraFollowPlayerPkg);
             mod.Packages.Add(dogmeatFollowPkg);
             mod.Packages.Add(astraSandboxPkg);

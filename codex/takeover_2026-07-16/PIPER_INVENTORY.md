@@ -1,0 +1,544 @@
+# Piper (vanilla) dialogue inventory — for Astra gap analysis
+
+## Quests with 'Piper' in EditorID
+- MQ201Piper (06D41F:Fallout4.esm)
+- COMPiper (0BBD96:Fallout4.esm)
+- CIS_PiperTakeNotes_OBSOLETE (17043B:Fallout4.esm)
+- CIS_ChatWithNPC_Piper (1830A5:Fallout4.esm)
+- DialogueDiamondCityPiperNat (1A00A6:Fallout4.esm)
+- COMPiperTalk (1A6207:Fallout4.esm)
+
+## MQ201Piper — 13 topics
+- Scene/Assign (SCEN): 8 topics, 10 INFOs
+- Misc/RechargeExit (HELO): 1 topics, 0 INFOs
+- Player/Custom0 (CUST): 1 topics, 0 INFOs
+- Misc/ImpatientPositive (GREE): 1 topics, 1 INFOs
+- Misc/PickpocketTopic (IDAT): 1 topics, 0 INFOs
+- Scene/Custom17 (SCEN): 1 topics, 2 INFOs
+
+## COMPiper — 468 topics
+- Scene/Enter (SCEN): 307 topics, 364 INFOs
+- Player/Custom0 (CUST): 67 topics, 292 INFOs
+- Scene/Custom17 (SCEN): 65 topics, 66 INFOs
+- Misc/ImpatientNeutral (WFPI): 1 topics, 12 INFOs
+- Misc/Greeting (GREE): 1 topics, 28 INFOs
+- Misc/Idle (IDLE): 1 topics, 299 INFOs
+- Misc/Hello (HELO): 1 topics, 44 INFOs
+- Detection/LostIdle (NOTC): 1 topics, 81 INFOs
+- Detection/NormalToAlert (NOTL): 1 topics, 6 INFOs
+- Detection/AlertIdle (NOTA): 1 topics, 6 INFOs
+- Detection/CombatToNormal (LOTN): 1 topics, 6 INFOs
+- Detection/CombatToLost (LOTC): 1 topics, 6 INFOs
+- Detection/AlertToNormal (COTN): 1 topics, 11 INFOs
+- Detection/AlertToCombat (COLO): 1 topics, 6 INFOs
+- Detection/NormalToCombat (ALTN): 1 topics, 6 INFOs
+- Detection/NormalToLost (ALTC): 1 topics, 6 INFOs
+- Favor/MoralRefusal (TRAD): 1 topics, 7 INFOs
+- Favor/Custom17 (SHOW): 1 topics, 9 INFOs
+- Favor/Agree (REFU): 1 topics, 6 INFOs
+- Favor/ExitFavorState (MREF): 1 topics, 6 INFOs
+- Favor/Refuse (FEXT): 1 topics, 6 INFOs
+- Favor/Show (AGRE): 1 topics, 12 INFOs
+- Combat/Block (THGR): 1 topics, 3 INFOs
+- Combat/Death (TAUT): 1 topics, 11 INFOs
+- Combat/PathingRefusal (POAT): 1 topics, 4 INFOs
+- Combat/PowerAttack (HIT_): 1 topics, 9 INFOs
+- Combat/BleedOut (DETH): 1 topics, 2 INFOs
+- Combat/Hit (BLED): 1 topics, 4 INFOs
+- Combat/Flee (AVTH): 1 topics, 4 INFOs
+- Combat/Trade (ATCK): 1 topics, 5 INFOs
+- Misc/SharedInfo (IDAT): 1 topics, 30 INFOs
+- Favor/PathingRefusal (PRJT): 1 topics, 5 INFOs
+
+## CIS_PiperTakeNotes_OBSOLETE — 1 topics
+- Scene/Enter (SCEN): 1 topics, 5 INFOs
+
+## CIS_ChatWithNPC_Piper — 6 topics
+- Scene/Enter (SCEN): 5 topics, 52 INFOs
+- Scene/Custom17 (SCEN): 1 topics, 0 INFOs
+
+## DialogueDiamondCityPiperNat — 12 topics
+- Scene/Enter (SCEN): 12 topics, 11 INFOs
+
+## COMPiperTalk — 15 topics
+- Scene/Custom17 (SCEN): 14 topics, 64 INFOs
+- Misc/Greeting (GREE): 1 topics, 41 INFOs
+
+## Piper Hello INFOs — condition functions used
+Total Hello INFOs: 44
+- GetValue: 14
+- GetInFaction: 10
+- GetStageDone: 2
+- GetGlobalValue: 1
+
+## Sample location-conditioned Hellos
+
+## COMPiper topics in full
+-  [Favor/AGRE] — 12 INFOs
+-  [Detection/ALTC] — 6 INFOs
+-  [Detection/ALTN] — 6 INFOs
+-  [Combat/ATCK] — 5 INFOs
+-  [Combat/AVTH] — 4 INFOs
+-  [Combat/BLED] — 4 INFOs
+-  [Detection/COLO] — 6 INFOs
+-  [Detection/COTN] — 11 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 5 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 4 INFOs
+-  [Player/CUST] — 6 INFOs
+-  [Player/CUST] — 6 INFOs
+- CA_CustomEvent_Generous_Piper [Player/CUST] — 6 INFOs
+- CA_CustomEvent_Mean_Piper [Player/CUST] — 0 INFOs
+- CA_CustomEvent_Nice_Piper [Player/CUST] — 0 INFOs
+- CA_CustomEvent_Peaceful_Piper [Player/CUST] — 6 INFOs
+- CA_CustomEvent_PeacefulFailed_Piper [Player/CUST] — 0 INFOs
+- CA_CustomEvent_PlayerEncumbered_Piper [Player/CUST] — 6 INFOs
+- CA_CustomEvent_Selfish_Piper [Player/CUST] — 6 INFOs
+- CA_CustomEvent_Violent_Piper [Player/CUST] — 6 INFOs
+- CA_Event_ChemAddiction_Piper [Player/CUST] — 4 INFOs
+- CA_Event_ChemUse_Piper [Player/CUST] — 5 INFOs
+- CA_Event_CompanionCrippledArm_Piper [Player/CUST] — 4 INFOs
+- CA_Event_CompanionCrippledHead_Piper [Player/CUST] — 4 INFOs
+- CA_Event_CompanionCrippledLeg_Piper [Player/CUST] — 4 INFOs
+- CA_Event_DischargeWeapon_Piper [Player/CUST] — 4 INFOs
+- CA_Event_DogmeatBleedout_Piper [Player/CUST] — 4 INFOs
+- CA_Event_DonateItem_Piper [Player/CUST] — 4 INFOs
+- CA_Event_Drink_Piper [Player/CUST] — 5 INFOs
+- CA_Event_DropCapsUsefulItem_Piper [Player/CUST] — 4 INFOs
+- CA_Event_EatCorpse_Piper [Player/CUST] — 6 INFOs
+- CA_Event_EnterPowerArmor_Piper [Player/CUST] — 4 INFOs
+- CA_Event_EnterVertibird_Piper [Player/CUST] — 4 INFOs
+- CA_Event_HackComputer_Piper [Player/CUST] — 6 INFOs
+- CA_Event_HealCompanion_Piper [Player/CUST] — 4 INFOs
+- CA_Event_HealDogmeat_Piper [Player/CUST] — 5 INFOs
+- CA_Event_JumpFromHeight_Piper [Player/CUST] — 4 INFOs
+- CA_Event_LootCorpse_Piper [Player/CUST] — 6 INFOs
+- CA_Event_LootEpicItem_Piper [Player/CUST] — 4 INFOs
+- CA_Event_LootGarbage_Piper [Player/CUST] — 4 INFOs
+- CA_Event_LootPrewarItem_Piper [Player/CUST] — 4 INFOs
+- CA_Event_ModArmor_Piper [Player/CUST] — 4 INFOs
+- CA_Event_ModWeapon_Piper [Player/CUST] — 4 INFOs
+- CA_Event_Murder_Piper [Player/CUST] — 4 INFOs
+- CA_Event_PickLock_Piper [Player/CUST] — 6 INFOs
+- CA_Event_PickLockOwnedDoor_Piper [Player/CUST] — 4 INFOs
+- CA_Event_PlayerCrippled_Arm_Piper [Player/CUST] — 4 INFOs
+- CA_Event_PlayerCrippled_Head_Piper [Player/CUST] — 4 INFOs
+- CA_Event_PlayerCrippled_Leg_Piper [Player/CUST] — 4 INFOs
+- CA_Event_RadDamage_Piper [Player/CUST] — 6 INFOs
+- CA_Event_RadPoisoning_Piper [Player/CUST] — 4 INFOs
+- CA_Event_ReadSkillBook_Piper [Player/CUST] — 4 INFOs
+- CA_Event_RecieveReward_Piper [Player/CUST] — 6 INFOs
+- CA_Event_SpeechForMoreCaps_Piper [Player/CUST] — 4 INFOs
+- CA_Event_Stealing_Piper [Player/CUST] — 4 INFOs
+- CA_Event_StealPickpocket_Piper [Player/CUST] — 4 INFOs
+- CA_Event_Swim_Piper [Player/CUST] — 4 INFOs
+- CA_Event_TriggerMine_Piper [Player/CUST] — 4 INFOs
+- CA_Event_UseWorkbench_Piper [Player/CUST] — 4 INFOs
+- CA_Event_WalkAroundNaked_Piper [Player/CUST] — 4 INFOs
+-  [Combat/DETH] — 2 INFOs
+-  [Favor/FEXT] — 6 INFOs
+- COMPiperGreetings [Misc/GREE] — 28 INFOs
+- COMPiperHellos [Misc/HELO] — 44 INFOs
+-  [Combat/HIT_] — 9 INFOs
+- COMPiperSharedInfo [Misc/IDAT] — 30 INFOs
+- COMPiperIdles [Misc/IDLE] — 299 INFOs
+-  [Detection/LOTC] — 6 INFOs
+-  [Detection/LOTN] — 6 INFOs
+-  [Favor/MREF] — 6 INFOs
+-  [Detection/NOTA] — 6 INFOs
+-  [Detection/NOTC] — 81 INFOs
+-  [Detection/NOTL] — 6 INFOs
+-  [Combat/POAT] — 4 INFOs
+-  [Favor/PRJT] — 5 INFOs
+-  [Favor/REFU] — 6 INFOs
+-  [Scene/SCEN] — 11 INFOs
+-  [Scene/SCEN] — 14 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 5 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 3 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 3 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 0 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 3 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 3 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 0 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 0 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 5 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 4 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 2 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Scene/SCEN] — 1 INFOs
+-  [Favor/SHOW] — 9 INFOs
+-  [Combat/TAUT] — 11 INFOs
+-  [Combat/THGR] — 3 INFOs
+-  [Favor/TRAD] — 7 INFOs
+-  [Misc/WFPI] — 12 INFOs

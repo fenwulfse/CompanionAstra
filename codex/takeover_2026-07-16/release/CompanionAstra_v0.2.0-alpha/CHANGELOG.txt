@@ -1,0 +1,30 @@
+COMPANION ASTRA — CHANGELOG
+
+v0.2.0-alpha (2026-07-07) — "The Human Update"
+- Astra's identity finalized: human cryo survivor of Vault 98, pre-war
+  survey engineer, ten years awake. All remaining AI/machine-era dialogue
+  rewritten (68 lines re-voiced).
+- NEW: "Her Story" — nine-chapter progressive memoir in the talk menu.
+  Chapters advance one per ask and persist in your save; epilogue lines
+  after the story completes.
+- NEW: Presence Pack — 18 dialogue systems: combat barks (attack, hit,
+  power attack, bleedout, taunt, block, flee), full detection chatter
+  (spot, search, alert, all-clear and transitions), hellos, and
+  wait-impatient lines. 50 new voiced lines.
+- NEW: spoken reactions to radiation damage, rad poisoning, swimming,
+  lockpicking, hacking, entering power armor, and healing Astra.
+- Affinity arc rewritten as a human story: trust, confession, love after
+  ten years alone. Mechanics unchanged.
+- Removed workbench/weapon-mod/armor-mod affinity accelerators (testing
+  leftovers); affinity now progresses at the intended pace.
+- Voice coverage audit: all 595 voiced lines verified to have audio.
+
+v0.1.x (2026-05/06) — internal
+- Affinity system with 14 threshold scenes and max-affinity perk
+- Location-gated travel banter for Far Harbor and Nuka-World (adds DLC
+  requirements)
+- Gift/pickup exchange, power armor exit command, companion crosstalk
+
+v0.1.0-alpha (2026-04-06)
+- First public test build: recruitment, follow/escort travel, story
+  questline through the Institute arc, ~500 voiced lines

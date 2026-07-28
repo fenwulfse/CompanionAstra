@@ -1,0 +1,122 @@
+[
+  {
+    "FormId": "000204B4",
+    "Text": "New interior. I will remember the way out. You remember why we came in."
+  },
+  {
+    "FormId": "000204B5",
+    "Text": "Fresh walls, old damage. Give me a moment to learn the angles."
+  },
+  {
+    "FormId": "000204B6",
+    "Text": "Different roof, same rule: know the exits before the shooting starts."
+  },
+  {
+    "FormId": "000204B7",
+    "Text": "I have not mapped this place yet. Stay close while I fix that."
+  },
+  {
+    "FormId": "000204B8",
+    "Text": "Unknown interior. Watch the doors; I will watch what is behind us."
+  },
+  {
+    "FormId": "000204B9",
+    "Text": "We have been here before. Last time we left breathing. Keep the pattern."
+  },
+  {
+    "FormId": "000204BA",
+    "Text": "I remember this route. The place may have changed its mind about us."
+  },
+  {
+    "FormId": "000204BB",
+    "Text": "Familiar ground. That helps, right up until it makes us careless."
+  },
+  {
+    "FormId": "000204BC",
+    "Text": "Back again. I kept the exits filed where they belong."
+  },
+  {
+    "FormId": "000204BD",
+    "Text": "I know these walls. Let us see what moved while we were gone."
+  },
+  {
+    "FormId": "000204BE",
+    "Text": "We have been under this roof a while. Quiet does not mean empty."
+  },
+  {
+    "FormId": "000204BF",
+    "Text": "Long interior. Check your ammunition before the next room checks it for you."
+  },
+  {
+    "FormId": "000204C0",
+    "Text": "We are deep enough in that the way back matters as much as the way forward."
+  },
+  {
+    "FormId": "000204C1",
+    "Text": "Still tracking our route. We have not crossed our own trail yet."
+  },
+  {
+    "FormId": "000204C2",
+    "Text": "This place keeps going. So do we, but we do it awake."
+  },
+  {
+    "FormId": "000204C3",
+    "Text": "Three more fights, and I know your rhythm a little better."
+  },
+  {
+    "FormId": "000204C4",
+    "Text": "You pull their attention. I close the angle. That pattern works."
+  },
+  {
+    "FormId": "000204C5",
+    "Text": "We are getting faster at the part where everyone else stops moving."
+  },
+  {
+    "FormId": "000204C6",
+    "Text": "Another clean finish. I am updating my definition of clean."
+  },
+  {
+    "FormId": "000204C7",
+    "Text": "I knew where you would move before you moved. That is new."
+  },
+  {
+    "FormId": "000204C8",
+    "Text": "We covered each other without asking. I noticed."
+  },
+  {
+    "FormId": "000204C9",
+    "Text": "That was too close. Check yourself before we move."
+  },
+  {
+    "FormId": "000204CA",
+    "Text": "You are hurt. The next room can wait long enough for a Stimpak."
+  },
+  {
+    "FormId": "000204CB",
+    "Text": "I nearly lost you there. Do not make me get used to that feeling."
+  },
+  {
+    "FormId": "000204CC",
+    "Text": "Breathe. Reload. Heal. Then we decide what deserves us next."
+  },
+  {
+    "FormId": "000204CD",
+    "Text": "First fight together. You take the center; I watch the flank. That will work."
+  },
+  {
+    "FormId": "000204CE",
+    "Text": "Five fights together. I know the way you move now. You push; I keep the angle."
+  },
+  {
+    "FormId": "000204CF",
+    "Text": "Ten fights. I have stopped checking whether you will cover me. I know you will."
+  },
+  {
+    "FormId": "000204D0",
+    "Text": "Twenty-five fights. We are not two travelers anymore. We are a unit."
+  },
+  {
+    "FormId": "000204D2",
+    "Text": "Fifty fights together. At this point, I trust your shadow to cover mine."
+  }
+]

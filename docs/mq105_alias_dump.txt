@@ -1,0 +1,631 @@
+=== Quest Alias Inspector ===
+
+Looking up quest: MQ105 (0229E6:Fallout4.esm)
+  EditorID: MQ105
+  Name:     Getting a Clue
+
+  Total Aliases: 36
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+ALIAS #61: "DiamondCityValentinesLocation"  (Type: QuestLocationAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #19: "DiamondCitySecurityOfficeLocation"  (Type: QuestLocationAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #6: "DiamondCityLocation"  (Type: QuestLocationAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #4: "DiamondCityKelloggsHouse"  (Type: QuestLocationAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #0: "NickValentine"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 002F24:Fallout4.esm -> CompanionNickValentine
+  Flags: Optional, AllowReserved
+
+  ALIAS PACKAGES (10 total):
+
+    [0] FormKey: 0E52D5:Fallout4.esm
+         EditorID: MQ105NickForcegreetKelloggHousePackage
+         Type:     Package
+         Flags:    0
+         Template: 017BAB:Fallout4.esm -> ForceGreet
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (24 entries):
+           Key=0, Type=PackageDataTopic
+           Key=1, Type=PackageDataLocation
+           Key=2, Type=PackageDataLocation
+           Key=5, Type=PackageDataLocation
+           Key=28, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: True
+           Key=4, Type=PackageDataTarget
+             Type: SingleRef
+           Key=9, Type=PackageDataLocation
+           Key=13, Type=PackageDataBool
+             Data: False
+           Key=15, Type=PackageDataBool
+             Data: False
+           Key=16, Type=PackageDataBool
+             Data: False
+           Key=17, Type=PackageDataBool
+             Data: False
+           Key=18, Type=PackageDataBool
+             Data: True
+           Key=19, Type=PackageDataBool
+             Data: True
+           Key=20, Type=PackageDataBool
+             Data: False
+           Key=26, Type=PackageDataBool
+             Data: True
+           Key=22, Type=PackageDataBool
+             Data: False
+           Key=24, Type=PackageDataBool
+             Data: True
+           Key=29, Type=PackageDataBool
+             Data: False
+           Key=31, Type=PackageDataBool
+             Data: False
+           Key=32, Type=PackageDataTarget
+             Type: Target
+           Key=33, Type=PackageDataFloat
+             Data: 0
+           Key=34, Type=PackageDataInt
+             Data: 0
+           Key=36, Type=PackageDataTarget
+             Type: Target
+
+    [1] FormKey: 12FAEF:Fallout4.esm
+         EditorID: MQ105NickDogmeatIntroPackage
+         Type:     Package
+         Flags:    0
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+    [2] FormKey: 145865:Fallout4.esm
+         EditorID: MQ105NickStayInSecretRoomMarkerPackage
+         Type:     Package
+         Flags:    PreferredSpeed
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (3):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+    [3] FormKey: 0E52D4:Fallout4.esm
+         EditorID: MQ105NickStayInKelloggHouse
+         Type:     Package
+         Flags:    0
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: True
+           Key=7, Type=PackageDataBool
+             Data: False
+
+    [4] FormKey: 0E52C3:Fallout4.esm
+         EditorID: MQ105NickSearchKelloggHouse
+         Type:     Package
+         Flags:    0
+         Template: 002CB1:Fallout4.esm -> Sandbox
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (3):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (15 entries):
+           Key=2, Type=PackageDataLocation
+           Key=12, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=6, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+           Key=8, Type=PackageDataBool
+             Data: True
+           Key=9, Type=PackageDataBool
+             Data: True
+           Key=14, Type=PackageDataBool
+             Data: True
+           Key=10, Type=PackageDataBool
+             Data: False
+           Key=16, Type=PackageDataBool
+             Data: False
+           Key=18, Type=PackageDataFloat
+             Data: 50
+           Key=20, Type=PackageDataBool
+             Data: True
+           Key=22, Type=PackageDataBool
+             Data: False
+           Key=24, Type=PackageDataTarget
+             Type: Target
+           Key=26, Type=PackageDataFloat
+             Data: 150
+
+    [5] FormKey: 070E21:Fallout4.esm
+         EditorID: MQ105NickSmokeOutsideKelloggPkg
+         Type:     Package
+         Flags:    0
+         Template: 004DF6:Fallout4.esm -> UseIdleMarker
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (3):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (1 entries):
+           Key=0, Type=PackageDataTarget
+             Type: SingleRef
+
+    [6] FormKey: 065F70:Fallout4.esm
+         EditorID: MQ105NickKeepLockpickingPkg
+         Type:     Package
+         Flags:    0
+         Template: 004DF6:Fallout4.esm -> UseIdleMarker
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (3):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (1 entries):
+           Key=0, Type=PackageDataTarget
+             Type: SingleRef
+
+    [7] FormKey: 065F76:Fallout4.esm
+         EditorID: MQ105NickStayInOfficePkg
+         Type:     Package
+         Flags:    0
+         Template: 003896:Fallout4.esm -> Sit
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (6 entries):
+           Key=0, Type=PackageDataTarget
+             Type: SingleRef
+           Key=1, Type=PackageDataFloat
+             Data: 0
+           Key=2, Type=PackageDataBool
+             Data: False
+           Key=4, Type=PackageDataBool
+             Data: False
+           Key=6, Type=PackageDataTarget
+             Type: Target
+           Key=8, Type=PackageDataBool
+             Data: True
+
+    [8] FormKey: 072015:Fallout4.esm
+         EditorID: MQ105NickTraveltoDiamondCity
+         Type:     Package
+         Flags:    PreferredSpeed
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+    [9] FormKey: 065F66:Fallout4.esm
+         EditorID: MQ105NickStayOutsideVault114
+         Type:     Package
+         Flags:    0
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (1):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+----------------------------------------------------------------------------------------------------
+ALIAS #3: "KelloggHouseCenterMarker"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #5: "DiamondCityCenter"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #7: "Piper"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 002F1E:Fallout4.esm -> CompanionPiper
+  Flags: Optional, AllowReserved
+
+  ALIAS PACKAGES (1 total):
+
+    [0] FormKey: 0F61B9:Fallout4.esm
+         EditorID: MQ105PiperTraveltoMayorMarker01Package
+         Type:     Package
+         Flags:    0
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (3):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: True
+           Key=7, Type=PackageDataBool
+             Data: False
+
+----------------------------------------------------------------------------------------------------
+ALIAS #8: "Geneva"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 002F0A:Fallout4.esm -> Geneva
+  Flags: Optional, AllowReserved
+
+  ALIAS PACKAGES (1 total):
+
+    [0] FormKey: 09647E:Fallout4.esm
+         EditorID: MQ105GenevaSitAtDeskPkg
+         Type:     Package
+         Flags:    0
+         Template: 003896:Fallout4.esm -> Sit
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (1):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (6 entries):
+           Key=0, Type=PackageDataTarget
+             Type: SingleRef
+           Key=1, Type=PackageDataFloat
+             Data: 0
+           Key=2, Type=PackageDataBool
+             Data: False
+           Key=4, Type=PackageDataBool
+             Data: False
+           Key=6, Type=PackageDataTarget
+             Type: Target
+           Key=8, Type=PackageDataBool
+             Data: True
+
+----------------------------------------------------------------------------------------------------
+ALIAS #10: "MayorMcDonough"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 002F08:Fallout4.esm -> MayorMcDonough
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #12: "MayorDesk"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  ForcedReference: 0F7EDE:Fallout4.esm -> (no EDID)
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #14: "MayorGuard"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: Optional, AllowDead, MatchingRefForActorsOnly
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #15: "Player"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 000007:Fallout4.esm -> Player
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #17: "dogmeat"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 01D15C:Fallout4.esm -> dogmeat
+  Flags: 0
+
+  ALIAS PACKAGES (3 total):
+
+    [0] FormKey: 12FAF0:Fallout4.esm
+         EditorID: MQ106DogmeatIntroTravelMarker02Package
+         Type:     Package
+         Flags:    PreferredSpeed
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+    [1] FormKey: 12FAE8:Fallout4.esm
+         EditorID: MQ106DogmeatIntroTravelPackage
+         Type:     Package
+         Flags:    PreferredSpeed
+         Template: 002CB0:Fallout4.esm -> Travel
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+    [2] FormKey: 12FAEC:Fallout4.esm
+         EditorID: MQ105DogmeatWaitOutsideKelloggHouse
+         Type:     Package
+         Flags:    0
+         Template: 002CB0:Fallout4.esm -> Travel
+         Conditions (4):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (4 entries):
+           Key=1, Type=PackageDataLocation
+           Key=3, Type=PackageDataBool
+             Data: False
+           Key=5, Type=PackageDataBool
+             Data: False
+           Key=7, Type=PackageDataBool
+             Data: False
+
+----------------------------------------------------------------------------------------------------
+ALIAS #34: "KelloggSecretDoor"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #36: "KelloggDesk"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #37: "KelloggChair"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #38: "KelloggSecretDoorButton"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #39: "KelloggItem01"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #44: "KelloggItem02"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #45: "KelloggItem03"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #46: "KelloggItem04"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #47: "KelloggItem05"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #48: "KelloggItem06"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #68: "KelloggItem07"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #50: "KelloggCigar01"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: QuestObject, AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #53: "Companion"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: Optional, ExternalAliasLinked, OptionalAllScenes
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #58: "Ellie"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 0222A2:Fallout4.esm -> ElliePerkins
+  Flags: AllowReserved
+
+  ALIAS PACKAGES (1 total):
+
+    [0] FormKey: 065F75:Fallout4.esm
+         EditorID: MQ105EllieTakesNotesPkg
+         Type:     Package
+         Flags:    0
+         Template: 003896:Fallout4.esm -> Sit
+         OwnerQuest: 0229E6:Fallout4.esm -> MQ105
+         Conditions (2):
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+           [Unknown condition data: FunctionConditionDataBinaryOverlay]
+         PackageData (6 entries):
+           Key=0, Type=PackageDataTarget
+             Type: SingleRef
+           Key=1, Type=PackageDataFloat
+             Data: 0
+           Key=2, Type=PackageDataBool
+             Data: False
+           Key=4, Type=PackageDataBool
+             Data: False
+           Key=6, Type=PackageDataTarget
+             Type: Target
+           Key=8, Type=PackageDataBool
+             Data: True
+
+----------------------------------------------------------------------------------------------------
+ALIAS #59: "ValentinesOfficeCenterMarker"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  ForcedReference: 0283CC:Fallout4.esm -> (no EDID)
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #60: "ValentinesOfficePlayerChair"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #63: "KelloggHouseDoor"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  ForcedReference: 001E98:Fallout4.esm -> MQ105KelloggHouseDoorREF
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #64: "MayorElevatorMarker"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  ForcedReference: 065F79:Fallout4.esm -> MQ105ElevatorMarker
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #66: "DmndElevatorController"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #67: "KelloggSecretDoorQT"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  ForcedReference: 065F80:Fallout4.esm -> MQ105KelloggSecretDoorQTMarker
+  Flags: 0
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #69: "Hancock"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  UniqueActor: 022613:Fallout4.esm -> Hancock
+  Flags: Optional, AllowReserved
+
+  ALIAS PACKAGES: (none)
+
+----------------------------------------------------------------------------------------------------
+ALIAS #72: "GenevaKeyCopy"  (Type: QuestReferenceAliasBinaryOverlay)
+----------------------------------------------------------------------------------------------------
+  Flags: AllowDisabled
+
+  ALIAS PACKAGES: (none)
+
+====================================================================================================
+=== DONE ===

@@ -417,6 +417,8 @@
   "Message:CompanionInfatuationPerkMessage_Astra": "0x020306",
   "Message:CompanionInfatuationRomanticMessage_Astra": "0x020307",
   "Package:AstraDefaultSandboxPkg": "0x020309",
+  "Package:MQAstraALT_AstraBootstrapForcegreet": "0x020357",
+  "Package:MQAstraALT_AstraEscortPlayerWhenNearToMuseum": "0x020356",
   "Package:MQAstraALT_AstraEscortPlayerWhenNearToRedRocket": "0x0202F5",
   "Package:MQAstraALT_AstraEscortPlayerWhenNearToRedRocketAlways": "0x0202F6",
   "Package:MQAstraALT_AstraEscortPlayerWhenNearToSanctuary": "0x0202F9",

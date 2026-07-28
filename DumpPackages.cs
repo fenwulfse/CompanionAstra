@@ -32,11 +32,8 @@ namespace MQAstraALT
             // Specific FormKeys to inspect
             var targetKeys = new (string name, FormKey fk)[]
             {
-                ("DeaconFollowerPackage", new FormKey(fo4, 0x0754B0)),
-                ("DeaconFollowerPackageSneaking", new FormKey(fo4, 0x2499B1)),
-                ("MQ105NickEscortPlayerWhenNearToDiamondCity", new FormKey(fo4, 0x065F64)),
-                ("MQ105NickTraveltoDiamondCityPkg", new FormKey(fo4, 0x070114)),
-                ("MQ105NickEscortPlayerWhenNearToDiamondCityAlways", new FormKey(fo4, 0x20B42E)),
+                ("MQ105NickForcegreetKelloggHousePackage", new FormKey(fo4, 0x0E52D5)),
+                ("ForceGreet Template", new FormKey(fo4, 0x017BAB)),
             };
 
             foreach (var (name, fk) in targetKeys)
@@ -121,6 +118,7 @@ namespace MQAstraALT
             // InterruptOverride and PreferredSpeed
             Console.WriteLine($"  InterruptOverride: {pkg.InterruptOverride}");
             Console.WriteLine($"  PreferredSpeed:    {pkg.PreferredSpeed}");
+            Console.WriteLine($"  DataInputVersion:  {pkg.DataInputVersion}");
 
             // Idle animations
             if (pkg.IdleAnimations != null)
@@ -232,6 +230,7 @@ namespace MQAstraALT
                             foreach (var item in items)
                             {
                                 Console.WriteLine($"{indent}  - {item}");
+                                DumpObjectProperties(item, indent + "    ", depth + 1);
                             }
                         }
                     }

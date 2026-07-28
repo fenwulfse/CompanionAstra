@@ -30,3 +30,10 @@ REDROCKET_*.md
 # Old project file
 MQClaudeALT.csproj
 QF_MQClaudeALT_*.psc
+
+BACKUPS/
+*.zip
+bin/
+obj/
+*.fuz
+voice_intermediate/

@@ -80,32 +80,32 @@
   {
     "FormId": "0002004F",
     "EditorId": "MQAstraALT_Sanctuary_Que_P",
-    "Prompt": "You said two hundred years. What are you?",
-    "Text": "You said two hundred years. What are you?"
+    "Prompt": "You said ten years. What happened to you?",
+    "Text": "You said ten years. What happened to you?"
   },
   {
     "FormId": "00020056",
     "EditorId": "MQAstraALT_RedRocket_Pos_P",
-    "Prompt": "Let\u0027s move.",
-    "Text": "Let\u0027s move."
+    "Prompt": "Ready. What\u0027s in Concord?",
+    "Text": "Ready. What\u0027s in Concord?"
   },
   {
     "FormId": "0002005A",
     "EditorId": "MQAstraALT_RedRocket_Neg_P",
-    "Prompt": "Skip the dog.",
-    "Text": "Skip the dog."
+    "Prompt": "I want to look around first.",
+    "Text": "I want to look around first."
   },
   {
     "FormId": "0002005E",
     "EditorId": "MQAstraALT_RedRocket_Neu_P",
-    "Prompt": "What are we walking into?",
-    "Text": "What are we walking into?"
+    "Prompt": "Tell me more about what\u0027s ahead.",
+    "Text": "Tell me more about what\u0027s ahead."
   },
   {
     "FormId": "00020062",
     "EditorId": "MQAstraALT_RedRocket_Que_P",
-    "Prompt": "How do you know that?",
-    "Text": "How do you know that?"
+    "Prompt": "How do you know all this?",
+    "Text": "How do you know all this?"
   },
   {
     "FormId": "00020069",
@@ -152,8 +152,8 @@
   {
     "FormId": "00020088",
     "EditorId": "MQAstraALT_CoalitionPitch_Que_P",
-    "Prompt": "Why do you need me? You\u0027ve had two hundred years.",
-    "Text": "Why do you need me? You\u0027ve had two hundred years."
+    "Prompt": "Why do you need me? You\u0027ve had ten years.",
+    "Text": "Why do you need me? You\u0027ve had ten years."
   },
   {
     "FormId": "0002008F",
@@ -290,8 +290,8 @@
   {
     "FormId": "000200F6",
     "EditorId": "MQAstraALT_CambridgeApproach_Neu_P",
-    "Prompt": "What doesn\u0027t Danse know about himself?",
-    "Text": "What doesn\u0027t Danse know about himself?"
+    "Prompt": "What do you know about the Brotherhood?",
+    "Text": "What do you know about the Brotherhood?"
   },
   {
     "FormId": "000200FA",
@@ -314,8 +314,8 @@
   {
     "FormId": "00020109",
     "EditorId": "MQAstraALT_BoSContact_Neu_P",
-    "Prompt": "You said he doesn\u0027t know something about himself.",
-    "Text": "You said he doesn\u0027t know something about himself."
+    "Prompt": "What did you make of Danse?",
+    "Text": "What did you make of Danse?"
   },
   {
     "FormId": "0002010D",
@@ -356,8 +356,8 @@
   {
     "FormId": "0002012B",
     "EditorId": "MQAstraALT_InstitutePrep_Neg_P",
-    "Prompt": "You\u0027re a machine. You don\u0027t get nervous.",
-    "Text": "You\u0027re a machine. You don\u0027t get nervous."
+    "Prompt": "Save the nerves for later. Focus.",
+    "Text": "Save the nerves for later. Focus."
   },
   {
     "FormId": "0002012F",
