@@ -12,7 +12,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      This project globs **/*.cs implicitly (SDK-style). Every sibling
+      workspace has its own .csproj and its own entry point, so they must be
+      excluded here or the build fails with duplicate Program/Main symbols.
+      Add a Remove line whenever a new workspace folder appears.
+    -->
     <Compile Remove="reference\**" />
+    <Compile Remove="core\**" />
+    <Compile Remove="claude\**" />
+    <Compile Remove="codex\**" />
+    <Compile Remove="gemini\**" />
+    <Compile Remove="pilot\**" />
+    <Compile Remove="legacy-v14\**" />
+    <Compile Remove="docs\**" />
+    <Compile Remove="release\**" />
   </ItemGroup>
 
 </Project>

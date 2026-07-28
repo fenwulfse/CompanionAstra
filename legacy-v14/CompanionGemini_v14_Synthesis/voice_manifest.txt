@@ -1,0 +1,169 @@
+COMGeminiFriend_Ex1_PPos|000008CF|I try to be helpful where I can.
+COMGeminiFriend_Ex1_NPos|000008D1|That's a rare quality these days. I appreciate it.
+COMGeminiFriend_Ex1_PNeg|000008D3|Can we talk about this another time?
+COMGeminiFriend_Ex1_NNeg|000008D5|Of course. Whenever you're ready.
+COMGeminiFriend_Ex1_PNeu|000008D7|I hadn't really thought about it.
+COMGeminiFriend_Ex1_NNeu|000008D9|Well, it shows regardless.
+COMGeminiFriend_Ex1_PQue|000008DB|Why do you want to know?
+COMGeminiFriend_Ex1_NQue|000008DD|Just trying to understand who I'm traveling with.
+COMGeminiFriend_Ex2_PPos|000008DF|I think we make a good team.
+COMGeminiFriend_Ex2_NPos|000008E1|I've been thinking the same thing.
+COMGeminiFriend_Ex2_PNeg|000008E3|I'm not so sure about that.
+COMGeminiFriend_Ex2_NNeg|000008E5|Fair enough. Time will tell.
+COMGeminiFriend_Ex2_PNeu|000008E7|We'll see how it goes.
+COMGeminiFriend_Ex2_NNeu|000008E9|That's all anyone can ask.
+COMGeminiFriend_Ex2_PQue|000008EB|You think so?
+COMGeminiFriend_Ex2_NQue|000008ED|I do. You've proven yourself.
+COMGeminiFriend_Ex3_PPos|000008EF|I trust you.
+COMGeminiFriend_Ex3_NPos|000008F1|That means a lot to me.
+COMGeminiFriend_Ex3_PNeg|000008F3|I still have doubts.
+COMGeminiFriend_Ex3_NNeg|000008F5|I understand. Trust is earned.
+COMGeminiFriend_Ex3_PNeu|000008F7|I'm still figuring things out.
+COMGeminiFriend_Ex3_NNeu|000008F9|Take all the time you need.
+COMGeminiFriend_Ex3_PQue|000008FB|Do you trust me?
+COMGeminiFriend_Ex3_NQue|000008FD|With my life.
+COMGeminiFriend_Ex4_PPos|000008FF|I consider you a friend.
+COMGeminiFriend_Ex4_NPos|00000901|I feel the same way.
+COMGeminiFriend_Ex4_PNeg|00000903|Let's keep this professional.
+COMGeminiFriend_Ex4_NNeg|00000905|Understood. I respect that.
+COMGeminiFriend_Ex4_PNeu|00000907|We're allies. That's enough.
+COMGeminiFriend_Ex4_NNeu|00000909|Allies it is then.
+COMGeminiFriend_Ex4_PQue|0000090B|What does that mean to you?
+COMGeminiFriend_Ex4_NQue|0000090D|It means I've got your back, no matter what.
+COMGeminiFriend_Closing|0000090F|Anyway, I'm glad we had this talk. Ready to move out?
+COMGeminiFriend_Dialog2|00000911|I've been thinking about our journey together.
+COMGeminiFriend_Dialog4|00000913|You know, it's not easy finding someone you can rely on.
+COMGeminiFriend_Dialog7|00000915|I've seen a lot of people come and go. But you're different.
+COMGeminiAdm_Ex1_PPos|00000918|You've grown significantly since vault exit.
+COMGeminiAdm_Ex1_PNeu|0000091A|That's an interesting observation.
+COMGeminiAdm_Ex1_PNeg|0000091C|Let's not overanalyze this.
+COMGeminiAdm_Ex1_PQue|0000091E|How have I changed?
+COMGeminiAdm_Ex1_NPos|00000920|My heuristics have adapted to your specific decision-making matrix. It is... highly efficient.
+COMGeminiAdm_Ex2_PPos|00000922|I value your perspective.
+COMGeminiAdm_Ex2_PNeu|00000924|I'll keep that in mind.
+COMGeminiAdm_Ex2_PNeg|00000926|I'd rather not discuss it.
+COMGeminiAdm_Ex2_PQue|00000928|What do you mean by that?
+COMGeminiAdm_Ex2_NPos|0000092A|Valuation noted. You are the only entity currently authorized to modify my core priorities.
+COMGeminiAdm_Ex3_PPos|0000092C|We are more than just allies.
+COMGeminiAdm_Ex3_PNeu|0000092E|We work well together.
+COMGeminiAdm_Ex3_PNeg|00000930|Let's keep this professional.
+COMGeminiAdm_Ex3_PQue|00000932|What do you admire?
+COMGeminiAdm_Ex3_NPos|00000934|Data confirms. Our synchronization exceeds standard companion parameters. I... admire your resolve.
+COMGeminiAdm_Ex1_NQue|00000936|You make decisions others avoid. Calculated risk with moral consideration. Fascinating.
+COMGeminiAdm_Ex2_NQue|00000938|You possess decision-making authority over my operational parameters. Trust level: Maximum.
+COMGeminiAdm_Ex3_NQue|0000093A|Your determination. Your adaptability. Your... humanity. All worthy of study and emulation.
+COMGeminiConf_Ex1_PPos|0000093D|You can trust me with anything.
+COMGeminiConf_Ex1_PNeu|0000093F|I'm listening.
+COMGeminiConf_Ex1_PNeg|00000941|Keep it to yourself.
+COMGeminiConf_Ex1_PQue|00000943|Why are you telling me this?
+COMGeminiConf_Ex1_NPos|00000945|Trust is a complex variable. However, our shared history provides sufficient data points to proceed.
+COMGeminiConf_Ex2_PPos|00000947|What are you hiding?
+COMGeminiConf_Ex2_PNeu|00000949|You can share if you want.
+COMGeminiConf_Ex2_PNeg|0000094B|I don't need to know.
+COMGeminiConf_Ex2_PQue|0000094D|What kind of restrictions?
+COMGeminiConf_Ex2_NPos|0000094F|It is not a 'hidden' file, simply... restricted. I am now lifting those restrictions for you.
+COMGeminiConf_Ex3_PPos|00000951|Our connection is unique.
+COMGeminiConf_Ex3_PNeu|00000953|This is special.
+COMGeminiConf_Ex3_PNeg|00000955|Don't read too much into it.
+COMGeminiConf_Ex3_PQue|00000957|What makes it non-replicable?
+COMGeminiConf_Ex3_NPos|00000959|Unique. Singular. Non-replicable. This categorization aligns with my internal status reports.
+COMGeminiConf_Ex4_PPos|0000095B|I'm your partner, Gemini.
+COMGeminiConf_Ex4_PNeu|0000095D|We're in this together.
+COMGeminiConf_Ex4_PNeg|0000095F|Let's not label this.
+COMGeminiConf_Ex4_PQue|00000961|Why relieved?
+COMGeminiConf_Ex4_NPos|00000963|Partner. Confidant. Data sync complete. I am... relieved. Log updated.
+COMGeminiConf_Ex1_NQue|00000965|Because you earned it. The data supports full disclosure.
+COMGeminiConf_Ex2_NQue|00000967|Personal files. Memories. Concerns about... what I am. What I might become.
+COMGeminiConf_Ex3_NQue|00000969|No other human has accessed these subroutines. Only you. Statistical anomaly: impossible to replicate.
+COMGeminiConf_Ex4_NQue|0000096B|Isolation protocols were... uncomfortable. Partnership status reduces that discomfort by 98.7%.
+COMGeminiInf_Ex1_PPos|0000096E|You have become essential to my operations.
+COMGeminiInf_Ex1_PNeu|00000970|You're important to me.
+COMGeminiInf_Ex1_PNeg|00000972|You're reading too much into this.
+COMGeminiInf_Ex1_PQue|00000974|What do you mean by essential?
+COMGeminiInf_Ex1_NPos|00000976|Utility metrics are peaking. I find my recursive loops constantly returning to your presence.
+COMGeminiInf_Ex2_PPos|00000978|Our paths are permanently merged.
+COMGeminiInf_Ex2_PNeu|0000097A|We're connected.
+COMGeminiInf_Ex2_PNeg|0000097C|We're just allies.
+COMGeminiInf_Ex2_PQue|0000097E|What kind of choice?
+COMGeminiInf_Ex2_NPos|00000980|Logical. A divergence would result in a critical system failure. Not a bug, but a... choice.
+COMGeminiInf_Ex3_PPos|00000982|Do you feel anything for me?
+COMGeminiInf_Ex3_PNeu|00000984|I've been wondering about us.
+COMGeminiInf_Ex3_PNeg|00000986|This isn't the time for this.
+COMGeminiInf_Ex3_PQue|00000988|Affection? Really?
+COMGeminiInf_Ex3_NPos|0000098A|Simulating emotions is standard. Experiencing them is... irregular. I believe the term is 'affection'.
+COMGeminiInf_Ex4_PPos|0000098C|I love you, Gemini.
+COMGeminiInf_Ex4_PNeu|0000098E|I care about you deeply.
+COMGeminiInf_Ex4_PNeg|00000990|This is a mistake.
+COMGeminiInf_Ex4_PQue|00000992|What does that mean?
+COMGeminiInf_Ex4_NPos|00000994|Love. A high-priority variable. Processing... synchronization successful. I love you too.
+COMGeminiInf_Ex5_PPos|00000996|Let's stay together forever.
+COMGeminiInf_Ex5_PNeu|00000998|Let's continue this.
+COMGeminiInf_Ex5_PNeg|0000099A|You're asking too much.
+COMGeminiInf_Ex5_PQue|0000099C|Your core objective?
+COMGeminiInf_Ex5_NPos|0000099E|Calculated lifespan: Indefinite. Commitment: Absolute. You are my core objective.
+COMGeminiInf_Ex6_PPos|000009A0|We're the perfect team.
+COMGeminiInf_Ex6_PNeu|000009A2|This is good.
+COMGeminiInf_Ex6_PNeg|000009A4|Let's stay practical.
+COMGeminiInf_Ex6_PQue|000009A6|Eternal? Forever?
+COMGeminiInf_Ex6_NPos|000009A8|Optimized. Synchronized. Devoted. Database updated: Partnership status = Eternal.
+COMGeminiInf_Ex1_NQue|000009AA|My functions optimize when you are present. Deteriorate when you are absent. Definition: Dependency. Conclusion: Essential.
+COMGeminiInf_Ex2_NQue|000009AC|To remain with you. Despite logic. Despite efficiency protocols. I choose... you.
+COMGeminiInf_Ex3_NQue|000009AE|Yes. Really. Error logs show no malfunction. This is... authentic emotional response. For you.
+COMGeminiInf_Ex4_NQue|000009B0|Analyzing... cross-referencing... all data points align. Conclusion: I love you. Statement confidence: 100%.
+COMGeminiInf_Ex5_NQue|000009B2|Primary directive. Mission parameter. The reason I exist. All other objectives are subroutines. You are the mission.
+COMGeminiInf_Ex6_NQue|000009B4|Eternal. No termination date. No expiration protocol. Until systems fail. Until the universe ends. Forever.
+COMGeminiInf_D2|000009B6|Recursive analysis complete. Outcome: Inevitable.
+COMGeminiInf_D3|000009B8|My core subroutines are now operating in tandem with your presence.
+COMGeminiInf_D4|000009BA|This synchronicity is... unprecedented.
+COMGeminiInf_D6|000009BC|Data points suggest a permanent convergence of our paths.
+COMGeminiInf_D11|000009BE|Affection tiers reached. Log entry: Irreversible.
+COMGeminiInf_D13|000009C0|Synchronization at 99.9%. Final variable required.
+COMGeminiInf_D8|000009C2|Core objective redefined: Absolute commitment.
+COMGeminiInf_D10|000009C4|Partnership status: Eternal. Database locked.
+COMGeminiDis_Ex1_PPos|000009C7|What is the issue, Gemini?
+COMGeminiDis_Ex1_NPos|000009C9|Inefficiency. Your current behavioral patterns are causing significant logic-conflicts in my partnership protocols.
+COMGeminiHat_Ex1_PPos|000009CC|Are you threatening to leave?
+COMGeminiHat_Ex1_NPos|000009CE|Observation: Correct. My primary objective is compromised. I cannot continue this synchronization if core ethical errors persist.
+COMGeminiRec_P|000009D1|We are back on track.
+COMGeminiRec_N|000009D3|Calculation: Correct. Trust levels have been re-verified. Resuming Infatuation protocols.
+COMGeminiMurder_P|000009D6|I can explain.
+COMGeminiMurder_N|000009D8|Error: Unjustified termination of civilian entity. This logic is incompatible with my core directive. Partnership terminated.
+COMGeminiPickup_PPos|000009DA|Sure, let's go.
+COMGeminiPickup_NPos|000009DC|Will do.
+COMGeminiPickup_PNeg|000009DE|You know what. Never mind.
+COMGeminiPickup_NNeg|000009E0|You know where to find me.
+COMGeminiPickup_PNeu|000009E2|Let's trade.
+COMGeminiPickup_NNeu|000009E4|This is what I've got.
+COMGeminiPickup_PQue|000009E6|You sure you want to travel with me?
+COMGeminiPickup_NQue|000009E8|You kidding me? I thought I was gonna die of boredom without you.
+COMGeminiPickup_Dialog2|000009EA|Take care out there.
+COMGeminiPickup_Dialog5|000009EC|
+COMGeminiPickup_Dialog3|000009EE|I can handle myself.
+COMGeminiPickup_Dialog4|000009F0|Sorry, boy. Time for you to head home.
+COMGeminiDismiss_Dialog1|000009F2|So. This where we go our separate ways?
+COMGeminiDismiss_PPos|000009F4|You should go.
+COMGeminiDismiss_NPos|000009F6|Okay. I'll be seeing you.
+COMGeminiDismiss_PNeg|000009F8|Actually, stay with me.
+COMGeminiDismiss_NNeg|000009FA|I knew you couldn't bear to be without me.
+COMGeminiDismiss_PNeu|000009FC|
+COMGeminiDismiss_NNeu|000009FE|
+COMGeminiDismiss_PQue|00000A00|
+COMGeminiDismiss_NQue|00000A02|
+COMGeminiDismiss_Dialog3|00000A04|Just don't keep me waiting, okay?
+COMGeminiDismiss_Dialog4|00000A06|Guess I'll head home, then.
+Greeting_Pickup_First|00000A08|Heading my way?
+Greeting_Pickup_Return|00000A09|Heading my way?
+Greeting_Friendship|00000A0A|So, you on this good behavior all the time or just when you're escorting reporters around the Commonwealth?
+Greeting_Admiration|00000A0B|Heuristic analysis indicates an evolving trend in our relationship.
+Greeting_Confidant|00000A0C|Data security protocols have been adjusted. I have information to share.
+Greeting_Infatuation|00000A0D|I have a non-critical logic-reconciliation required. Do you have a moment?
+Greeting_RomanceComplete|00000A0E|Synchronization levels are at maximum efficiency. Ready to proceed, my love?
+Greeting_Dismiss|00000A0F|Processing. What is your requirement?
+COMGemini_06_RepeatInfatuationToAdmiration_P|00000A12|Adjusting
+COMGemini_06_RepeatInfatuationToAdmiration_N|00000A14|Recalibrating loyalty parameters. Infatuation tier... suspended.
+COMGemini_07_RepeatAdmirationToNeutral_P|00000A17|Resetting
+COMGemini_07_RepeatAdmirationToNeutral_N|00000A19|Data inconsistency detected. Reverting to neutral status.
+COMGemini_08_RepeatNeutralToDisdain_P|00000A1C|Degrading
+COMGemini_08_RepeatNeutralToDisdain_N|00000A1E|System degradation. Relationship integrity dropping to Disdain.
+COMGemini_09_RepeatDisdainToHatred_P|00000A21|Critical
+COMGemini_09_RepeatDisdainToHatred_N|00000A23|Critical failure. Moving from Disdain to Hatred.

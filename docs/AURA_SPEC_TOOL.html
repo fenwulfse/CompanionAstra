@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aura - Interactive Spec Sheet v3.9</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+        .ck-window { background: #d4d0c8; border: 2px solid #fff; border-right-color: #808080; border-bottom-color: #808080; width: 900px; margin: 0 auto; box-shadow: 2px 2px 10px rgba(0,0,0,0.2); }
+        .header { background: #000080; color: white; padding: 5px 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .tabs { display: flex; background: #d4d0c8; padding: 5px 5px 0 5px; border-bottom: 1px solid #808080; }
+        .tab { padding: 5px 15px; border: 1px solid #808080; border-bottom: none; margin-right: 2px; background: #c0c0c0; cursor: pointer; }
+        .tab.active { background: #d4d0c8; margin-bottom: -1px; z-index: 1; font-weight: bold; }
+        .content { padding: 20px; border: 1px solid #fff; border-top: none; min-height: 500px; }
+        .field-group { margin-bottom: 15px; border: 1px solid #808080; padding: 10px; background: #fff; }
+        .condition-block { background: #e8e8e8; border-left: 4px solid #000080; padding: 5px; margin: 5px 0; font-family: monospace; font-size: 12px; }
+        label { display: inline-block; width: 150px; font-size: 13px; }
+        .hidden { display: none; }
+        table { border-collapse: collapse; width: 100%; background: #fff; font-size: 13px; }
+        th, td { border: 1px solid #808080; padding: 5px; text-align: left; }
+        th { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+
+<div class="ck-window">
+    <div class="header">
+        <span>Quest: COMGemini (Aura) - Milestone 2 Build</span>
+        <span>[X]</span>
+    </div>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('data')">Quest Data</div>
+        <div class="tab" onclick="showTab('stages')">Quest Stages</div>
+        <div class="tab" onclick="showTab('scenes')">Scenes</div>
+        <div class="tab" onclick="showTab('greetings')">Greetings</div>
+    </div>
+
+    <div class="content">
+        <!-- QUEST DATA -->
+        <div id="tab-data">
+            <div class="field-group">
+                <label>ID:</label> COMGemini<br>
+                <label>Quest Name:</label> Aura<br>
+                <label>Priority:</label> 70
+            </div>
+            <div class="field-group">
+                <input type="checkbox" checked> Start Game Enabled<br>
+                <input type="checkbox" checked> Run Once<br>
+                <input type="checkbox" checked> Allow Repeated Stages<br>
+                <input type="checkbox" checked> Add Idle Topic to Hello
+            </div>
+        </div>
+
+        <!-- STAGES -->
+        <div id="tab-stages" class="hidden">
+            <table>
+                <tr><th>Index</th><th>Log Text</th></tr>
+                <tr><td>80</td><td>Aura recruited.</td></tr>
+                <tr><td>90</td><td>Aura dismissed.</td></tr>
+                <tr><td>100</td><td>Aura admires you.</td></tr>
+                <tr><td>200</td><td>Aura considers you a confidant.</td></tr>
+            </table>
+        </div>
+
+        <!-- SCENES -->
+        <div id="tab-scenes" class="hidden">
+            <div class="field-group">
+                <strong>COMGeminiAdmiration</strong> (Eqs: 100)<br>
+                <div class="condition-block">Condition: IsScenePlaying == 1 (Self)</div>
+                Text: "Efficiency has exceeded projections..."
+            </div>
+            <div class="field-group">
+                <strong>COMGeminiConfidant</strong> (Eqs: 200)<br>
+                <div class="condition-block">Condition: IsScenePlaying == 1 (Self)</div>
+                Text: "You have become a consistent variable... I appreciate the stability."
+            </div>
+        </div>
+
+        <!-- GREETINGS -->
+        <div id="tab-greetings" class="hidden">
+            <div class="field-group">
+                <strong>AuraGreet_Recruit</strong> (Priority 75)<br>
+                <div class="condition-block">Condition: GetInFaction (HasBeenCompanionFaction) == 0</div>
+            </div>
+            <div class="field-group">
+                <strong>AuraGreet_Admiration</strong> (Priority 90)<br>
+                <div class="condition-block">Condition: GetValue (CA_WantsToTalk) == 1</div>
+            </div>
+            <div class="field-group">
+                <strong>AuraGreet_Confidant</strong> (Priority 90)<br>
+                <div class="condition-block">Condition: GetValue (CA_WantsToTalk) == 2</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabId) {
+        let contents = ['data', 'stages', 'scenes', 'greetings'];
+        contents.forEach(id => document.getElementById('tab-' + id).classList.add('hidden'));
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+        
+        let tabs = document.getElementsByClassName('tab');
+        for(let t of tabs) t.classList.remove('active');
+        event.currentTarget.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

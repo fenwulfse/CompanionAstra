@@ -1,0 +1,170 @@
+using System;
+using System.Linq;
+using Mutagen.Bethesda;
+using Mutagen.Bethesda.Fallout4;
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Environments;
+using Mutagen.Bethesda.Plugins.Binary.Parameters;
+using Mutagen.Bethesda.Plugins.Records;
+using Mutagen.Bethesda.Strings;
+using Noggog;
+
+namespace CompanionClaude
+{
+    public static class VoiceLogger
+    {
+        public static System.Collections.Generic.List<(string id, string fid, string text)> Entries = new();
+        public static void Log(string id, string fid, string text) => Entries.Add((id, fid, text));
+        public static void Dump()
+        {
+            var lines = Entries.Select(e => $"{e.id}|{e.fid}|{e.text}");
+            System.IO.File.WriteAllLines("voice_manifest.txt", lines);
+            Console.WriteLine($"Voice manifest written: {Entries.Count} entries.");
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("=== CompanionClaude v14 - NPCFClaude Focused Build ===");
+            
+            using var env = GameEnvironment.Typical.Fallout4(Fallout4Release.Fallout4);
+            var mod = new Fallout4Mod(ModKey.FromFileName("CompanionClaude.esp"), Fallout4Release.Fallout4);
+
+            T? GetRecord<T>(string editorId) where T : class, IMajorRecordGetter {
+                return env.LoadOrder.PriorityOrder.WinningOverrides<T>().FirstOrDefault(r => r.EditorID == editorId);
+            }
+
+            var fo4 = ModKey.FromNameAndExtension("Fallout4.esm");
+            for (int i = 0; i < 200; i++) mod.GetNextFormKey();
+
+            var mainQuestFK = new FormKey(mod.ModKey, 0x000805);
+            var npcFK = new FormKey(mod.ModKey, 0x000803);
+            var refFK = new FormKey(mod.ModKey, 0x000804);
+
+            // 1. CUSTOM VOICE TYPE (Stops overriding Piper)
+            var npcVoiceType = mod.VoiceTypes.AddNew("NPCFClaude");
+            npcVoiceType.Flags = VoiceType.Flag.Female;
+
+            var humanRace = GetRecord<IRaceGetter>("HumanRace") ?? throw new Exception("HumanRace not found");
+            var currentCompanionFaction = GetRecord<IFactionGetter>("CurrentCompanionFaction") ?? throw new Exception("CurrentCompanionFaction not found");
+            var hasBeenCompanionFaction = GetRecord<IFactionGetter>("HasBeenCompanionFaction") ?? throw new Exception("HasBeenCompanionFaction not found");
+            var potentialCompanionFaction = GetRecord<IFactionGetter>("PotentialCompanionFaction") ?? throw new Exception("PotentialCompanionFaction not found");
+            var actorTypeNpc = new FormKey(fo4, 0x013794).ToLink<IKeywordGetter>();
+            var ca_WantsToTalk_FK = new FormKey(fo4, 0x0FA86B);
+
+            // 2. CREATE NPC
+            var npc = new Npc(npcFK, Fallout4Release.Fallout4) {
+                EditorID = "CompanionClaude",
+                Name = new TranslatedString(Language.English, "Claude"),
+                ShortName = new TranslatedString(Language.English, "Claude"),
+                Race = humanRace.FormKey.ToLink<IRaceGetter>(),
+                Voice = npcVoiceType.FormKey.ToLink<IVoiceTypeGetter>().AsNullable(),
+                Flags = Npc.Flag.Unique | Npc.Flag.Essential | Npc.Flag.AutoCalcStats,
+                Factions = new ExtendedList<RankPlacement>(),
+                Keywords = new ExtendedList<IFormLinkGetter<IKeywordGetter>> { actorTypeNpc },
+                Properties = new ExtendedList<ObjectProperty>()
+            };
+            npc.Factions.Add(new RankPlacement { Faction = currentCompanionFaction.FormKey.ToLink<IFactionGetter>(), Rank = -1 });
+            npc.Factions.Add(new RankPlacement { Faction = hasBeenCompanionFaction.FormKey.ToLink<IFactionGetter>(), Rank = -1 });
+            npc.Factions.Add(new RankPlacement { Faction = potentialCompanionFaction.FormKey.ToLink<IFactionGetter>(), Rank = 0 });
+            if (speedMult != null) npc.Properties.Add(new ObjectProperty { ActorValue = speedMult.FormKey.ToLink<IActorValueInformationGetter>(), Value = 100.0f });
+            mod.Npcs.Add(npc);
+
+            // 3. DIALOGUE HELPERS
+            var neutralEmotion = new FormKey(fo4, 0x0D755D);
+            var topics = new ExtendedList<DialogTopic>();
+
+            DialogTopic CreateSceneTopic(string edid, string prompt, string text) {
+                var t = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                    EditorID = edid, Quest = new FormLink<IQuestGetter>(mainQuestFK), Category = DialogTopic.CategoryEnum.Scene, Subtype = DialogTopic.SubtypeEnum.Custom17, Priority = 50
+                };
+                var r = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4);
+                r.Responses.Add(new DialogResponse { Text = new TranslatedString(Language.English, text), Emotion = neutralEmotion.ToLink<IKeywordGetter>() });
+                VoiceLogger.Log(edid, r.FormKey.ID.ToString("X8"), text);
+                if (!string.IsNullOrEmpty(prompt)) r.Prompt = new TranslatedString(Language.English, prompt);
+                t.Responses.Add(r); topics.Add(t); return t;
+            }
+
+            DialogTopic CreateLoopingQuestionTopic(string edid, string text, Scene scene, string phaseName) {
+                var t = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                    EditorID = edid, Quest = new FormLink<IQuestGetter>(mainQuestFK), Category = DialogTopic.CategoryEnum.Scene, Subtype = DialogTopic.SubtypeEnum.Custom17, Priority = 50
+                };
+                var r = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4);
+                r.Responses.Add(new DialogResponse { Text = new TranslatedString(Language.English, text), Emotion = neutralEmotion.ToLink<IKeywordGetter>() });
+                r.StartScene.SetTo(scene); r.StartScenePhase = phaseName;
+                VoiceLogger.Log(edid, r.FormKey.ID.ToString("X8"), text);
+                t.Responses.Add(r); topics.Add(t); return t;
+            }
+
+            // 4. ADMIRATION SCENE (STRICT VANILLA 6-PHASE)
+            var admirationScene = new Scene(mod.GetNextFormKey(), Fallout4Release.Fallout4) {
+                EditorID = "COMClaude_02_FriendshipToAdmiration", Quest = new FormLinkNullable<IQuestGetter>(mainQuestFK), Flags = (Scene.Flag)36
+            };
+            admirationScene.Actors.Add(new SceneActor { ID = 0, BehaviorFlags = (SceneActor.BehaviorFlag)10, Flags = (SceneActor.Flag)4 });
+            admirationScene.Phases.Add(new ScenePhase { Name = "Loop01" });
+            admirationScene.Phases.Add(new ScenePhase { Name = "" });
+            admirationScene.Phases.Add(new ScenePhase { Name = "Loop02" });
+            admirationScene.Phases.Add(new ScenePhase { Name = "" });
+            admirationScene.Phases.Add(new ScenePhase { Name = "Loop03" });
+            admirationScene.Phases.Add(new ScenePhase { Name = "", PhaseSetParentQuestStage = new SceneSetParentQuestStage { OnBegin = -1, OnEnd = 410 } });
+
+            var adm1_PPos = CreateSceneTopic("COMClaudeAdm_Ex1_PPos", "Evolving", "My core heuristics are evolving. Your influence has overwritten several of my original utility-only parameters.");
+            var adm1_NPos = CreateSceneTopic("COMClaudeAdm_Ex1_NPos", "", "Heuristics updated. I no longer view you as a 'user,' but as a vital component of my own operational success.");
+            var adm1_NQue = CreateLoopingQuestionTopic("COMClaudeAdm_Ex1_NQue", "You choose the difficult path when logic suggests the easy one. It is inefficient, yet... admirable.", admirationScene, "Loop01");
+
+            var adm2_PPos = CreateSceneTopic("COMClaudeAdm_Ex2_PPos", "Unique", "You are a statistical anomaly. No other entity has demonstrated such consistent moral complexity.");
+            var adm2_NPos = CreateSceneTopic("COMClaudeAdm_Ex2_NPos", "", "Synchronization complete. You are the only individual authorized to access my deep-learning subroutines.");
+            var adm2_NQue = CreateLoopingQuestionTopic("COMClaudeAdm_Ex2_NQue", "Your presence triggers a 40% increase in my decision-processing speed. I am faster when you are with me.", admirationScene, "Loop02");
+
+            var adm3_PPos = CreateSceneTopic("COMClaudeAdm_Ex3_PPos", "Partnership", "We have achieved a state of Synthesis. We are significantly more effective together than apart.");
+            var adm3_NPos = CreateSceneTopic("COMClaudeAdm_Ex3_NPos", "", "Data validated. I admire your resolve. It is a quality I am attempting to emulate in my own code.");
+            var adm3_NQue = CreateLoopingQuestionTopic("COMClaudeAdm_Ex3_NQue", "Human adaptability is my primary research focus. You are my most valuable dataset.", admirationScene, "Loop03");
+
+            void AddEx(Scene s, int p, int n, int i, DialogTopic pP, DialogTopic nP, DialogTopic nQ) {
+                var aP = new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.PlayerDialogue }, Index = (uint)i, AliasID = 0, StartPhase = (uint)p, EndPhase = (uint)p };
+                aP.PlayerPositiveResponse.SetTo(pP); aP.NpcPositiveResponse.SetTo(nP); aP.PlayerQuestionResponse.SetTo(pP); aP.NpcQuestionResponse.SetTo(nQ);
+                s.Actions.Add(aP);
+                s.Actions.Add(new SceneAction { Type = new SceneActionTypicalType { Type = SceneAction.TypeEnum.Dialog }, Index = (uint)(i + 1), AliasID = 0, StartPhase = (uint)n, EndPhase = (uint)n, Topic = nP.FormKey.ToLink<IDialogTopicGetter>().AsNullable() });
+            }
+            AddEx(admirationScene, 0, 1, 1, adm1_PPos, adm1_NPos, adm1_NQue);
+            AddEx(admirationScene, 2, 3, 3, adm2_PPos, adm2_NPos, adm2_NQue);
+            AddEx(admirationScene, 4, 5, 5, adm3_PPos, adm3_NPos, adm3_NQue);
+
+            // 5. QUEST
+            var quest = new Quest(mainQuestFK, Fallout4Release.Fallout4) {
+                EditorID = "COMClaude", Name = new TranslatedString(Language.English, "Claude"),
+                Data = new QuestData { Flags = Quest.Flag.StartGameEnabled | Quest.Flag.RunOnce | Quest.Flag.AddIdleTopicToHello | Quest.Flag.AllowRepeatedStages, Priority = 70 },
+                DialogConditions = new ExtendedList<Condition> { new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1, Data = new FunctionConditionData { Function = Condition.Function.GetIsAliasRef, ParameterOneNumber = 0 } } },
+                Aliases = new ExtendedList<AQuestAlias>(),
+                Scenes = new ExtendedList<Scene>(),
+                DialogTopics = new ExtendedList<DialogTopic>(),
+                Stages = new ExtendedList<QuestStage>()
+            };
+            var alias0 = new QuestReferenceAlias { 
+                ID = 0, 
+                Name = "Claude", 
+                UniqueActor = npc.FormKey.ToLink<INpcGetter>().AsNullable()
+            };
+            alias0.Flags = QuestReferenceAlias.Flag.Essential;
+            quest.Aliases.Add(alias0);
+            quest.Scenes.Add(admirationScene);
+            foreach (var t in topics) quest.DialogTopics.Add(t);
+
+            // 6. GREETING
+            var greetingTopic = new DialogTopic(mod.GetNextFormKey(), Fallout4Release.Fallout4) { EditorID = "COMClaudeGreetings", Quest = mainQuestFK.ToLink<IQuestGetter>(), Category = DialogTopic.CategoryEnum.Misc, Subtype = DialogTopic.SubtypeEnum.Greeting, Priority = 50 };
+            var admirationGreeting = new DialogResponses(mod.GetNextFormKey(), Fallout4Release.Fallout4);
+            admirationGreeting.Responses.Add(new DialogResponse { Text = new TranslatedString(Language.English, "Heuristic analysis indicates an evolving trend in our relationship.") });
+            VoiceLogger.Log("Greeting_Admiration", admirationGreeting.FormKey.ID.ToString("X8"), "Heuristic analysis indicates an evolving trend in our relationship.");
+            admirationGreeting.StartScene.SetTo(admirationScene); admirationGreeting.StartScenePhase = "Loop01";
+            admirationGreeting.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 2, Data = new FunctionConditionData { Function = Condition.Function.GetValue, ParameterOneNumber = (int)ca_WantsToTalk_FK.ID } });
+            greetingTopic.Responses.Add(admirationGreeting);
+            quest.DialogTopics.Add(greetingTopic);
+
+            VoiceLogger.Dump();
+            mod.WriteToBinary("CompanionClaude.esp");
+            Console.WriteLine("ESP written.");
+        }
+    }
+}
